@@ -66,6 +66,24 @@ export default defineConfig({
                   }
                 }
                 
+                // Extract 3D models to zip if present
+                if (config.modelUrl && config.modelUrl.startsWith('data:')) {
+                  const base64Data = config.modelUrl.split(',')[1];
+                  const mimeMatch = config.modelUrl.match(/^data:([^;]+);/);
+                  const ext = mimeMatch && mimeMatch[1].includes('gltf') ? 'gltf' : 'glb';
+                  const modelFileName = `model/textured_scene.${ext}`;
+                  zip.addFile(modelFileName, Buffer.from(base64Data, 'base64'));
+                  config.modelUrl = modelFileName;
+                }
+                if (config.untexturedModelUrl && config.untexturedModelUrl.startsWith('data:')) {
+                  const base64Data = config.untexturedModelUrl.split(',')[1];
+                  const mimeMatch = config.untexturedModelUrl.match(/^data:([^;]+);/);
+                  const ext = mimeMatch && mimeMatch[1].includes('gltf') ? 'gltf' : 'glb';
+                  const modelFileName = `model/untextured_scene.${ext}`;
+                  zip.addFile(modelFileName, Buffer.from(base64Data, 'base64'));
+                  config.untexturedModelUrl = modelFileName;
+                }
+                
                 const finalConfigJson = JSON.stringify(config);
                 
                 // Write config to temp file
