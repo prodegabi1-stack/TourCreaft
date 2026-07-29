@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { get, set } from "idb-keyval";
 import { Phone, Mail, Copy, X, MapPin, Compass, ChevronLeft, ChevronRight, Maximize, Minimize, CircleHelp, Glasses, Info, Share2 } from "lucide-react";
+import whatsappLogo from "../../whatsapp-svgrepo-com.svg";
+import phoneIcon from "../../phone-svgrepo-com (1).svg";
+import mailIcon from "../../email-svgrepo-com.svg";
 
 // ─── Marzipano global type ────────────────────────────────────────────────────
 declare const Marzipano: any;
@@ -172,6 +175,16 @@ function CopyButton({ text }: { text: string }) {
       <Copy size={11} className={copied ? "text-accent" : ""} />
     </button>
   );
+}
+
+function getWhatsAppHref(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  const internationalNumber = digits.startsWith("0") ? `40${digits.slice(1)}` : digits;
+  return `https://wa.me/${internationalNumber}`;
+}
+
+function openExternalLink(url: string) {
+  window.location.href = url;
 }
 
 // ─── View mode pill ───────────────────────────────────────────────────────────
@@ -1751,38 +1764,62 @@ export default function App() {
 
           {/* Agent card */}
           {agentOpen ? (
-            <div className="pointer-events-auto bg-white rounded-2xl shadow-2xl w-64 overflow-hidden">
+            <div
+              className="pointer-events-auto relative w-64 overflow-hidden rounded-2xl p-1.5"
+              style={{
+                background: bubbleBgStyle,
+                backdropFilter: bubbleBlurStyle,
+                WebkitBackdropFilter: bubbleBlurStyle,
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
               <div className="flex items-center gap-3 p-4 pb-3">
                 <img src={AGENT.avatar} alt={AGENT.name} className="w-11 h-11 rounded-xl object-cover flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="font-semibold text-gray-900 text-sm leading-tight">{AGENT.name}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{AGENT.title}</div>
+                  <div className="font-semibold text-white text-sm leading-tight">{AGENT.name}</div>
+                  <div className="text-xs text-white/60 mt-0.5">{AGENT.title}</div>
                 </div>
-                <button onClick={() => setAgentOpen(false)} className="ml-auto text-gray-300 hover:text-gray-500 transition-colors flex-shrink-0">
+                <button onClick={() => setAgentOpen(false)} className="ml-auto text-white/50 hover:text-white transition-colors flex-shrink-0">
                   <X size={14} />
                 </button>
               </div>
-              <div className="border-t border-gray-100 px-4 py-3 space-y-2">
-                <div className="flex items-center gap-2 text-xs text-gray-600">
+              <div className="border-t border-white/10 px-4 py-3 space-y-2">
+                <div className="flex items-center gap-2 text-xs text-white/75">
                   <Phone size={12} className="text-accent flex-shrink-0" />
                   <span className="font-medium">{AGENT.phone}</span>
                   <CopyButton text={AGENT.phone} />
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-600">
+                <div className="flex items-center gap-2 text-xs text-white/75">
                   <Mail size={12} className="text-accent flex-shrink-0" />
                   <span className="font-medium truncate">{AGENT.email}</span>
                   <CopyButton text={AGENT.email} />
                 </div>
               </div>
               <div className="px-4 pb-4 flex gap-2">
-                <a href={`tel:${AGENT.phone.replace(/\s/g, "")}`} className="flex-1 bg-accent text-black text-xs font-semibold rounded-lg py-2 text-center hover:opacity-90 transition-opacity">Call Now</a>
-                <a href={`mailto:${AGENT.email}`} className="flex-1 border border-gray-200 text-gray-700 text-xs font-semibold rounded-lg py-2 text-center hover:bg-gray-50 transition-colors">Email</a>
+                <button type="button" onClick={() => openExternalLink(`tel:${AGENT.phone.replace(/\s/g, "")}`)} aria-label="Call now" className="flex-1 flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-2 py-2 hover:bg-white/15 transition-colors">
+                  <img src={phoneIcon} alt="Call now" className="h-5 w-auto object-contain brightness-0 invert" draggable={false} />
+                </button>
+                <a href={getWhatsAppHref(AGENT.phone)} target="_blank" rel="noreferrer" aria-label="Open WhatsApp conversation" className="flex-1 flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-2 py-2 hover:bg-white/15 transition-colors">
+                  <img src={whatsappLogo} alt="WhatsApp" className="h-5 w-auto object-contain brightness-0 invert" draggable={false} />
+                </a>
+                <button type="button" onClick={() => openExternalLink(`mailto:${AGENT.email}`)} aria-label="Email" className="flex-1 flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-2 py-2 hover:bg-white/15 transition-colors">
+                  <img src={mailIcon} alt="Email" className="h-5 w-auto object-contain brightness-0 invert" draggable={false} />
+                </button>
               </div>
             </div>
           ) : (
-            <button onClick={() => setAgentOpen(true)} className="pointer-events-auto bg-white rounded-2xl shadow-xl px-3 py-2 flex items-center gap-2 hover:shadow-2xl transition-shadow">
+            <button
+              onClick={() => setAgentOpen(true)}
+              className="pointer-events-auto rounded-2xl px-3 py-2 flex items-center gap-2 hover:opacity-95 transition-opacity"
+              style={{
+                background: bubbleBgStyle,
+                backdropFilter: bubbleBlurStyle,
+                WebkitBackdropFilter: bubbleBlurStyle,
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
               <img src={AGENT.avatar} alt={AGENT.name} className="w-7 h-7 rounded-lg object-cover" />
-              <span className="text-xs font-semibold text-gray-800">{AGENT.name}</span>
+              <span className="text-xs font-semibold text-white">{AGENT.name}</span>
             </button>
           )}
         </div>
