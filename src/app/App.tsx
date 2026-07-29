@@ -2078,14 +2078,6 @@ export default function App() {
                       <Glasses size={16} />
                       <span>VR</span>
                     </button>
-                    <button
-                      onClick={handleFullscreenMenuAction}
-                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
-                      style={{ color: bubbleColor }}
-                    >
-                      {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
-                      <span>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
-                    </button>
                   </div>
                 </div>
               )}
