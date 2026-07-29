@@ -129,7 +129,7 @@ interface HotspotData {
   targetYaw?: number;
   targetPitch?: number;
   targetFov?: number;
-  style?: "glow" | "chevron" | "label" | "floor-glow";
+  style?: "glow" | "floor-glow" | "floor-circle" | "door-enter" | "door-exit" | "elevator-up" | "elevator-down" | "stair-up" | "stair-down";
 }
 
 interface SceneData {
@@ -704,10 +704,14 @@ function RightPanel({
                       onChange={(e) => onUpdateHotspot(activeId!, hs.id, { style: e.target.value as any })}
                       className="bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-white outline-none focus:border-accent w-full"
                     >
-                      <option value="glow">Glow (Default)</option>
-                      <option value="floor-glow">Floor (Tilted)</option>
-                      <option value="chevron">Chevron (Directional)</option>
-                      <option value="label">Floating Label</option>
+                      <option value="floor-circle">Floor Circle (Tilted)</option>
+                      <option value="door-enter">Door Enter</option>
+                      <option value="door-exit">Door Exit</option>
+                      <option value="elevator-up">Elevator Up</option>
+                      <option value="elevator-down">Elevator Down</option>
+                      <option value="stair-up">Stairs Up</option>
+                      <option value="stair-down">Stairs Down</option>
+                      <option value="floor-glow">Floor Glow (Tilted)</option>
                     </select>
                   </label>
 
@@ -1400,12 +1404,13 @@ export default function App() {
       yaw: view.yaw(),
       pitch: view.pitch(),
       targetId: null,
-      style: "glow",
+      style: "floor-circle",
     };
     setScenes((prev) => prev.map(s => {
       if (s.id !== sceneId) return s;
       return { ...s, hotspots: [...(s.hotspots || []), newHotspot] };
     }));
+    setActiveHotspotId(newHotspot.id);
   }, []);
 
   const updateHotspot = useCallback((sceneId: string, hotspotId: string, updates: Partial<HotspotData>) => {
@@ -1496,7 +1501,30 @@ export default function App() {
 
         const wrapper = document.createElement("div");
         const el = document.createElement("div");
-        if (hsData.style === "chevron") el.className = "hs-chevron";
+        if (hsData.style === "door-enter") {
+          el.className = "hs-door hs-door-enter";
+          el.innerHTML = `<svg viewBox="0 0 57 60" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M55.5 29.816V58.8681H17V45.8773" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M55.5 30.0521V1H17V13.9908" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M1 29.684H35.0123M25.3282 39.3681L35.0123 29.684L25.3282 20" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`;
+        }
+        else if (hsData.style === "door-exit") {
+          el.className = "hs-door hs-door-exit";
+          el.innerHTML = `<svg viewBox="0 0 58 60" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 29.8159V58.8681H39.5V45.8773" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M1 30.0522V1.00001H39.5V13.9908" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M22 29.684H56.0123M46.3282 39.3681L56.0123 29.684L46.3282 20" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`;
+        }
+        else if (hsData.style === "elevator-up") {
+          el.className = "hs-door hs-elevator-up";
+          el.innerHTML = `<svg viewBox="0 0 78 78" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M39 77H4C2.34315 77 1 75.6569 1 74V4C1 2.34315 2.34315 1 4 1H39" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M39 14H18.0638C16.3717 14 15 15.4976 15 17.3451V77" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M39 14H59.9362C61.6283 14 63 15.4976 63 17.3451V77" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M39 77H74C75.6569 77 77 75.6569 77 74V4C77 2.34315 75.6569 1 74 1H39" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M39 27V77M30 36L39 27L48 36" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`;
+        }
+        else if (hsData.style === "elevator-down") {
+          el.className = "hs-door hs-elevator-down";
+          el.innerHTML = `<svg viewBox="0 0 78 78" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M39 77H4C2.34315 77 1 75.6569 1 74V4C1 2.34315 2.34315 1 4 1H39" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M39 14H18.0638C16.3717 14 15 15.4976 15 17.3451V77" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M39 14H59.9362C61.6283 14 63 15.4976 63 17.3451V77" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M39 77H74C75.6569 77 77 75.6569 77 74V4C77 2.34315 75.6569 1 74 1H39" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M39 64V14M30 55L39 64L48 55" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>`;
+        }
+        else if (hsData.style === "stair-up") {
+          el.className = "hs-door hs-stair-up";
+          el.innerHTML = `<svg viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M34.9685 54.4238L56.4238 32.9685M56.4238 48.9054L56.4238 32.9685L40.4869 32.9685" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M1 65V47C1 45.3431 2.34315 44 4 44H19C20.6569 44 22 42.6569 22 41V25C22 23.3431 23.3431 22 25 22H41C42.6569 22 44 20.6569 44 19V4C44 2.34315 45.3431 1 47 1H65" stroke="white" stroke-width="3" stroke-linecap="square"/></svg>`;
+        }
+        else if (hsData.style === "stair-down") {
+          el.className = "hs-door hs-stair-down";
+          el.innerHTML = `<svg viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M56.4238 32.9685L34.9685 54.4238M34.9685 38.4869L34.9685 54.4238L50.9054 54.4238" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M1 65V47C1 45.3431 2.34315 44 4 44H19C20.6569 44 22 42.6569 22 41V25C22 23.3431 23.3431 22 25 22H41C42.6569 22 44 20.6569 44 19V4C44 2.34315 45.3431 1 47 1H65" stroke="white" stroke-width="3" stroke-linecap="square"/></svg>`;
+        }
         else if (hsData.style === "floor-glow") {
           el.className = "hs-floor-glow";
           // Dynamic tilt based on absolute pitch: straight down/up (90) = 0 tilt, horizon (0) = 90 tilt
@@ -1506,16 +1534,21 @@ export default function App() {
           if (tiltDeg > 85) tiltDeg = 85; // Cap to prevent making it fully edge-on/invisible
           el.style.rotate = `x ${tiltDeg}deg`;
         }
-        else if (hsData.style === "label") {
-          el.className = "hs-label";
-          const targetScene = scenes.find((s) => s.id === hsData.targetId);
-          el.innerText = targetScene ? targetScene.label : "Hotspot";
-        } else {
+        else if (hsData.style === "floor-circle") {
+          el.className = "hs-floor-circle";
+          el.innerHTML = `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" stroke="white" stroke-width="4"/></svg>`;
+          const pitchDeg = hsData.pitch * (180 / Math.PI);
+          let tiltDeg = 90 - Math.abs(pitchDeg);
+          if (tiltDeg < 0) tiltDeg = 0;
+          if (tiltDeg > 85) tiltDeg = 85;
+          el.style.rotate = `x ${tiltDeg}deg`;
+        }
+        else {
           el.className = "hs-glow"; // default
         }
         wrapper.appendChild(el);
 
-        const options = hsData.style === "floor-glow"
+        const options = (hsData.style === "floor-glow" || hsData.style === "floor-circle")
           ? { perspective: { radius: 1000 } }
           : undefined;
 
@@ -1579,7 +1612,7 @@ export default function App() {
                 hotspotObj.setPosition(coords);
 
                 // Update dynamic tilt in real-time during drag
-                if (hsData.style === "floor-glow") {
+                if (hsData.style === "floor-glow" || hsData.style === "floor-circle") {
                   const pitchDeg = coords.pitch * (180 / Math.PI);
                   let tiltDeg = 90 - Math.abs(pitchDeg);
                   if (tiltDeg < 0) tiltDeg = 0;
@@ -2212,48 +2245,58 @@ export default function App() {
         }
         .hs-floor-glow:hover { scale: 1.15; background: rgba(255,255,255,0.3); }
 
-        .hs-chevron {
-          width: 40px; height: 40px;
+        .hs-door {
+          width: 58px; height: 58px;
           border-radius: 50%;
-          background: rgba(0,0,0,0.5);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
-          border: 1px solid rgba(255,255,255,0.2);
-          display: flex; align-items: center; justify-content: center;
-          cursor: pointer;
-          transition: scale 0.2s, background 0.2s;
-          margin-top: -20px;
-          margin-left: -20px;
-          transform-origin: 50% 50% !important;
-        }
-        .hs-chevron::after {
-          content: ''; width: 10px; height: 10px;
-          border-top: 2px solid white; border-right: 2px solid white;
-          transform: rotate(-45deg) translate(2px, 2px);
-        }
-        .hs-chevron:hover { scale: 1.15; background: rgba(0,0,0,0.7); }
-
-        .hs-label {
-          padding: 8px 14px;
-          border-radius: 20px;
           background: rgba(0,0,0,0.6);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
-          border: 1px solid rgba(255,255,255,0.15);
-          color: white; font-size: 13px; font-weight: 600;
-          display: flex; align-items: center; gap: 8px;
+          border: 1px solid rgba(255,255,255,0.25);
+          display: flex; align-items: center; justify-content: center;
           cursor: pointer;
-          transition: scale 0.2s, background 0.2s;
-          white-space: nowrap;
-          margin-top: -18px; /* Approximate half height */
+          transition: scale 0.2s, background 0.2s, border-color 0.2s;
+          margin-top: -29px;
+          margin-left: -29px;
           transform-origin: 50% 50% !important;
+          padding: 12px;
         }
-        .hs-label::before {
-          content: ''; width: 14px; height: 14px;
-          background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 16 16 12 12 8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>') no-repeat center;
-          display: inline-block;
+        .hs-door svg {
+          width: 100%; height: 100%;
+          transition: transform 0.2s;
         }
-        .hs-label:hover { scale: 1.05; background: rgba(0,0,0,0.8); border-color: rgba(255,255,255,0.4); }
+        .hs-door:hover { 
+          scale: 1.15; 
+          background: rgba(0,0,0,0.85); 
+          border-color: rgba(255,255,255,0.6);
+        }
+        .hs-door:hover svg { transform: scale(1.05); }
+
+        .hs-door-enter svg { transform: translateX(-5px); }
+        .hs-door-enter:hover svg { transform: translateX(-5px) scale(1.05); }
+
+        .hs-door-exit svg { transform: translateX(5px); }
+        .hs-door-exit:hover svg { transform: translateX(5px) scale(1.05); }
+
+        .hs-floor-circle {
+          width: 120px; height: 120px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.6);
+          border: 1px solid rgba(255,255,255,0.25);
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer;
+          transition: scale 0.2s, background 0.2s, border-color 0.2s;
+          margin-top: -60px;
+          margin-left: -60px;
+          transform-origin: 50% 50% !important;
+          padding: 16px;
+        }
+        .hs-floor-circle svg { width: 100%; height: 100%; transition: transform 0.2s; }
+        .hs-floor-circle:hover { 
+          scale: 1.15; 
+          background: rgba(0,0,0,0.85); 
+          border-color: rgba(255,255,255,0.6);
+        }
+        .hs-floor-circle:hover svg { transform: scale(1.05); }
       `}</style>
     </div>
   );
