@@ -136,6 +136,7 @@ interface SceneData {
   id: string;
   label: string;
   img: string;
+  img4k?: string;
   thumb: string;
   width?: number;
   scene?: any; // Marzipano scene
@@ -737,6 +738,19 @@ function RightPanel({
 // ─── Main App ─────────────────────────────────────────────────────────────────
 const isExported = typeof window !== "undefined" && (window as any).__TOUR_CONFIG__ !== undefined;
 
+const getMaxTextureSize = () => {
+  if (typeof window === "undefined") return 8192;
+  try {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    // @ts-ignore
+    return gl ? gl.getParameter(gl.MAX_TEXTURE_SIZE) : 4096;
+  } catch (e) {
+    return 4096; // fallback for very old browsers
+  }
+};
+const MAX_TEXTURE_SIZE = getMaxTextureSize();
+
 export default function App() {
   const initialConfig = isExported ? (window as any).__TOUR_CONFIG__ : null;
 
@@ -933,15 +947,23 @@ export default function App() {
     if (!viewerRef.current) return null;
     if (marzScenes.current.has(sceneData.id)) return marzScenes.current.get(sceneData.id);
 
+    let imgSrc = sceneData.img;
     let imgWidth = sceneData.width;
+
+    // Use 4K image if device limits us and we have it
+    if (MAX_TEXTURE_SIZE < 8192 && sceneData.img4k) {
+      imgSrc = sceneData.img4k;
+      if (imgWidth) imgWidth = Math.min(imgWidth, 4096);
+    }
+
     if (!imgWidth) {
       const img = new Image();
-      img.src = sceneData.img;
+      img.src = imgSrc;
       await new Promise((res) => { img.onload = res; img.onerror = res; });
       imgWidth = img.naturalWidth || 4096;
     }
 
-    const source = Marzipano.ImageUrlSource.fromString(sceneData.img);
+    const source = Marzipano.ImageUrlSource.fromString(imgSrc);
     const geometry = new Marzipano.EquirectGeometry([{ width: imgWidth }]);
     const limiter = Marzipano.RectilinearView.limit.traditional(imgWidth, 100 * Math.PI / 180, 120 * Math.PI / 180, 30 * Math.PI / 180);
     const view = new Marzipano.RectilinearView({ yaw: 0, pitch: 0, fov: 75 * Math.PI / 180 }, limiter);
@@ -1018,15 +1040,34 @@ export default function App() {
           mainCtx.drawImage(img, 0, 0, w, h);
           const optimizedImg = mainCanvas.toDataURL("image/jpeg", 0.92);
 
-          // ── Thumbnail (200×100, JPEG 0.75) ──
+          // ── Optimized fallback image (4K, JPEG 0.90) ──
+          const MAX_W_4K = 4096;
+          const MAX_H_4K = 2048;
+          let w4k = img.naturalWidth;
+          let h4k = img.naturalHeight;
+          if (w4k > MAX_W_4K || h4k > MAX_H_4K) {
+            const ratio4k = Math.min(MAX_W_4K / w4k, MAX_H_4K / h4k);
+            w4k = Math.round(w4k * ratio4k);
+            h4k = Math.round(h4k * ratio4k);
+          }
+          const canvas4k = document.createElement("canvas");
+          canvas4k.width = w4k;
+          canvas4k.height = h4k;
+          const ctx4k = canvas4k.getContext("2d")!;
+          ctx4k.imageSmoothingEnabled = true;
+          ctx4k.imageSmoothingQuality = "high";
+          ctx4k.drawImage(img, 0, 0, w4k, h4k);
+          const img4k = canvas4k.toDataURL("image/jpeg", 0.90);
+
+          // ── Thumbnail (400×200, JPEG 0.90) ──
           const thumbCanvas = document.createElement("canvas");
-          thumbCanvas.width = 200; thumbCanvas.height = 100;
-          thumbCanvas.getContext("2d")!.drawImage(img, 0, 0, 200, 100);
-          const thumb = thumbCanvas.toDataURL("image/jpeg", 0.75);
+          thumbCanvas.width = 400; thumbCanvas.height = 200;
+          thumbCanvas.getContext("2d")!.drawImage(img, 0, 0, 400, 200);
+          const thumb = thumbCanvas.toDataURL("image/jpeg", 0.90);
 
           const id = `scene_${Date.now()}_${idx}`;
           const label = file.name.replace(/\.[^/.]+$/, "");
-          const newScene: SceneData = { id, label, img: optimizedImg, thumb, width: w };
+          const newScene: SceneData = { id, label, img: optimizedImg, img4k, thumb, width: w };
           setScenes((prev) => [...prev, newScene]);
           // Auto-switch to first uploaded
           if (idx === 0) setTimeout(() => switchScene(id), 100);
@@ -1290,12 +1331,12 @@ export default function App() {
     const canvas = document.querySelector("#pano canvas") as HTMLCanvasElement;
     if (canvas) {
       const thumbCanvas = document.createElement("canvas");
-      thumbCanvas.width = 200;
-      thumbCanvas.height = 100;
+      thumbCanvas.width = 400;
+      thumbCanvas.height = 200;
       const ctx = thumbCanvas.getContext("2d");
       if (ctx) {
-        ctx.drawImage(canvas, 0, 0, 200, 100);
-        const dataUrl = thumbCanvas.toDataURL("image/jpeg", 0.75);
+        ctx.drawImage(canvas, 0, 0, 400, 200);
+        const dataUrl = thumbCanvas.toDataURL("image/jpeg", 0.90);
 
         const view = viewerRef.current.view();
         updateScene(id, {
@@ -1545,7 +1586,7 @@ export default function App() {
 
   return (
     <div
-      className="flex h-[100dvh] w-full overflow-hidden bg-[#0a0c0b] select-none"
+      className="flex h-[100dvh] w-full overflow-hidden bg-[#0a0c0b] select-none relative"
       style={{
         fontFamily: "var(--font-sans)",
         "--accent": accentColor,

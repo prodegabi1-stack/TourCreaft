@@ -60,8 +60,10 @@ export default defineConfig({
                       }
                       return imgUrl;
                     };
-                    
                     scene.img = processImage(scene.img, 'img');
+                    if (scene.img4k) {
+                      scene.img4k = processImage(scene.img4k, 'img4k');
+                    }
                     scene.thumb = processImage(scene.thumb, 'thumb');
                   }
                 }
