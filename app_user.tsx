@@ -1,17 +1,17 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { get, set } from "idb-keyval";
-import { Phone, Mail, Copy, X, MapPin, Compass, ChevronLeft, ChevronRight, Maximize, Minimize, CircleHelp, Glasses, Info, Share2, Check, Link2, BedDouble, Ruler, CalendarDays, Trees, GraduationCap, ShoppingBag, TrainFront, Stethoscope, Dumbbell, ChevronDown } from "lucide-react";
+import { Phone, Mail, Copy, X, MapPin, Compass, ChevronLeft, ChevronRight, Maximize, Minimize, CircleHelp, Glasses, Info, Share2 } from "lucide-react";
 import whatsappLogo from "../../whatsapp-svgrepo-com.svg";
 import phoneIcon from "../../phone-svgrepo-com (1).svg";
 import mailIcon from "../../email-svgrepo-com.svg";
 
-// ΓöÇΓöÇΓöÇ Marzipano global type ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Marzipano global type ────────────────────────────────────────────────────
 declare const Marzipano: any;
 
-// ΓöÇΓöÇΓöÇ SVG Icon Components (from user's SVG files) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── SVG Icon Components (from user's SVG files) ──────────────────────────────
 
 function IcoSettings({ size = 20 }: { size?: number }) {
-  // Exact from Setings.svg (viewBox 0 0 10 39) ΓÇö 3 circles, one per position
+  // Exact from Setings.svg (viewBox 0 0 10 39) — 3 circles, one per position
   return (
     <svg width={size * (10 / 39)} height={size} viewBox="0 0 10 39" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="3.7" cy="3.7" r="3.7" transform="matrix(1 0 0 -1 1 38)" stroke="currentColor" strokeWidth="2" />
@@ -87,7 +87,7 @@ function IcoTopView({ size = 20 }: { size?: number }) {
 }
 
 function Ico3D({ size = 20 }: { size?: number }) {
-  // Exact from 3d.svg (viewBox 0 0 39 39) ΓÇö NO fill, stroke only
+  // Exact from 3d.svg (viewBox 0 0 39 39) — NO fill, stroke only
   return (
     <svg width={size} height={size} viewBox="0 0 39 39" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M14.59 38L1 30.3923V19.1921L5.02469 16.9501V6.80648L10.1874 3.90324L15.35 1L38 13.6795V24.8797L14.59 38Z" fill="none" />
@@ -106,7 +106,7 @@ function IcoWalkthrough({ size = 15 }: { size?: number }) {
   );
 }
 
-// ΓöÇΓöÇΓöÇ Agent data ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Agent data ───────────────────────────────────────────────────────────────
 const AGENT = {
   name: "Gabriel Prode",
   title: "Real Estate Agent",
@@ -115,26 +115,7 @@ const AGENT = {
   avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&auto=format",
 };
 
-// ΓöÇΓöÇΓöÇ Property data ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const PROPERTY_INFO = {
-  address: "Str. Florilor 12, Cluj-Napoca",
-  rooms: 4,
-  bathrooms: 2,
-  area: 120,
-  yearBuilt: 2022,
-  description: "Modern apartment in a quiet residential area with premium finishes, open-plan living, and natural light throughout. Located in one of Cluj-Napoca's most sought-after neighbourhoods.",
-  neighbourhood: "Gheorgheni is a well-established residential district known for its tree-lined streets, parks, and excellent connectivity to the city centre. The area offers a balanced mix of urban convenience and peaceful living.",
-  nearby: [
-    { name: "Central Park", distance: "350m", icon: "park" },
-    { name: "International School", distance: "500m", icon: "school" },
-    { name: "Shopping Mall", distance: "800m", icon: "shopping" },
-    { name: "Train Station", distance: "1.2km", icon: "train" },
-    { name: "Medical Centre", distance: "400m", icon: "medical" },
-    { name: "Fitness Club", distance: "250m", icon: "gym" },
-  ],
-};
-
-// ΓöÇΓöÇΓöÇ Demo scenes (Unsplash equirect-ish wide shots for demo) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Demo scenes (Unsplash equirect-ish wide shots for demo) ──────────────────
 const DEMO_ROOMS = [
   { id: "demo_1", label: "Master Bedroom", img: "https://images.unsplash.com/photo-1616486029423-aaa4789e8c9a?w=4096&h=2048&fit=crop", thumb: "https://images.unsplash.com/photo-1616486029423-aaa4789e8c9a?w=200&h=100&fit=crop" },
   { id: "demo_2", label: "Living Room", img: "https://images.unsplash.com/photo-1724582586529-62622e50c0b3?w=4096&h=2048&fit=crop", thumb: "https://images.unsplash.com/photo-1724582586529-62622e50c0b3?w=200&h=100&fit=crop" },
@@ -142,7 +123,7 @@ const DEMO_ROOMS = [
   { id: "demo_4", label: "Master Bathroom", img: "https://images.unsplash.com/photo-1651951646668-46562cfb4518?w=4096&h=2048&fit=crop", thumb: "https://images.unsplash.com/photo-1651951646668-46562cfb4518?w=200&h=100&fit=crop" },
 ];
 
-// ΓöÇΓöÇΓöÇ Types ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface HotspotData {
   id: string;
   yaw: number;
@@ -177,11 +158,11 @@ interface FloorConfig {
   targetPitch?: number;
   targetFov?: number;
 }
-type TargetCaptureModeType = 
+type TargetCaptureModeType =
   | { type: "hotspot"; sourceSceneId: string; hotspotId: string }
   | { type: "floor"; sourceSceneId: string; floorIndex: number };
 
-// ΓöÇΓöÇΓöÇ Copy button helper ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Copy button helper ───────────────────────────────────────────────────────
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
@@ -206,7 +187,7 @@ function openExternalLink(url: string) {
   window.location.href = url;
 }
 
-// ΓöÇΓöÇΓöÇ View mode pill ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── View mode pill ───────────────────────────────────────────────────────────
 function ViewModeSwitch({
   value,
   onChange,
@@ -246,7 +227,7 @@ function ViewModeSwitch({
       >
         <IcoWalkthrough size={22} />
       </button>
-      {/* 3D button ΓÇö exact 3d.svg, stroke only, no fill */}
+      {/* 3D button — exact 3d.svg, stroke only, no fill */}
       <button
         id="btn-3d-mode"
         onClick={() => onChange("3d")}
@@ -260,7 +241,7 @@ function ViewModeSwitch({
   );
 }
 
-// ΓöÇΓöÇΓöÇ Left Settings Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Left Settings Panel ──────────────────────────────────────────────────────
 function LeftPanel({
   transitionType, setTransitionType,
   transitionDuration, setTransitionDuration,
@@ -397,7 +378,7 @@ function LeftPanel({
               {hasFloors && (
                 <div className="flex flex-col gap-2">
                   <label className="flex flex-col gap-1 text-[10px] text-white/60">
-                    Num─âr etaje
+                    Număr etaje
                     <input
                       type="number" min={0} max={20}
                       value={parseInt(floorsList) || 0}
@@ -405,12 +386,12 @@ function LeftPanel({
                       className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-white outline-none focus:border-accent w-full"
                     />
                   </label>
-                  
+
                   <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 pr-1 mt-1 border-t border-white/10 pt-2">
                     {Array.from({ length: (parseInt(floorsList) || 0) + 1 }).map((_, idx) => (
                       <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-2 flex flex-col gap-1.5 relative">
                         <div className="text-[11px] font-semibold text-accent">Etaj {idx} {idx === 0 ? "(Parter)" : ""}</div>
-                        
+
                         <label className="flex flex-col gap-1 text-[10px] text-white/50">
                           Target Scene
                           <select
@@ -475,63 +456,63 @@ function LeftPanel({
                 Proiectul are model 3D
               </label>
             </div>
-            
+
             {has3D && (
               <>
                 <div>
                   <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3">Textured 3D Model</p>
-              <input
-                ref={modelInputRef} type="file" accept=".glb,.gltf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) onModelUpload(file);
-                }}
-              />
-              {modelUrl ? (
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-accent flex-shrink-0"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
-                    <span className="text-white/60 text-xs truncate flex-1">Textured Model</span>
-                    <button onClick={onModelRemove} className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"><X size={14} /></button>
-                  </div>
-                  <button onClick={() => modelInputRef.current?.click()} className="text-xs text-accent hover:underline text-left">Replace model...</button>
+                  <input
+                    ref={modelInputRef} type="file" accept=".glb,.gltf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) onModelUpload(file);
+                    }}
+                  />
+                  {modelUrl ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-accent flex-shrink-0"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+                        <span className="text-white/60 text-xs truncate flex-1">Textured Model</span>
+                        <button onClick={onModelRemove} className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"><X size={14} /></button>
+                      </div>
+                      <button onClick={() => modelInputRef.current?.click()} className="text-xs text-accent hover:underline text-left">Replace model...</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => modelInputRef.current?.click()} className="w-full border-2 border-dashed border-white/15 hover:border-accent/50 rounded-xl py-4 text-center transition-all cursor-pointer">
+                      <svg className="mx-auto mb-1.5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+                      <p className="text-xs text-white/40"><span className="text-accent">Upload</span> .GLB / .GLTF</p>
+                    </button>
+                  )}
                 </div>
-              ) : (
-                <button onClick={() => modelInputRef.current?.click()} className="w-full border-2 border-dashed border-white/15 hover:border-accent/50 rounded-xl py-4 text-center transition-all cursor-pointer">
-                  <svg className="mx-auto mb-1.5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                  <p className="text-xs text-white/40"><span className="text-accent">Upload</span> .GLB / .GLTF</p>
-                </button>
-              )}
-            </div>
 
-            <div>
-              <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3">Untextured 3D Model</p>
-              <input
-                ref={untexturedModelInputRef} type="file" accept=".glb,.gltf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) onUntexturedModelUpload(file);
-                }}
-              />
-              {untexturedModelUrl ? (
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-accent flex-shrink-0"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
-                    <span className="text-white/60 text-xs truncate flex-1">Untextured Model</span>
-                    <button onClick={onUntexturedModelRemove} className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"><X size={14} /></button>
-                  </div>
-                  <button onClick={() => untexturedModelInputRef.current?.click()} className="text-xs text-accent hover:underline text-left">Replace model...</button>
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3">Untextured 3D Model</p>
+                  <input
+                    ref={untexturedModelInputRef} type="file" accept=".glb,.gltf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) onUntexturedModelUpload(file);
+                    }}
+                  />
+                  {untexturedModelUrl ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-accent flex-shrink-0"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+                        <span className="text-white/60 text-xs truncate flex-1">Untextured Model</span>
+                        <button onClick={onUntexturedModelRemove} className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"><X size={14} /></button>
+                      </div>
+                      <button onClick={() => untexturedModelInputRef.current?.click()} className="text-xs text-accent hover:underline text-left">Replace model...</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => untexturedModelInputRef.current?.click()} className="w-full border-2 border-dashed border-white/15 hover:border-accent/50 rounded-xl py-4 text-center transition-all cursor-pointer">
+                      <svg className="mx-auto mb-1.5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+                      <p className="text-xs text-white/40"><span className="text-accent">Upload</span> .GLB / .GLTF</p>
+                    </button>
+                  )}
                 </div>
-              ) : (
-                <button onClick={() => untexturedModelInputRef.current?.click()} className="w-full border-2 border-dashed border-white/15 hover:border-accent/50 rounded-xl py-4 text-center transition-all cursor-pointer">
-                  <svg className="mx-auto mb-1.5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                  <p className="text-xs text-white/40"><span className="text-accent">Upload</span> .GLB / .GLTF</p>
-                </button>
-              )}
-            </div>
-            </>
+              </>
             )}
           </section>
 
@@ -551,406 +532,7 @@ function LeftPanel({
   );
 }
 
-// ΓöÇΓöÇΓöÇ Space Info Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-function SpaceInfoPanel({
-  open,
-  onClose,
-  accentColor,
-}: {
-  open: boolean;
-  onClose: () => void;
-  accentColor: string;
-}) {
-  const [expandedSection, setExpandedSection] = useState<string | null>("details");
-
-  const toggleSection = (section: string) => {
-    setExpandedSection(prev => prev === section ? null : section);
-  };
-
-  const nearbyIcon = (type: string) => {
-    switch (type) {
-      case "park": return <Trees size={15} />;
-      case "school": return <GraduationCap size={15} />;
-      case "shopping": return <ShoppingBag size={15} />;
-      case "train": return <TrainFront size={15} />;
-      case "medical": return <Stethoscope size={15} />;
-      case "gym": return <Dumbbell size={15} />;
-      default: return <MapPin size={15} />;
-    }
-  };
-
-  return (
-    <div
-      className={`absolute top-0 left-0 bottom-0 z-30 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"}`}
-      style={{ width: "clamp(320px, 28vw, 400px)" }}
-    >
-      <div
-        className="pointer-events-auto h-full flex flex-col overflow-hidden"
-        style={{
-          background: "rgba(12, 12, 12, 0.92)",
-          backdropFilter: "blur(40px)",
-          WebkitBackdropFilter: "blur(40px)",
-          borderRight: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "8px 0 32px rgba(0,0,0,0.4)",
-        }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 flex-shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: `${accentColor}20`, color: accentColor }}
-            >
-              <Info size={15} />
-            </div>
-            <h3 className="text-white font-semibold text-sm">Space Info</h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
-          >
-            <X size={14} />
-          </button>
-        </div>
-
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
-          {/* Address */}
-          <div className="px-5 py-4 border-b border-white/6">
-            <div className="flex items-center gap-2 mb-1">
-              <MapPin size={13} style={{ color: accentColor }} />
-              <span className="text-white font-medium text-sm">{PROPERTY_INFO.address}</span>
-            </div>
-            <p className="text-white/40 text-xs leading-relaxed mt-2">{PROPERTY_INFO.description}</p>
-          </div>
-
-          {/* Property Details ΓÇö collapsible */}
-          <div className="border-b border-white/6">
-            <button
-              onClick={() => toggleSection("details")}
-              className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/3 transition-colors"
-            >
-              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Property Details</span>
-              <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${expandedSection === "details" ? "rotate-180" : ""}`} />
-            </button>
-            <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedSection === "details" ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
-              <div className="grid grid-cols-2 gap-2 px-5 pb-4">
-                <div className="bg-white/4 border border-white/6 rounded-xl p-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accentColor}15`, color: accentColor }}>
-                    <BedDouble size={15} />
-                  </div>
-                  <div>
-                    <div className="text-white font-semibold text-sm leading-none">{PROPERTY_INFO.rooms}</div>
-                    <div className="text-white/35 text-[10px] mt-0.5">Rooms</div>
-                  </div>
-                </div>
-                <div className="bg-white/4 border border-white/6 rounded-xl p-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accentColor}15`, color: accentColor }}>
-                    <Ruler size={15} />
-                  </div>
-                  <div>
-                    <div className="text-white font-semibold text-sm leading-none">{PROPERTY_INFO.area} m&sup2;</div>
-                    <div className="text-white/35 text-[10px] mt-0.5">Area</div>
-                  </div>
-                </div>
-                <div className="bg-white/4 border border-white/6 rounded-xl p-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accentColor}15`, color: accentColor }}>
-                    <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />
-                      <line x1="10" x2="8" y1="5" y2="7" />
-                      <line x1="2" x2="22" y1="12" y2="12" />
-                      <line x1="7" x2="7" y1="19" y2="21" />
-                      <line x1="17" x2="17" y1="19" y2="21" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-white font-semibold text-sm leading-none">{PROPERTY_INFO.bathrooms}</div>
-                    <div className="text-white/35 text-[10px] mt-0.5">Bathrooms</div>
-                  </div>
-                </div>
-                <div className="bg-white/4 border border-white/6 rounded-xl p-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accentColor}15`, color: accentColor }}>
-                    <CalendarDays size={15} />
-                  </div>
-                  <div>
-                    <div className="text-white font-semibold text-sm leading-none">{PROPERTY_INFO.yearBuilt}</div>
-                    <div className="text-white/35 text-[10px] mt-0.5">Year Built</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Neighbourhood ΓÇö collapsible */}
-          <div className="border-b border-white/6">
-            <button
-              onClick={() => toggleSection("neighbourhood")}
-              className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/3 transition-colors"
-            >
-              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Neighbourhood</span>
-              <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${expandedSection === "neighbourhood" ? "rotate-180" : ""}`} />
-            </button>
-            <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedSection === "neighbourhood" ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
-              <div className="px-5 pb-4">
-                <p className="text-white/50 text-xs leading-relaxed">{PROPERTY_INFO.neighbourhood}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Nearby Locations ΓÇö collapsible */}
-          <div className="border-b border-white/6">
-            <button
-              onClick={() => toggleSection("nearby")}
-              className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/3 transition-colors"
-            >
-              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Nearby Locations</span>
-              <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${expandedSection === "nearby" ? "rotate-180" : ""}`} />
-            </button>
-            <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedSection === "nearby" ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
-              <div className="flex flex-col gap-1.5 px-5 pb-4">
-                {PROPERTY_INFO.nearby.map((loc, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-white/3 border border-white/5 hover:bg-white/6 transition-colors"
-                  >
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ background: `${accentColor}12`, color: accentColor }}
-                    >
-                      {nearbyIcon(loc.icon)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white/80 text-xs font-medium">{loc.name}</div>
-                    </div>
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0"
-                      style={{ background: `${accentColor}15`, color: accentColor }}
-                    >
-                      {loc.distance}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ΓöÇΓöÇΓöÇ Share Modal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-function ShareModal({
-  open,
-  onClose,
-  accentColor,
-}: {
-  open: boolean;
-  onClose: () => void;
-  accentColor: string;
-}) {
-  const [copied, setCopied] = useState(false);
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const shareTitle = typeof document !== "undefined" ? document.title : "Virtual Tour";
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Fallback
-      const el = document.createElement("textarea");
-      el.value = shareUrl;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const encodedUrl = encodeURIComponent(shareUrl);
-  const encodedTitle = encodeURIComponent(shareTitle);
-
-  const socials = [
-    {
-      name: "Facebook",
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-        </svg>
-      ),
-    },
-    {
-      name: "X",
-      href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-          <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
-        </svg>
-      ),
-    },
-    {
-      name: "LinkedIn",
-      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-        </svg>
-      ),
-    },
-    {
-      name: "Pinterest",
-      href: `https://pinterest.com/pin/create/button/?url=${encodedUrl}&description=${encodedTitle}`,
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-          <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12.017 24 18.635 24 24 18.633 24 12.013 24 5.396 18.635.03 12.017.03V0z" />
-        </svg>
-      ),
-    },
-    {
-      name: "Email",
-      href: `mailto:?subject=${encodedTitle}&body=${encodeURIComponent(`Check out this virtual tour: ${shareUrl}`)}`,
-      icon: (
-        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="4" width="20" height="16" rx="2" />
-          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-        </svg>
-      ),
-    },
-  ];
-
-  if (!open) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center"
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" onClick={onClose} />
-
-      {/* Modal */}
-      <div
-        className="relative w-[380px] max-w-[calc(100vw-2rem)] rounded-3xl overflow-hidden"
-        style={{
-          background: "rgba(18, 18, 18, 0.92)",
-          backdropFilter: "blur(40px)",
-          WebkitBackdropFilter: "blur(40px)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset",
-          animation: "shareModalIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-2">
-          <h3 className="text-lg font-semibold tracking-widest uppercase text-white">Share</h3>
-          <button
-            id="share-modal-close"
-            onClick={onClose}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        {/* Separator */}
-        <div className="mx-6 mt-3 mb-4 h-px bg-white/8" />
-
-        {/* Copy Link */}
-        <div className="px-6 mb-5">
-          <label className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-2 block">Tour Link</label>
-          <div
-            className="flex items-center gap-2 rounded-xl overflow-hidden transition-all"
-            style={{
-              background: "rgba(255,255,255,0.06)",
-              border: copied ? `1px solid ${accentColor}` : "1px solid rgba(255,255,255,0.1)",
-            }}
-          >
-            <div className="flex items-center gap-2 flex-1 min-w-0 px-3 py-2.5">
-              <Link2 size={14} className="text-white/30 flex-shrink-0" />
-              <span className="text-white/70 text-xs font-medium truncate select-all">
-                {shareUrl}
-              </span>
-            </div>
-            <button
-              id="share-copy-link"
-              onClick={copyLink}
-              className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold transition-all flex-shrink-0"
-              style={{
-                background: copied ? accentColor : "rgba(255,255,255,0.08)",
-                color: copied ? "#000" : "white",
-              }}
-            >
-              {copied ? (
-                <>
-                  <Check size={13} />
-                  <span>Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy size={13} />
-                  <span>Copy</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Social Share */}
-        <div className="px-6 pb-6">
-          <label className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3 block">Share via</label>
-          <div className="flex items-center justify-between gap-2">
-            {socials.map((s) => (
-              <a
-                key={s.name}
-                id={`share-${s.name.toLowerCase()}`}
-                href={s.href}
-                target={s.name === "Email" ? "_self" : "_blank"}
-                rel="noreferrer"
-                className="group flex flex-col items-center gap-2 flex-1"
-                onClick={(e) => {
-                  if (s.name !== "Email") {
-                    e.preventDefault();
-                    window.open(s.href, "_blank", "width=600,height=400,noopener,noreferrer");
-                  }
-                }}
-              >
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
-                  style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "rgba(255,255,255,0.7)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = `${accentColor}20`;
-                    e.currentTarget.style.borderColor = `${accentColor}40`;
-                    e.currentTarget.style.color = accentColor;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-                    e.currentTarget.style.color = "rgba(255,255,255,0.7)";
-                  }}
-                >
-                  {s.icon}
-                </div>
-                <span className="text-[10px] text-white/40 font-medium group-hover:text-white/70 transition-colors">
-                  {s.name}
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ΓöÇΓöÇΓöÇ Right Scenes Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Right Scenes Panel ─────────────────────────────────────────────────────
 function RightPanel({
   scenes, activeId, activeHotspotId, setActiveHotspotId, hasFloors, floorsList, onSceneClick, onUpload, onDeleteScene, onUpdateScene, onReorderScenes, onCaptureHighlight,
   onAddHotspot, onUpdateHotspot, onDeleteHotspot, onStartTargetCapture
@@ -1001,14 +583,14 @@ function RightPanel({
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
           </svg>
-          <span className="text-xs font-semibold">Upload 360┬░ Photos</span>
+          <span className="text-xs font-semibold">Upload 360° Photos</span>
         </div>
       </div>
 
       {/* Scene list (Moved up) */}
       <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
         {scenes.length === 0 && (
-          <div className="text-center text-white/20 text-xs py-8">No scenes yet.<br />Upload 360┬░ photos to start.</div>
+          <div className="text-center text-white/20 text-xs py-8">No scenes yet.<br />Upload 360° photos to start.</div>
         )}
         {scenes.map((s, idx) => (
           <div
@@ -1070,7 +652,7 @@ function RightPanel({
             />
             Show in bottom gallery (Highlight)
           </label>
-          
+
           {hasFloors && (
             <label className="flex flex-col gap-1 text-[11px] text-white/60 mt-3">
               Etaj
@@ -1143,7 +725,6 @@ function RightPanel({
                       <option value="stair-up">Stairs Up</option>
                       <option value="stair-down">Stairs Down</option>
                       <option value="floor-glow">Floor Glow (Tilted)</option>
-                      <option value="glow">Glow (Default)</option>
                     </select>
                   </label>
 
@@ -1162,7 +743,7 @@ function RightPanel({
               onClick={() => onAddHotspot(activeId!)}
               className="mt-1 bg-accent/20 text-accent font-medium text-[11px] py-1.5 rounded-lg hover:bg-accent/30 transition-colors border border-accent/20"
             >
-              + Adaug─â hotspot (Current View)
+              + Adaugă hotspot (Current View)
             </button>
           </div>
         </div>
@@ -1171,7 +752,7 @@ function RightPanel({
   );
 }
 
-// ΓöÇΓöÇΓöÇ Main App ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Main App ─────────────────────────────────────────────────────────────────
 const isExported = typeof window !== "undefined" && (window as any).__TOUR_CONFIG__ !== undefined;
 
 const getMaxTextureSize = () => {
@@ -1208,8 +789,6 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [floorsList, setFloorsList] = useState(initialConfig?.floorsList || "2");
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [showSpaceInfo, setShowSpaceInfo] = useState(false);
 
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -1225,15 +804,15 @@ export default function App() {
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
+      document.documentElement.requestFullscreen().catch(() => { });
     } else {
       document.exitFullscreen();
     }
   };
 
   const openSpaceInfo = () => {
+    setAgentOpen(true);
     setShowSettingsMenu(false);
-    setShowSpaceInfo(prev => !prev);
   };
 
   const showHelp = () => {
@@ -1241,9 +820,23 @@ export default function App() {
     window.alert("Use the settings menu to open space info, share the tour, enter VR/3D mode, or toggle fullscreen.");
   };
 
-  const shareTour = () => {
+  const shareTour = async () => {
     setShowSettingsMenu(false);
-    setShowShareModal(true);
+
+    const shareUrl = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: document.title,
+          url: shareUrl,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareUrl);
+    } catch {
+      // Ignore share cancellations and clipboard failures.
+    }
   };
 
   const enterVr = () => {
@@ -1387,7 +980,7 @@ export default function App() {
   const bubbleBgStyle = `rgba(${hexToRgb(bubbleBg)}, ${bubbleOpacity})`;
   const bubbleBlurStyle = bubbleBlur ? "blur(16px)" : "none";
 
-  // ΓöÇΓöÇ Init Marzipano viewer ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Init Marzipano viewer ──────────────────────────────────────────────────
   useEffect(() => {
     if (!panoRef.current || typeof Marzipano === "undefined") return;
     viewerRef.current = new Marzipano.Viewer(panoRef.current, {
@@ -1409,7 +1002,7 @@ export default function App() {
     return () => { /* cleanup handled by scene replacement */ };
   }, [isLoading]); // Runs when isLoading becomes false and the div is mounted
 
-  // ΓöÇΓöÇ Load scene into Marzipano ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Load scene into Marzipano ─────────────────────────────────────────────
   const loadMarzipanoScene = useCallback(async (sceneData: SceneData): Promise<any> => {
     if (!viewerRef.current) return null;
     if (marzScenes.current.has(sceneData.id)) return marzScenes.current.get(sceneData.id);
@@ -1439,7 +1032,7 @@ export default function App() {
     return scene;
   }, []);
 
-  // ΓöÇΓöÇ Switch to a scene ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Switch to a scene ─────────────────────────────────────────────────────
   const switchScene = useCallback(async (id: string, overrideYaw?: number, overridePitch?: number, overrideFov?: number) => {
     if (!viewerRef.current) return;
     const sceneData = scenes.find((s) => s.id === id);
@@ -1478,7 +1071,7 @@ export default function App() {
   }, [scenes, loadMarzipanoScene, transitionType, transitionDuration]);
 
 
-  // ΓöÇΓöÇ Upload handler (with image optimization) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Upload handler (with image optimization) ──────────────────────────────
   const handleUpload = useCallback((files: FileList) => {
     Array.from(files).forEach((file, idx) => {
       if (!file.type.match("image.*")) return;
@@ -1487,7 +1080,7 @@ export default function App() {
         const dataUrl = e.target?.result as string;
         const img = new Image();
         img.onload = () => {
-          // ΓöÇΓöÇ Optimized main image (High Quality 8K, JPEG 0.92) ΓöÇΓöÇ
+          // ── Optimized main image (High Quality 8K, JPEG 0.92) ──
           const MAX_W = 8192;
           const MAX_H = 4096;
           let w = img.naturalWidth;
@@ -1507,7 +1100,7 @@ export default function App() {
           mainCtx.drawImage(img, 0, 0, w, h);
           const optimizedImg = mainCanvas.toDataURL("image/jpeg", 0.92);
 
-          // ΓöÇΓöÇ Optimized fallback image (4K, JPEG 0.90) ΓöÇΓöÇ
+          // ── Optimized fallback image (4K, JPEG 0.90) ──
           const MAX_W_4K = 4096;
           const MAX_H_4K = 2048;
           let w4k = img.naturalWidth;
@@ -1526,7 +1119,7 @@ export default function App() {
           ctx4k.drawImage(img, 0, 0, w4k, h4k);
           const img4k = canvas4k.toDataURL("image/jpeg", 0.90);
 
-          // ΓöÇΓöÇ Thumbnail (400├ù200, JPEG 0.90) ΓöÇΓöÇ
+          // ── Thumbnail (400×200, JPEG 0.90) ──
           const thumbCanvas = document.createElement("canvas");
           thumbCanvas.width = 400; thumbCanvas.height = 200;
           thumbCanvas.getContext("2d")!.drawImage(img, 0, 0, 400, 200);
@@ -1545,7 +1138,7 @@ export default function App() {
     });
   }, [switchScene]);
 
-  // ΓöÇΓöÇ Delete scene ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Delete scene ──────────────────────────────────────────────────────────
   const deleteScene = useCallback((id: string) => {
     marzScenes.current.delete(id);
     setScenes((prev) => {
@@ -1565,7 +1158,7 @@ export default function App() {
     });
   }, [activeId, switchScene]);
 
-  // ΓöÇΓöÇ Auto-play slideshow ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Auto-play slideshow ───────────────────────────────────────────────────
   const stopAutoPlay = useCallback(() => {
     if (playTimerRef.current) { clearInterval(playTimerRef.current); playTimerRef.current = null; }
     setIsPlaying(false);
@@ -1578,17 +1171,17 @@ export default function App() {
         setActiveId((cur) => {
           const curScene = prev.find(s => s.id === cur);
           const highlights = prev.filter(s => s.isHighlight);
-          
+
           let targetScene = curScene;
           if (highlights.length > 0 && !curScene?.isHighlight) {
-             targetScene = highlights[0];
+            targetScene = highlights[0];
           }
 
           if (targetScene) {
-             const pitch = targetScene.highlightPitch ?? 0;
-             const fov = targetScene.highlightFov ?? (75 * Math.PI / 180);
-             const startYaw = (targetScene.highlightYaw ?? 0) - (30 * Math.PI / 180);
-             setTimeout(() => switchScene(targetScene!.id, startYaw, pitch, fov), 0);
+            const pitch = targetScene.highlightPitch ?? 0;
+            const fov = targetScene.highlightFov ?? (75 * Math.PI / 180);
+            const startYaw = (targetScene.highlightYaw ?? 0) - (30 * Math.PI / 180);
+            setTimeout(() => switchScene(targetScene!.id, startYaw, pitch, fov), 0);
           }
           return targetScene?.id ?? cur;
         });
@@ -1601,7 +1194,7 @@ export default function App() {
           setActiveId((cur) => {
             const highlights = prev.filter(s => s.isHighlight);
             if (highlights.length === 0) return cur;
-            
+
             const curIsHighlight = prev.find(s => s.id === cur)?.isHighlight;
             let next: SceneData;
             if (curIsHighlight) {
@@ -1610,7 +1203,7 @@ export default function App() {
             } else {
               next = highlights[0];
             }
-            
+
             if (next) {
               const pitch = next.highlightPitch ?? 0;
               const fov = next.highlightFov ?? (75 * Math.PI / 180);
@@ -1628,10 +1221,10 @@ export default function App() {
     return () => { if (playTimerRef.current) clearInterval(playTimerRef.current); };
   }, [isPlaying, switchScene]);
 
-  // ΓöÇΓöÇ Auto-rotate logic ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Auto-rotate logic ────────────────────────────────────────────────
   useEffect(() => {
     if (!viewerRef.current) return;
-    
+
     if (autoRotateRef.current) {
       viewerRef.current.stopMovement();
       autoRotateRef.current = null;
@@ -1640,20 +1233,20 @@ export default function App() {
     if (isPlaying) {
       // 60 degrees over 6 seconds = 10 degrees per second
       const view = viewerRef.current.view();
-      const ar = Marzipano.autorotate({ 
-        yawSpeed: 10 * Math.PI / 180, 
+      const ar = Marzipano.autorotate({
+        yawSpeed: 10 * Math.PI / 180,
         yawAccel: 10,
-        targetPitch: view.pitch(), 
-        targetFov: view.fov() 
+        targetPitch: view.pitch(),
+        targetFov: view.fov()
       });
       viewerRef.current.startMovement(ar);
       autoRotateRef.current = ar;
     } else if (viewMode === "3d") {
-      const ar = Marzipano.autorotate({ 
-        yawSpeed: 0.2, 
-        yawAccel: 0.1, 
-        targetPitch: 0, 
-        targetFov: 75 * Math.PI / 180 
+      const ar = Marzipano.autorotate({
+        yawSpeed: 0.2,
+        yawAccel: 0.1,
+        targetPitch: 0,
+        targetFov: 75 * Math.PI / 180
       });
       viewerRef.current.startMovement(ar);
       autoRotateRef.current = ar;
@@ -1662,7 +1255,7 @@ export default function App() {
 
 
 
-  // ΓöÇΓöÇ Prev / Next ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Prev / Next ───────────────────────────────────────────────────────────
   const goNext = () => {
     const idx = scenes.findIndex((s) => s.id === activeId);
     const next = scenes[(idx + 1) % scenes.length];
@@ -1693,7 +1286,7 @@ export default function App() {
     container.scrollTo({ left: targetScroll, behavior: "smooth" });
   }, [highlightActiveIdx]);
 
-  // ΓöÇΓöÇ Handle Model Upload ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Handle Model Upload ───────────────────────────────────────────────────
   const handleModelUpload = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => { setModelUrl(e.target?.result as string); };
@@ -1708,7 +1301,7 @@ export default function App() {
   };
   const handleUntexturedModelRemove = () => setUntexturedModelUrl(null);
 
-  // ΓöÇΓöÇ Auto-open-then-close gallery on first load ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Auto-open-then-close gallery on first load ──────────────────────────
   useEffect(() => {
     if (galleryInitDone.current) return;
     galleryInitDone.current = true;
@@ -1720,14 +1313,14 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  // ΓöÇΓöÇΓöÇ Gallery button toggle ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Gallery button toggle ─────────────────────────────────────
   const handleGalleryClick = () => {
     setShowThumbnails(prev => !prev);
   };
 
 
 
-  // ΓöÇΓöÇΓöÇ Top View ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Top View ─────────────────────────────────────────────────────────────
   const handleTopView = () => {
     if (viewMode === "3d") {
       // model-viewer: orbit camera to top-down view
@@ -1743,7 +1336,7 @@ export default function App() {
     if (view) view.setPitch(-Math.PI / 2.2);
   };
 
-  // ΓöÇΓöÇΓöÇ Play / Pause toggle ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Play / Pause toggle ──────────────────────────────────────────────────
   const handlePlayPause = () => {
     if (isPlaying) {
       stopAutoPlay();
@@ -1779,7 +1372,7 @@ export default function App() {
     }
   };
 
-  // ΓöÇΓöÇ Scene Modification ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Scene Modification ────────────────────────────────────────────────────
   const updateScene = useCallback((id: string, updates: Partial<SceneData>) => {
     setScenes((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
   }, []);
@@ -1831,12 +1424,13 @@ export default function App() {
       return { ...s, hotspots: [...(s.hotspots || []), newHotspot] };
     }));
     setActiveHotspotId(newHotspot.id);
-
+    
     // Scroll to the newly added hotspot in the side panel
     setTimeout(() => {
       const el = document.getElementById(`hs-config-${newHotspot.id}`);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Optional: add a temporary highlight flash effect if not already handled by active state
       }
     }, 100);
   }, []);
@@ -1874,7 +1468,7 @@ export default function App() {
   const saveTargetCapture = useCallback(() => {
     if (!targetCaptureMode || !viewerRef.current) return;
     const view = viewerRef.current.view();
-    
+
     if (targetCaptureMode.type === "hotspot") {
       updateHotspot(targetCaptureMode.sourceSceneId, targetCaptureMode.hotspotId, {
         targetYaw: view.yaw(),
@@ -1893,7 +1487,7 @@ export default function App() {
         }
       }));
     }
-    
+
     switchScene(targetCaptureMode.sourceSceneId);
     setTargetCaptureMode(null);
   }, [targetCaptureMode, updateHotspot, switchScene]);
@@ -1904,7 +1498,7 @@ export default function App() {
     setTargetCaptureMode(null);
   }, [targetCaptureMode, switchScene]);
 
-  // ΓöÇΓöÇ Hotspot Rendering & Dragging ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Hotspot Rendering & Dragging ──────────────────────────────────────────
   const activeHotspots = useMemo(() => scenes.find((s) => s.id === activeId)?.hotspots || [], [scenes, activeId]);
 
   useEffect(() => {
@@ -2114,7 +1708,7 @@ export default function App() {
           </div>
         </div>
       )}
-      {/* ΓöÇΓöÇ Left Settings Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ── Left Settings Panel ──────────────────────────────────────────────── */}
       {!isExported && (
         <LeftPanel
           transitionType={transitionType} setTransitionType={setTransitionType}
@@ -2137,7 +1731,7 @@ export default function App() {
         />
       )}
 
-      {/* ΓöÇΓöÇ Central Viewer ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ── Central Viewer ─────────────────────────────────────────────────── */}
       <div className="relative flex-1 overflow-hidden">
         {/* Marzipano pano (visible in walk mode and if scenes exist) */}
         <div id="pano" ref={panoRef} className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${(viewMode === "walk" && scenes.length > 0) ? "opacity-100 z-0" : "opacity-0 z-0 pointer-events-none"}`} style={{ cursor: "grab" }} />
@@ -2149,8 +1743,8 @@ export default function App() {
               <svg className="mx-auto mb-3 text-white/20" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
               </svg>
-              <p className="text-white/30 text-sm">Nicio poz─â ├«nc─ârcat─â</p>
-              <p className="text-white/20 text-xs mt-1">├Äncarc─â poze din panoul de set─âri</p>
+              <p className="text-white/30 text-sm">Nicio poză încărcată</p>
+              <p className="text-white/20 text-xs mt-1">Încarcă poze din panoul de setări</p>
             </div>
           </div>
         )}
@@ -2194,14 +1788,7 @@ export default function App() {
         <div className={`absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none z-10 transition-opacity duration-500 ${viewMode === "3d" ? "opacity-40" : "opacity-100"}`} />
         <div className={`absolute inset-0 bg-gradient-to-r from-black/15 via-transparent to-transparent pointer-events-none z-10 transition-opacity duration-500 ${viewMode === "3d" ? "opacity-0" : "opacity-100"}`} />
 
-        {/* ΓöÇΓöÇ Space Info Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
-        <SpaceInfoPanel
-          open={showSpaceInfo}
-          onClose={() => setShowSpaceInfo(false)}
-          accentColor={accentColor}
-        />
-
-        {/* ΓöÇΓöÇ Top bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {/* ── Top bar ────────────────────────────────────────────────────── */}
         <div className={`absolute top-0 left-0 right-0 flex items-start justify-between p-5 pt-[calc(1.25rem+env(safe-area-inset-top))] pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] z-20 pointer-events-none transition-all duration-500 ease-in-out ${isPlaying ? "opacity-0 -translate-y-4" : "opacity-100 translate-y-0"}`}>
           {/* Logo + address */}
           <div className="pointer-events-auto flex items-center gap-2">
@@ -2279,7 +1866,7 @@ export default function App() {
           )}
         </div>
 
-        {/* ΓöÇΓöÇ Bottom controls ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+        {/* ── Bottom controls ─────────────────────────────────────────────── */}
         <div className="absolute bottom-0 left-0 right-0 z-20 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] flex flex-col gap-3 pointer-events-none">
           {/* Room label + Prev/Next */}
           <div className={`flex items-end justify-between transition-all duration-500 ease-in-out ${(viewMode === "walk" && (!isPlaying || showTitleTemp) && !showFloorsMenu && !showSettingsMenu) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
@@ -2288,7 +1875,7 @@ export default function App() {
                 {activeIdx + 1} / {scenes.length}
               </p>
               <h2 className="text-white font-semibold text-xl leading-tight truncate pointer-events-auto" style={{ fontFamily: "'Segoe UI', sans-serif" }}>
-                {activeScene?.label ?? "ΓÇö"}
+                {activeScene?.label ?? "—"}
               </h2>
             </div>
             {/* Hide Prev/Next buttons completely in autoplay to keep it clean */}
@@ -2304,7 +1891,7 @@ export default function App() {
 
           {/* Main controls row */}
           <div className="flex flex-wrap landscape:flex-nowrap items-center w-full justify-between gap-y-3">
-            {/* ΓöÇΓöÇ LEFT toolbar (custom SVGs) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+            {/* ── LEFT toolbar (custom SVGs) ──────────────────────────────── */}
             <div
               className="relative pointer-events-auto flex items-center gap-1 rounded-2xl p-1.5 flex-shrink-0 order-1"
               style={{
@@ -2477,7 +2064,7 @@ export default function App() {
               </button>
             </div>
 
-            {/* ΓöÇΓöÇ Thumbnail strip ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+            {/* ── Thumbnail strip ─────────────────────────────────────────── */}
             <div
               className={`pointer-events-auto overflow-hidden flex items-center order-3 landscape:order-2 portrait:w-full landscape:min-w-0 ${showThumbnails
                 ? "landscape:max-w-[1500px] landscape:ml-3 landscape:mr-2 portrait:max-h-[100px]"
@@ -2522,7 +2109,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* ΓöÇΓöÇ Right side ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+            {/* ── Right side ───────────────────────────── */}
             <div className={`pointer-events-auto flex gap-2 flex-shrink-0 transition-all duration-500 ease-in-out order-2 landscape:order-3 landscape:ml-auto ${isPlaying ? "opacity-0 translate-x-8 pointer-events-none" : "opacity-100 translate-x-0"}`}>
               {has3D ? (
                 <ViewModeSwitch
@@ -2626,7 +2213,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* ΓöÇΓöÇ Right Scenes Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ── Right Scenes Panel ──────────────────────────────────────────────── */}
       {!isExported && (
         <RightPanel
           scenes={scenes} activeId={activeId} activeHotspotId={activeHotspotId} setActiveHotspotId={setActiveHotspotId} hasFloors={hasFloors} floorsList={floorsList}
@@ -2643,27 +2230,10 @@ export default function App() {
         />
       )}
 
-      {/* ΓöÇΓöÇ Share Modal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
-      <ShareModal
-        open={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        accentColor={accentColor}
-      />
-
       <style>{`
         @keyframes tourprogress {
           from { width: 0%; }
           to { width: 100%; }
-        }
-        @keyframes shareModalIn {
-          from {
-            opacity: 0;
-            transform: scale(0.92) translateY(12px);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
         }
         #pano canvas { display: block; }
         #pano { cursor: grab; }
