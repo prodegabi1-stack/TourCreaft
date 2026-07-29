@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { get, set } from "idb-keyval";
-import { Phone, Mail, Copy, X, MapPin, Compass, ChevronLeft, ChevronRight, Maximize, Minimize } from "lucide-react";
+import { Phone, Mail, Copy, X, MapPin, Compass, ChevronLeft, ChevronRight, Maximize, Minimize, CircleHelp, Glasses, Info, Share2 } from "lucide-react";
 
 // ─── Marzipano global type ────────────────────────────────────────────────────
 declare const Marzipano: any;
@@ -771,6 +771,7 @@ export default function App() {
   const [has3D, setHas3D] = useState(initialConfig?.has3D ?? true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [floorsList, setFloorsList] = useState(initialConfig?.floorsList || "2");
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
 
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -791,6 +792,48 @@ export default function App() {
       document.exitFullscreen();
     }
   };
+
+  const openSpaceInfo = () => {
+    setAgentOpen(true);
+    setShowSettingsMenu(false);
+  };
+
+  const showHelp = () => {
+    setShowSettingsMenu(false);
+    window.alert("Use the settings menu to open space info, share the tour, enter VR/3D mode, or toggle fullscreen.");
+  };
+
+  const shareTour = async () => {
+    setShowSettingsMenu(false);
+
+    const shareUrl = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: document.title,
+          url: shareUrl,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareUrl);
+    } catch {
+      // Ignore share cancellations and clipboard failures.
+    }
+  };
+
+  const enterVr = () => {
+    setShowSettingsMenu(false);
+    if (has3D) {
+      setViewMode("3d");
+    }
+  };
+
+  const handleFullscreenMenuAction = () => {
+    setShowSettingsMenu(false);
+    toggleFullscreen();
+  };
+
   const [floorConfigs, setFloorConfigs] = useState<Record<number, FloorConfig>>(initialConfig?.floorConfigs || {});
   const [accentColor, setAccentColor] = useState(initialConfig?.accentColor || "#c8a96e");
   const [transitionType, setTransitionType] = useState(initialConfig?.transitionType || "fade");
@@ -1747,7 +1790,7 @@ export default function App() {
         {/* ── Bottom controls ─────────────────────────────────────────────── */}
         <div className="absolute bottom-0 left-0 right-0 z-20 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] flex flex-col gap-3 pointer-events-none">
           {/* Room label + Prev/Next */}
-          <div className={`flex items-end justify-between transition-all duration-500 ease-in-out ${(viewMode === "walk" && (!isPlaying || showTitleTemp) && !showFloorsMenu) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
+          <div className={`flex items-end justify-between transition-all duration-500 ease-in-out ${(viewMode === "walk" && (!isPlaying || showTitleTemp) && !showFloorsMenu && !showSettingsMenu) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
             <div className="flex-1 min-w-0 pr-4">
               <p className="text-white/40 text-xs font-medium tracking-widest uppercase mb-1">
                 {activeIdx + 1} / {scenes.length}
@@ -1781,14 +1824,72 @@ export default function App() {
             >
               {/* Settings (only if has3D is true) */}
               {has3D && (
-                <button
-                  id="btn-settings"
-                  className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden hover:bg-white/12 ${isPlaying ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
-                  style={{ color: bubbleColor }}
-                  title="Settings"
-                >
-                  <IcoSettings size={24} />
-                </button>
+                <>
+                  <button
+                    id="btn-settings"
+                    onClick={() => {
+                      setShowFloorsMenu(false);
+                      setShowSettingsMenu(prev => !prev);
+                    }}
+                    className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showSettingsMenu ? "bg-accent" : "hover:bg-white/12"} ${isPlaying ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
+                    style={{ color: showSettingsMenu ? "#000" : bubbleColor }}
+                    title="Settings"
+                  >
+                    <IcoSettings size={24} />
+                  </button>
+
+                  {/* Settings Dropdown Menu */}
+                  <div
+                    className={`absolute bottom-[calc(100%+12px)] left-0 w-full flex flex-col gap-1 p-1.5 rounded-2xl transition-all duration-300 transform origin-bottom ${showSettingsMenu ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
+                    style={{
+                      background: bubbleBgStyle,
+                      backdropFilter: bubbleBlurStyle,
+                      WebkitBackdropFilter: bubbleBlurStyle,
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <button
+                      onClick={openSpaceInfo}
+                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
+                      style={{ color: bubbleColor }}
+                    >
+                      <Info size={16} />
+                      <span>Space Info</span>
+                    </button>
+                    <button
+                      onClick={showHelp}
+                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
+                      style={{ color: bubbleColor }}
+                    >
+                      <CircleHelp size={16} />
+                      <span>Help</span>
+                    </button>
+                    <button
+                      onClick={shareTour}
+                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
+                      style={{ color: bubbleColor }}
+                    >
+                      <Share2 size={16} />
+                      <span>Share</span>
+                    </button>
+                    <button
+                      onClick={enterVr}
+                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
+                      style={{ color: bubbleColor }}
+                    >
+                      <Glasses size={16} />
+                      <span>VR</span>
+                    </button>
+                    <button
+                      onClick={handleFullscreenMenuAction}
+                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
+                      style={{ color: bubbleColor }}
+                    >
+                      {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+                      <span>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
+                    </button>
+                  </div>
+                </>
               )}
 
               {/* Floors */}
@@ -1796,7 +1897,10 @@ export default function App() {
                 <>
                   <button
                     id="btn-floors"
-                    onClick={() => setShowFloorsMenu(prev => !prev)}
+                    onClick={() => {
+                      setShowSettingsMenu(false);
+                      setShowFloorsMenu(prev => !prev);
+                    }}
                     className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showFloorsMenu ? "bg-accent" : "hover:bg-white/12"} ${isPlaying ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
                     style={{ color: showFloorsMenu ? "#000" : bubbleColor }}
                     title="Floors / Etaje"
@@ -1962,12 +2066,68 @@ export default function App() {
                   {/* Settings Button moved here */}
                   <button
                     id="btn-settings-right"
-                    className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:bg-white/12"
-                    style={{ color: bubbleColor }}
+                    onClick={() => {
+                      setShowFloorsMenu(false);
+                      setShowSettingsMenu(prev => !prev);
+                    }}
+                    className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showSettingsMenu ? "bg-accent" : "hover:bg-white/12"}`}
+                    style={{ color: showSettingsMenu ? "#000" : bubbleColor }}
                     title="Settings"
                   >
                     <IcoSettings size={24} />
                   </button>
+
+                  {/* Settings Dropdown Menu */}
+                  <div
+                    className={`absolute bottom-[calc(100%+12px)] right-0 w-[10rem] max-w-[calc(100vw-2rem)] flex flex-col gap-1 p-1.5 rounded-2xl transition-all duration-300 transform origin-bottom ${showSettingsMenu ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}
+                    style={{
+                      background: bubbleBgStyle,
+                      backdropFilter: bubbleBlurStyle,
+                      WebkitBackdropFilter: bubbleBlurStyle,
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <button
+                      onClick={openSpaceInfo}
+                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
+                      style={{ color: bubbleColor }}
+                    >
+                      <Info size={16} />
+                      <span>Space Info</span>
+                    </button>
+                    <button
+                      onClick={showHelp}
+                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
+                      style={{ color: bubbleColor }}
+                    >
+                      <CircleHelp size={16} />
+                      <span>Help</span>
+                    </button>
+                    <button
+                      onClick={shareTour}
+                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
+                      style={{ color: bubbleColor }}
+                    >
+                      <Share2 size={16} />
+                      <span>Share</span>
+                    </button>
+                    <button
+                      onClick={enterVr}
+                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
+                      style={{ color: bubbleColor }}
+                    >
+                      <Glasses size={16} />
+                      <span>VR</span>
+                    </button>
+                    <button
+                      onClick={handleFullscreenMenuAction}
+                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
+                      style={{ color: bubbleColor }}
+                    >
+                      {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+                      <span>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
