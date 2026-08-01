@@ -116,7 +116,7 @@ const AGENT = {
 };
 
 // ΓöÇΓöÇΓöÇ Property data ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const PROPERTY_INFO = {
+const INITIAL_PROPERTY_INFO = {
   address: "Str. Florilor 12, Cluj-Napoca",
   rooms: 4,
   bathrooms: 2,
@@ -279,10 +279,12 @@ function LeftPanel({
   onExport, isExporting,
   modelUrl, onModelUpload, onModelRemove,
   untexturedModelUrl, onUntexturedModelUpload, onUntexturedModelRemove,
-  floorModels, onFloorModelUpload, onFloorModelRemove
+  floorModels, onFloorModelUpload, onFloorModelRemove,
+  propertyInfo, setPropertyInfo
 }: any) {
   const modelInputRef = useRef<HTMLInputElement>(null);
   const untexturedModelInputRef = useRef<HTMLInputElement>(null);
+  const [showSpaceInfoMenu, setShowSpaceInfoMenu] = useState(false);
   return (
     <div
       className="flex-shrink-0 flex flex-col border-r border-white/8 bg-[#0f1110] overflow-hidden"
@@ -513,6 +515,161 @@ function LeftPanel({
             </div>
           </section>
 
+          {/* Space Info settings */}
+          <section className="border-b border-white/6">
+            <button
+              onClick={() => setShowSpaceInfoMenu(!showSpaceInfoMenu)}
+              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/3 transition-colors"
+            >
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Space Info</span>
+              <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${showSpaceInfoMenu ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showSpaceInfoMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div className="flex flex-col gap-3 px-5 pb-4">
+                <label className="flex flex-col gap-1 text-[10px] text-white/60">
+                  Address
+                  <input
+                    type="text" value={propertyInfo.address || ""} placeholder="e.g. Str. Florilor 12, Cluj-Napoca"
+                    onChange={(e) => setPropertyInfo({ ...propertyInfo, address: e.target.value })}
+                    className="bg-white/8 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs outline-none focus:border-accent w-full"
+                  />
+                </label>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="flex flex-col gap-1 text-[10px] text-white/60">
+                    Rooms
+                    <input
+                      type="number" value={propertyInfo.rooms || ""} placeholder="e.g. 4"
+                      onChange={(e) => setPropertyInfo({ ...propertyInfo, rooms: parseInt(e.target.value) || 0 })}
+                      className="bg-white/8 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs outline-none focus:border-accent w-full"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-[10px] text-white/60">
+                    Bathrooms
+                    <input
+                      type="number" value={propertyInfo.bathrooms || ""} placeholder="e.g. 2"
+                      onChange={(e) => setPropertyInfo({ ...propertyInfo, bathrooms: parseInt(e.target.value) || 0 })}
+                      className="bg-white/8 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs outline-none focus:border-accent w-full"
+                    />
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="flex flex-col gap-1 text-[10px] text-white/60">
+                    Area (m&sup2;)
+                    <input
+                      type="number" value={propertyInfo.area || ""} placeholder="e.g. 120"
+                      onChange={(e) => setPropertyInfo({ ...propertyInfo, area: parseInt(e.target.value) || 0 })}
+                      className="bg-white/8 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs outline-none focus:border-accent w-full"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-[10px] text-white/60">
+                    Year Built
+                    <input
+                      type="number" value={propertyInfo.yearBuilt || ""} placeholder="e.g. 2022"
+                      onChange={(e) => setPropertyInfo({ ...propertyInfo, yearBuilt: parseInt(e.target.value) || 0 })}
+                      className="bg-white/8 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs outline-none focus:border-accent w-full"
+                    />
+                  </label>
+                </div>
+
+                <label className="flex flex-col gap-1 text-[10px] text-white/60">
+                  Description
+                  <textarea
+                    value={propertyInfo.description || ""} placeholder="Property description..." rows={3}
+                    onChange={(e) => setPropertyInfo({ ...propertyInfo, description: e.target.value })}
+                    className="bg-white/8 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs outline-none focus:border-accent w-full resize-none"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1 text-[10px] text-white/60">
+                  Neighbourhood Info
+                  <textarea
+                    value={propertyInfo.neighbourhood || ""} placeholder="Information about the area..." rows={3}
+                    onChange={(e) => setPropertyInfo({ ...propertyInfo, neighbourhood: e.target.value })}
+                    className="bg-white/8 border border-white/10 rounded-lg px-2 py-1.5 text-white text-xs outline-none focus:border-accent w-full resize-none"
+                  />
+                </label>
+
+                {/* Nearby Locations Editor */}
+                <div className="flex flex-col gap-2 mt-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Nearby Locations</span>
+                    <button
+                      onClick={() => {
+                        const newNearby = [...(propertyInfo.nearby || []), { name: "New Place", distance: "100m", icon: "park" }];
+                        setPropertyInfo({ ...propertyInfo, nearby: newNearby });
+                      }}
+                      className="text-xs text-accent hover:underline"
+                    >
+                      + Add
+                    </button>
+                  </div>
+                  
+                  <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 pr-1">
+                    {(propertyInfo.nearby || []).map((loc: any, i: number) => (
+                      <div key={i} className="bg-white/5 border border-white/10 rounded-lg p-2 flex flex-col gap-2 relative">
+                        <button 
+                          onClick={() => {
+                            const newNearby = [...propertyInfo.nearby];
+                            newNearby.splice(i, 1);
+                            setPropertyInfo({ ...propertyInfo, nearby: newNearby });
+                          }}
+                          className="absolute top-2 right-2 text-white/30 hover:text-red-400"
+                        >
+                          <X size={12} />
+                        </button>
+                        
+                        <div className="pr-6">
+                          <input
+                            type="text" value={loc.name} placeholder="Name"
+                            onChange={(e) => {
+                              const newNearby = [...propertyInfo.nearby];
+                              newNearby[i].name = e.target.value;
+                              setPropertyInfo({ ...propertyInfo, nearby: newNearby });
+                            }}
+                            className="bg-white/8 border border-white/10 rounded-md px-2 py-1.5 text-white text-[11px] outline-none focus:border-accent w-full mb-1"
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="text" value={loc.distance} placeholder="Distance (e.g. 300m)"
+                            onChange={(e) => {
+                              const newNearby = [...propertyInfo.nearby];
+                              newNearby[i].distance = e.target.value;
+                              setPropertyInfo({ ...propertyInfo, nearby: newNearby });
+                            }}
+                            className="bg-white/8 border border-white/10 rounded-md px-2 py-1.5 text-white text-[11px] outline-none focus:border-accent w-full"
+                          />
+                          <select
+                            value={loc.icon}
+                            onChange={(e) => {
+                              const newNearby = [...propertyInfo.nearby];
+                              newNearby[i].icon = e.target.value;
+                              setPropertyInfo({ ...propertyInfo, nearby: newNearby });
+                            }}
+                            className="bg-white/8 border border-white/10 rounded-md px-1 py-1.5 text-white text-[11px] outline-none focus:border-accent w-full"
+                          >
+                            <option value="park">Park</option>
+                            <option value="school">School</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="train">Transport</option>
+                            <option value="medical">Medical</option>
+                            <option value="gym">Gym</option>
+                          </select>
+                        </div>
+                      </div>
+                    ))}
+                    {(!propertyInfo.nearby || propertyInfo.nearby.length === 0) && (
+                      <p className="text-[10px] text-white/30 text-center py-2">No nearby locations added.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* 3D Model Upload */}
           <section className="px-5 py-4 border-b border-white/6 flex flex-col gap-4">
             <div className="flex flex-col gap-2">
@@ -607,10 +764,12 @@ function SpaceInfoPanel({
   open,
   onClose,
   accentColor,
+  propertyInfo,
 }: {
   open: boolean;
   onClose: () => void;
   accentColor: string;
+  propertyInfo: typeof INITIAL_PROPERTY_INFO;
 }) {
   const [expandedSection, setExpandedSection] = useState<string | null>("details");
 
@@ -670,9 +829,9 @@ function SpaceInfoPanel({
           <div className="px-5 py-4 border-b border-white/6">
             <div className="flex items-center gap-2 mb-1">
               <MapPin size={13} style={{ color: accentColor }} />
-              <span className="text-white font-medium text-sm">{PROPERTY_INFO.address}</span>
+              <span className="text-white font-medium text-sm">{propertyInfo.address}</span>
             </div>
-            <p className="text-white/40 text-xs leading-relaxed mt-2">{PROPERTY_INFO.description}</p>
+            <p className="text-white/40 text-xs leading-relaxed mt-2">{propertyInfo.description}</p>
           </div>
 
           {/* Property Details ΓÇö collapsible */}
@@ -691,7 +850,7 @@ function SpaceInfoPanel({
                     <BedDouble size={15} />
                   </div>
                   <div>
-                    <div className="text-white font-semibold text-sm leading-none">{PROPERTY_INFO.rooms}</div>
+                    <div className="text-white font-semibold text-sm leading-none">{propertyInfo.rooms}</div>
                     <div className="text-white/35 text-[10px] mt-0.5">Rooms</div>
                   </div>
                 </div>
@@ -700,7 +859,7 @@ function SpaceInfoPanel({
                     <Ruler size={15} />
                   </div>
                   <div>
-                    <div className="text-white font-semibold text-sm leading-none">{PROPERTY_INFO.area} m&sup2;</div>
+                    <div className="text-white font-semibold text-sm leading-none">{propertyInfo.area} m&sup2;</div>
                     <div className="text-white/35 text-[10px] mt-0.5">Area</div>
                   </div>
                 </div>
@@ -715,7 +874,7 @@ function SpaceInfoPanel({
                     </svg>
                   </div>
                   <div>
-                    <div className="text-white font-semibold text-sm leading-none">{PROPERTY_INFO.bathrooms}</div>
+                    <div className="text-white font-semibold text-sm leading-none">{propertyInfo.bathrooms}</div>
                     <div className="text-white/35 text-[10px] mt-0.5">Bathrooms</div>
                   </div>
                 </div>
@@ -724,7 +883,7 @@ function SpaceInfoPanel({
                     <CalendarDays size={15} />
                   </div>
                   <div>
-                    <div className="text-white font-semibold text-sm leading-none">{PROPERTY_INFO.yearBuilt}</div>
+                    <div className="text-white font-semibold text-sm leading-none">{propertyInfo.yearBuilt}</div>
                     <div className="text-white/35 text-[10px] mt-0.5">Year Built</div>
                   </div>
                 </div>
@@ -743,7 +902,7 @@ function SpaceInfoPanel({
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedSection === "neighbourhood" ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
               <div className="px-5 pb-4">
-                <p className="text-white/50 text-xs leading-relaxed">{PROPERTY_INFO.neighbourhood}</p>
+                <p className="text-white/50 text-xs leading-relaxed">{propertyInfo.neighbourhood}</p>
               </div>
             </div>
           </div>
@@ -759,7 +918,7 @@ function SpaceInfoPanel({
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedSection === "nearby" ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
               <div className="flex flex-col gap-1.5 px-5 pb-4">
-                {PROPERTY_INFO.nearby.map((loc, i) => (
+                {propertyInfo.nearby.map((loc, i) => (
                   <div
                     key={i}
                     className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-white/3 border border-white/5 hover:bg-white/6 transition-colors"
@@ -784,13 +943,247 @@ function SpaceInfoPanel({
               </div>
             </div>
           </div>
+
+          {/* Location Map — collapsible */}
+          <div className="border-b border-white/6">
+            <button
+              onClick={() => toggleSection("map")}
+              className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/3 transition-colors"
+            >
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Location</span>
+              <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${expandedSection === "map" ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedSection === "map" ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div className="px-5 pb-4">
+                <div className="rounded-xl overflow-hidden border border-white/8" style={{ height: 200 }}>
+                  <iframe
+                    title="Property location"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) brightness(0.95) contrast(0.9)" }}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(propertyInfo.address || '')}&z=16&output=embed`}
+                    allowFullScreen
+                  />
+                </div>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(propertyInfo.address || '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 w-full h-9 rounded-lg flex items-center justify-center gap-2 text-[11px] font-semibold transition-colors hover:brightness-110"
+                  style={{ background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}25` }}
+                >
+                  <MapPin size={12} />
+                  Open in Google Maps
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ΓöÇΓöÇΓöÇ Share Modal ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Help Panel ──────────────────────────────────────────────────────────
+function HelpPanel({
+  open,
+  onClose,
+  accentColor,
+}: {
+  open: boolean;
+  onClose: () => void;
+  accentColor: string;
+}) {
+  // Each help item: icon element, label, description
+  const helpItems: { icon: React.ReactNode; label: string; description: string; section: string }[] = [
+    // ── Navigation ──
+    {
+      section: "Navigation",
+      icon: <ChevronLeft size={16} />,
+      label: "Previous Room",
+      description: "Navigate to the previous room in the tour.",
+    },
+    {
+      section: "Navigation",
+      icon: <ChevronRight size={16} />,
+      label: "Next Room",
+      description: "Navigate to the next room in the tour.",
+    },
+    // ── Left Toolbar ──
+    {
+      section: "Left Toolbar",
+      icon: <IcoSettings size={20} />,
+      label: "Settings",
+      description: "Open the settings menu to access Space Info, Help, Share, VR mode, and Fullscreen options.",
+    },
+    {
+      section: "Left Toolbar",
+      icon: <IcoFloors size={18} />,
+      label: "Floors",
+      description: "Switch between different floors of the building. Only visible when the property has multiple floors.",
+    },
+    {
+      section: "Left Toolbar",
+      icon: <IcoGallery size={16} />,
+      label: "Gallery (Walk Mode)",
+      description: "Show or hide the room thumbnail strip at the bottom. Click a thumbnail to jump to that room.",
+    },
+    {
+      section: "Left Toolbar",
+      icon: <IcoTexture size={16} />,
+      label: "Texture (3D Mode)",
+      description: "Toggle between the textured and un-textured 3D model view.",
+    },
+    {
+      section: "Left Toolbar",
+      icon: <IcoPlay size={16} />,
+      label: "Autoplay (Walk Mode)",
+      description: "Start an automatic slideshow that cycles through all rooms. Press again to pause.",
+    },
+    {
+      section: "Left Toolbar",
+      icon: <IcoTopView size={16} />,
+      label: "Top View (3D Mode)",
+      description: "Switch the camera to a bird's-eye, top-down perspective of the 3D model.",
+    },
+    // ── Settings Menu ──
+    {
+      section: "Settings Menu",
+      icon: <Info size={16} />,
+      label: "Space Info",
+      description: "View property details like rooms, area, year built, neighbourhood info, and nearby locations.",
+    },
+    {
+      section: "Settings Menu",
+      icon: <Share2 size={16} />,
+      label: "Share",
+      description: "Share the tour via a link, or directly on Facebook, X (Twitter), LinkedIn, or WhatsApp.",
+    },
+    {
+      section: "Settings Menu",
+      icon: <Glasses size={16} />,
+      label: "VR Mode",
+      description: "Switch to the 3D model view for an immersive VR-like experience.",
+    },
+    {
+      section: "Settings Menu",
+      icon: <Maximize size={16} />,
+      label: "Fullscreen",
+      description: "Enter or exit fullscreen mode for a more immersive viewing experience.",
+    },
+    // ── View Mode ──
+    {
+      section: "View Mode",
+      icon: <IcoWalkthrough size={18} />,
+      label: "Walkthrough Mode",
+      description: "Explore the property room by room in a panoramic 360° view. Drag to look around.",
+    },
+    {
+      section: "View Mode",
+      icon: <Ico3D size={18} />,
+      label: "3D Model Mode",
+      description: "View the entire property as an interactive 3D model. Rotate, zoom, and explore the structure.",
+    },
+  ];
+
+  // Group by section
+  const sections = helpItems.reduce<Record<string, typeof helpItems>>((acc, item) => {
+    (acc[item.section] ??= []).push(item);
+    return acc;
+  }, {});
+
+  return (
+    <div
+      className={`absolute top-0 left-0 bottom-0 z-30 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"}`}
+      style={{ width: "clamp(320px, 30vw, 420px)" }}
+    >
+      <div
+        className="pointer-events-auto h-full flex flex-col overflow-hidden"
+        style={{
+          background: "rgba(12, 12, 12, 0.92)",
+          backdropFilter: "blur(40px)",
+          WebkitBackdropFilter: "blur(40px)",
+          borderRight: "1px solid rgba(255,255,255,0.08)",
+          boxShadow: "8px 0 32px rgba(0,0,0,0.4)",
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: `${accentColor}20`, color: accentColor }}
+            >
+              <CircleHelp size={15} />
+            </div>
+            <h3 className="text-white font-semibold text-sm">Help &amp; Controls</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
+          >
+            <X size={14} />
+          </button>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
+          {/* Intro text */}
+          <div className="px-5 py-4 border-b border-white/6">
+            <p className="text-white/45 text-xs leading-relaxed">
+              Learn how to navigate and use every control in the virtual tour. Each button is explained below with its icon.
+            </p>
+          </div>
+
+          {Object.entries(sections).map(([sectionName, items]) => (
+            <div key={sectionName} className="border-b border-white/6">
+              {/* Section header */}
+              <div className="px-5 pt-4 pb-2">
+                <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">{sectionName}</span>
+              </div>
+              {/* Items */}
+              <div className="flex flex-col gap-1 px-4 pb-4">
+                {items.map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 rounded-xl px-3 py-3 bg-white/3 border border-white/5 hover:bg-white/6 transition-colors"
+                  >
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                      style={{ background: `${accentColor}12`, color: accentColor }}
+                    >
+                      {item.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white/90 text-xs font-semibold leading-tight">{item.label}</div>
+                      <div className="text-white/40 text-[11px] leading-relaxed mt-1">{item.description}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Tip */}
+          <div className="px-5 py-5">
+            <div
+              className="rounded-xl px-4 py-3 border"
+              style={{ background: `${accentColor}08`, borderColor: `${accentColor}20` }}
+            >
+              <p className="text-[11px] leading-relaxed" style={{ color: `${accentColor}cc` }}>
+                <strong>Tip:</strong> In walkthrough mode, click and drag on the panorama to look around. Use scroll to zoom in and out. Click on floor hotspots to move between rooms.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Share Modal ──────────────────────────────────────────────────────────
 function ShareModal({
   open,
   onClose,
@@ -1001,7 +1394,7 @@ function ShareModal({
   );
 }
 
-// ΓöÇΓöÇΓöÇ Right Scenes Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Right Scenes Panel ────────────────────────────────────────────────────────
 function RightPanel({
   scenes, activeId, activeHotspotId, setActiveHotspotId, hasFloors, floorsList, onSceneClick, onUpload, onDeleteScene, onUpdateScene, onReorderScenes, onCaptureHighlight,
   onAddHotspot, onUpdateHotspot, onDeleteHotspot, onStartTargetCapture, startView, onSetStartView
@@ -1054,14 +1447,14 @@ function RightPanel({
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
           </svg>
-          <span className="text-xs font-semibold">Upload 360┬░ Photos</span>
+          <span className="text-xs font-semibold">Upload 360° Photos</span>
         </div>
       </div>
 
       {/* Scene list (Moved up) */}
       <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
         {scenes.length === 0 && (
-          <div className="text-center text-white/20 text-xs py-8">No scenes yet.<br />Upload 360┬░ photos to start.</div>
+          <div className="text-center text-white/20 text-xs py-8">No scenes yet.<br />Upload 360° photos to start.</div>
         )}
         {scenes.map((s, idx) => (
           <div
@@ -1234,7 +1627,7 @@ function RightPanel({
               onClick={() => onAddHotspot(activeId!)}
               className="mt-1 bg-accent/20 text-accent font-medium text-[11px] py-1.5 rounded-lg hover:bg-accent/30 transition-colors border border-accent/20"
             >
-              + Adaug─â hotspot (Current View)
+              + Adaugă hotspot (Current View)
             </button>
           </div>
         </div>
@@ -1243,7 +1636,7 @@ function RightPanel({
   );
 }
 
-// ΓöÇΓöÇΓöÇ Main App ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Main App ────────────────────────────────────────────────────────────────
 const isExported = typeof window !== "undefined" && (window as any).__TOUR_CONFIG__ !== undefined;
 
 const getMaxTextureSize = () => {
@@ -1286,6 +1679,9 @@ export default function App() {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showSpaceInfo, setShowSpaceInfo] = useState(false);
+  const [showHelpPanel, setShowHelpPanel] = useState(false);
+
+  const [propertyInfo, setPropertyInfo] = useState(initialConfig?.propertyInfo || INITIAL_PROPERTY_INFO);
 
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -1314,7 +1710,7 @@ export default function App() {
 
   const showHelp = () => {
     setShowSettingsMenu(false);
-    window.alert("Use the settings menu to open space info, share the tour, enter VR/3D mode, or toggle fullscreen.");
+    setShowHelpPanel(prev => !prev);
   };
 
   const shareTour = () => {
@@ -1486,7 +1882,7 @@ export default function App() {
   const bubbleBgStyle = `rgba(${hexToRgb(bubbleBg)}, ${bubbleOpacity})`;
   const bubbleBlurStyle = bubbleBlur ? "blur(16px)" : "none";
 
-  // ΓöÇΓöÇ Init Marzipano viewer ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Init Marzipano viewer ──────────────────────────────────────────────
   useEffect(() => {
     if (!panoRef.current || typeof Marzipano === "undefined") return;
     viewerRef.current = new Marzipano.Viewer(panoRef.current, {
@@ -1510,7 +1906,7 @@ export default function App() {
     return () => { /* cleanup handled by scene replacement */ };
   }, [isLoading]); // Runs when isLoading becomes false and the div is mounted
 
-  // ΓöÇΓöÇ Load scene into Marzipano ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Load scene into Marzipano ──────────────────────────────────────────
   const loadMarzipanoScene = useCallback(async (sceneData: SceneData): Promise<any> => {
     if (!viewerRef.current) return null;
     if (marzScenes.current.has(sceneData.id)) return marzScenes.current.get(sceneData.id);
@@ -1540,7 +1936,7 @@ export default function App() {
     return scene;
   }, []);
 
-  // ΓöÇΓöÇ Switch to a scene ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Switch to a scene ──────────────────────────────────────────────────
   const switchScene = useCallback(async (id: string, overrideYaw?: number, overridePitch?: number, overrideFov?: number) => {
     if (!viewerRef.current) return;
     const sceneData = scenes.find((s) => s.id === id);
@@ -1682,7 +2078,7 @@ export default function App() {
   }, [activeId, scenes, loadMarzipanoScene, sceneLoadedToken]);
 
 
-  // ΓöÇΓöÇ Upload handler (with image optimization) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Upload handler (with image optimization) ──────────────────────────
   const handleUpload = useCallback((files: FileList) => {
     Array.from(files).forEach((file, idx) => {
       if (!file.type.match("image.*")) return;
@@ -1691,7 +2087,7 @@ export default function App() {
         const dataUrl = e.target?.result as string;
         const img = new Image();
         img.onload = () => {
-          // ΓöÇΓöÇ Optimized main image (High Quality 8K, JPEG 0.92) ΓöÇΓöÇ
+          // ── Optimized main image (High Quality 8K, JPEG 0.92) ──
           const MAX_W = 8192;
           const MAX_H = 4096;
           let w = img.naturalWidth;
@@ -1711,7 +2107,7 @@ export default function App() {
           mainCtx.drawImage(img, 0, 0, w, h);
           const optimizedImg = mainCanvas.toDataURL("image/jpeg", 0.92);
 
-          // ΓöÇΓöÇ Optimized fallback image (4K, JPEG 0.90) ΓöÇΓöÇ
+          // ── Optimized fallback image (4K, JPEG 0.90) ──
           const MAX_W_4K = 4096;
           const MAX_H_4K = 2048;
           let w4k = img.naturalWidth;
@@ -1730,7 +2126,7 @@ export default function App() {
           ctx4k.drawImage(img, 0, 0, w4k, h4k);
           const img4k = canvas4k.toDataURL("image/jpeg", 0.90);
 
-          // ΓöÇΓöÇ Thumbnail (400├ù200, JPEG 0.90) ΓöÇΓöÇ
+          // ── Thumbnail (400×200, JPEG 0.90) ──
           const thumbCanvas = document.createElement("canvas");
           thumbCanvas.width = 400; thumbCanvas.height = 200;
           thumbCanvas.getContext("2d")!.drawImage(img, 0, 0, 400, 200);
@@ -1749,7 +2145,7 @@ export default function App() {
     });
   }, [switchScene]);
 
-  // ΓöÇΓöÇ Delete scene ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Delete scene ──────────────────────────────────────────────────────
   const deleteScene = useCallback((id: string) => {
     marzScenes.current.delete(id);
     setScenes((prev) => {
@@ -1769,7 +2165,7 @@ export default function App() {
     });
   }, [activeId, switchScene]);
 
-  // ΓöÇΓöÇ Auto-play slideshow ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Auto-play slideshow ──────────────────────────────────────────────
   const stopAutoPlay = useCallback(() => {
     if (playTimerRef.current) { clearInterval(playTimerRef.current); playTimerRef.current = null; }
     setIsPlaying(false);
@@ -1832,7 +2228,7 @@ export default function App() {
     return () => { if (playTimerRef.current) clearInterval(playTimerRef.current); };
   }, [isPlaying, switchScene]);
 
-  // ΓöÇΓöÇ Auto-rotate logic ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Auto-rotate logic ──────────────────────────────────────────────────
   useEffect(() => {
     if (!viewerRef.current) return;
 
@@ -1866,7 +2262,7 @@ export default function App() {
 
 
 
-  // ΓöÇΓöÇ Prev / Next ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Prev / Next ────────────────────────────────────────────────────────
   const goNext = () => {
     const idx = scenes.findIndex((s) => s.id === activeId);
     const next = scenes[(idx + 1) % scenes.length];
@@ -1897,7 +2293,7 @@ export default function App() {
     container.scrollTo({ left: targetScroll, behavior: "smooth" });
   }, [highlightActiveIdx]);
 
-  // ΓöÇΓöÇ Handle Model Upload ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Handle Model Upload ────────────────────────────────────────────────
   const handleModelUpload = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => { setModelUrl(e.target?.result as string); };
@@ -1940,7 +2336,7 @@ export default function App() {
     });
   };
 
-  // ΓöÇΓöÇ Auto-open-then-close gallery on first load ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Auto-open-then-close gallery on first load ─────────────────────────
   useEffect(() => {
     if (galleryInitDone.current) return;
     galleryInitDone.current = true;
@@ -1952,14 +2348,14 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  // ΓöÇΓöÇΓöÇ Gallery button toggle ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Gallery button toggle ──────────────────────────────────────────────
   const handleGalleryClick = () => {
     setShowThumbnails(prev => !prev);
   };
 
 
 
-  // ΓöÇΓöÇΓöÇ Top View ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Top View ──────────────────────────────────────────────────────────
   const handleTopView = () => {
     if (viewMode === "3d") {
       // model-viewer: orbit camera to top-down view
@@ -1975,7 +2371,7 @@ export default function App() {
     if (view) view.setPitch(-Math.PI / 2.2);
   };
 
-  // ΓöÇΓöÇΓöÇ Play / Pause toggle ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Play / Pause toggle ────────────────────────────────────────────────
   const handlePlayPause = () => {
     if (isPlaying) {
       stopAutoPlay();
@@ -1989,7 +2385,7 @@ export default function App() {
     try {
       const config = {
         scenes, activeId, startView, hotspotSize, hasFloors, floorsList, floorConfigs, accentColor, transitionType, transitionDuration,
-        bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, floorModels
+        bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, floorModels, propertyInfo
       };
       const res = await fetch('/api/export', {
         method: 'POST',
@@ -2011,7 +2407,7 @@ export default function App() {
     }
   };
 
-  // ΓöÇΓöÇ Scene Modification ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Scene Modification ─────────────────────────────────────────────────
   const updateScene = useCallback((id: string, updates: Partial<SceneData>) => {
     setScenes((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
   }, []);
@@ -2136,7 +2532,7 @@ export default function App() {
     setTargetCaptureMode(null);
   }, [targetCaptureMode, switchScene]);
 
-  // ΓöÇΓöÇ Hotspot Rendering & Dragging ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ─── Hotspot Rendering & Dragging ──────────────────────────────────────
   const renderedHotspots = useMemo(() => scenes.find((s) => s.id === loadedSceneId)?.hotspots || [], [scenes, loadedSceneId]);
 
   useEffect(() => {
@@ -2352,7 +2748,7 @@ export default function App() {
           </div>
         </div>
       )}
-      {/* ΓöÇΓöÇ Left Settings Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
+      {/* ── Left Settings Panel ────────────────────────────────────────────── */}
       {!isExported && (
         <LeftPanel
           transitionType={transitionType} setTransitionType={setTransitionType}
@@ -2374,6 +2770,7 @@ export default function App() {
           modelUrl={modelUrl} onModelUpload={handleModelUpload} onModelRemove={handleModelRemove}
           untexturedModelUrl={untexturedModelUrl} onUntexturedModelUpload={handleUntexturedModelUpload} onUntexturedModelRemove={handleUntexturedModelRemove}
           floorModels={floorModels} onFloorModelUpload={handleFloorModelUpload} onFloorModelRemove={handleFloorModelRemove}
+          propertyInfo={propertyInfo} setPropertyInfo={setPropertyInfo}
         />
       )}
 
@@ -2447,6 +2844,14 @@ export default function App() {
         <SpaceInfoPanel
           open={showSpaceInfo}
           onClose={() => setShowSpaceInfo(false)}
+          accentColor={accentColor}
+          propertyInfo={propertyInfo}
+        />
+
+        {/* ── Help Panel ──────────────────────────────────────────────── */}
+        <HelpPanel
+          open={showHelpPanel}
+          onClose={() => setShowHelpPanel(false)}
           accentColor={accentColor}
         />
 
