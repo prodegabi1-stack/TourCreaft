@@ -2407,6 +2407,147 @@ export default function App() {
     }
   };
 
+  // ─── Keyboard Navigation (Matterport-style) ──────────────────────────────
+  useEffect(() => {
+    if (viewMode !== "walk" || !viewerRef.current) return;
+
+    let rotateLeft = false;
+    let rotateRight = false;
+    let animationFrameId: number;
+
+    const renderLoop = () => {
+      const view = viewerRef.current?.view();
+      if (view) {
+        if (rotateLeft) view.setYaw(view.yaw() - 0.01);
+        if (rotateRight) view.setYaw(view.yaw() + 0.01);
+      }
+      animationFrameId = requestAnimationFrame(renderLoop);
+    };
+    animationFrameId = requestAnimationFrame(renderLoop);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        rotateLeft = true;
+        e.preventDefault();
+      }
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        rotateRight = true;
+        e.preventDefault();
+      }
+
+      if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
+        const view = viewerRef.current?.view();
+        if (!view || !loadedSceneId) return;
+
+        const currentScene = scenes.find(s => s.id === loadedSceneId);
+        if (!currentScene || !currentScene.hotspots) return;
+
+        let bestHotspot = null;
+        let minScore = Infinity;
+
+        const currentYaw = view.yaw();
+        const currentPitch = view.pitch();
+
+        currentScene.hotspots.forEach(hs => {
+          if (!hs.targetId) return;
+          if (typeof hs.yaw !== 'number' || typeof hs.pitch !== 'number') return;
+
+          let yawDiff = Math.abs(hs.yaw - currentYaw);
+          yawDiff = yawDiff % (2 * Math.PI);
+          if (yawDiff > Math.PI) yawDiff = 2 * Math.PI - yawDiff;
+
+          if (yawDiff < Math.PI / 3) {
+            let pitchDiff = Math.abs(hs.pitch - currentPitch);
+            pitchDiff = pitchDiff % (2 * Math.PI);
+            if (pitchDiff > Math.PI) pitchDiff = 2 * Math.PI - pitchDiff;
+
+            const score = yawDiff + pitchDiff * 0.5;
+            if (score < minScore) {
+              minScore = score;
+              bestHotspot = hs;
+            }
+          }
+        });
+
+        if (bestHotspot) {
+          e.preventDefault();
+          e.stopPropagation();
+          const hs = bestHotspot as any;
+          switchScene(hs.targetId, hs.targetYaw, hs.targetPitch, hs.targetFov);
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") rotateLeft = false;
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") rotateRight = false;
+    };
+
+    window.addEventListener("keydown", handleKeyDown, { capture: true });
+    window.addEventListener("keyup", handleKeyUp, { capture: true });
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("keydown", handleKeyDown, { capture: true });
+      window.removeEventListener("keyup", handleKeyUp, { capture: true });
+    };
+  }, [viewMode, scenes, loadedSceneId, switchScene]);
+
+  // ─── Double Tap / Click Navigation ─────────────────────────────────────────
+  useEffect(() => {
+    if (viewMode !== "walk" || !panoRef.current) return;
+
+    const handleDoubleClick = (e: MouseEvent) => {
+      const view = viewerRef.current?.view();
+      if (!view || !loadedSceneId) return;
+
+      const currentScene = scenes.find(s => s.id === loadedSceneId);
+      if (!currentScene || !currentScene.hotspots || currentScene.hotspots.length === 0) return;
+
+      const rect = panoRef.current!.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const coords = view.screenToCoordinates({ x, y });
+      if (!coords) return;
+
+      let bestHotspot = null;
+      let minScore = Infinity;
+
+      currentScene.hotspots.forEach(hs => {
+        if (!hs.targetId || typeof hs.yaw !== 'number' || typeof hs.pitch !== 'number') return;
+        
+        let yawDiff = Math.abs(hs.yaw - coords.yaw);
+        yawDiff = yawDiff % (2 * Math.PI);
+        if (yawDiff > Math.PI) yawDiff = 2 * Math.PI - yawDiff;
+
+        // Consider hotspots within ~45 degrees (PI/4) of the click
+        if (yawDiff < Math.PI / 4) {
+          let pitchDiff = Math.abs(hs.pitch - coords.pitch);
+          pitchDiff = pitchDiff % (2 * Math.PI);
+          if (pitchDiff > Math.PI) pitchDiff = 2 * Math.PI - pitchDiff;
+
+          const score = yawDiff + pitchDiff * 0.5;
+          if (score < minScore) {
+            minScore = score;
+            bestHotspot = hs;
+          }
+        }
+      });
+
+      if (bestHotspot) {
+        const hs = bestHotspot as any;
+        switchScene(hs.targetId, hs.targetYaw, hs.targetPitch, hs.targetFov);
+      }
+    };
+
+    const el = panoRef.current;
+    el.addEventListener("dblclick", handleDoubleClick);
+    return () => el.removeEventListener("dblclick", handleDoubleClick);
+  }, [viewMode, scenes, loadedSceneId, switchScene]);
+
   // ─── Scene Modification ─────────────────────────────────────────────────
   const updateScene = useCallback((id: string, updates: Partial<SceneData>) => {
     setScenes((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
