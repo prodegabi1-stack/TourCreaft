@@ -106,8 +106,8 @@ function IcoWalkthrough({ size = 15 }: { size?: number }) {
   );
 }
 
-// ΓöÇΓöÇΓöÇ Agent data ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-const AGENT = {
+// ─── Agent data ────────────────────────────────────────────────────────────────
+const INITIAL_AGENT_INFO = {
   name: "Gabriel Prode",
   title: "Real Estate Agent",
   phone: "0722 000 000",
@@ -280,11 +280,17 @@ function LeftPanel({
   modelUrl, onModelUpload, onModelRemove,
   untexturedModelUrl, onUntexturedModelUpload, onUntexturedModelRemove,
   floorModels, onFloorModelUpload, onFloorModelRemove,
-  propertyInfo, setPropertyInfo
+  propertyInfo, setPropertyInfo,
+  agentInfo, setAgentInfo
 }: any) {
   const modelInputRef = useRef<HTMLInputElement>(null);
   const untexturedModelInputRef = useRef<HTMLInputElement>(null);
   const [showSpaceInfoMenu, setShowSpaceInfoMenu] = useState(false);
+  const [showTransitionMenu, setShowTransitionMenu] = useState(true);
+  const [showHotspotsMenu, setShowHotspotsMenu] = useState(false);
+  const [showControlsMenu, setShowControlsMenu] = useState(false);
+  const [showFloorsMenu, setShowFloorsMenu] = useState(false);
+  const [showAgentMenu, setShowAgentMenu] = useState(false);
   return (
     <div
       className="flex-shrink-0 flex flex-col border-r border-white/8 bg-[#0f1110] overflow-hidden"
@@ -298,9 +304,13 @@ function LeftPanel({
 
         <div className="flex flex-col gap-0 overflow-y-auto flex-1 pb-6">
           {/* Transition */}
-          <section className="px-4 py-3 border-b border-white/6">
-            <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-2">Transition</p>
-            <div className="flex flex-col gap-2">
+          <section className="border-b border-white/6">
+            <button onClick={() => setShowTransitionMenu(!showTransitionMenu)} className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/3 transition-colors">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Transition</span>
+              <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${showTransitionMenu ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showTransitionMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div className="flex flex-col gap-2 px-5 pb-4">
               <label className="flex items-center justify-between text-xs text-white/60">
                 <span>Type</span>
                 <select
@@ -322,13 +332,18 @@ function LeftPanel({
                   className="bg-white/8 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none w-16 text-center focus:border-accent"
                 />
               </label>
+              </div>
             </div>
           </section>
 
           {/* Hotspots */}
-          <section className="px-4 py-3 border-b border-white/6">
-            <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-2">Hotspots</p>
-            <div className="flex flex-col gap-2">
+          <section className="border-b border-white/6">
+            <button onClick={() => setShowHotspotsMenu(!showHotspotsMenu)} className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/3 transition-colors">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Hotspots</span>
+              <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${showHotspotsMenu ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showHotspotsMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div className="flex flex-col gap-2 px-5 pb-4">
               <label className="flex flex-col gap-2 text-xs text-white/60">
                 <div className="flex items-center justify-between">
                   <span>Size (Scale)</span>
@@ -341,13 +356,18 @@ function LeftPanel({
                   className="w-full accent-accent"
                 />
               </label>
+              </div>
             </div>
           </section>
 
           {/* Controls appearance */}
-          <section className="px-4 py-3 border-b border-white/6">
-            <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-2">Controls Style</p>
-            <div className="flex flex-col gap-2">
+          <section className="border-b border-white/6">
+            <button onClick={() => setShowControlsMenu(!showControlsMenu)} className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/3 transition-colors">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Controls Style</span>
+              <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${showControlsMenu ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showControlsMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div className="flex flex-col gap-2 px-5 pb-4">
               <label className="flex items-center justify-between text-xs text-white/60">
                 <span>Background</span>
                 <div className="flex items-center gap-2">
@@ -402,13 +422,18 @@ function LeftPanel({
                   <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${bubbleBlur ? "left-4" : "left-0.5"}`} />
                 </button>
               </label>
+              </div>
             </div>
           </section>
 
           {/* Floors settings */}
-          <section className="px-4 py-3 border-b border-white/6">
-            <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-2">Organizare Etaje</p>
-            <div className="flex flex-col gap-2">
+          <section className="border-b border-white/6">
+            <button onClick={() => setShowFloorsMenu(!showFloorsMenu)} className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/3 transition-colors">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Organizare Etaje</span>
+              <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${showFloorsMenu ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showFloorsMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div className="flex flex-col gap-2 px-5 pb-4">
               <label className="flex items-center gap-2 text-[11px] text-white/80 cursor-pointer">
                 <input
                   type="checkbox"
@@ -489,29 +514,74 @@ function LeftPanel({
                   </div>
                 </div>
               )}
+              </div>
             </div>
           </section>
 
           {/* Agent card settings */}
-          <section className="px-5 py-4">
-            <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3">Agent Card</p>
-            <div className="flex flex-col gap-2">
+          <section className="border-b border-white/6">
+            <button onClick={() => setShowAgentMenu(!showAgentMenu)} className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/3 transition-colors">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Agent Card</span>
+              <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${showAgentMenu ? "rotate-180" : ""}`} />
+            </button>
+            <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showAgentMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
+              <div className="flex flex-col gap-2 px-5 pb-4">
+              <div className="flex items-center gap-3 mb-2">
+                <img src={agentInfo.avatar} alt="Agent" className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-white/10" />
+                <button 
+                  onClick={() => document.getElementById("agent_avatar_upload")?.click()}
+                  className="text-[10px] font-semibold text-accent hover:bg-accent/10 transition-colors bg-white/5 border border-white/10 rounded-lg px-3 py-1.5"
+                >
+                  Change Photo (Auto Crop)
+                </button>
+                <input 
+                  type="file" 
+                  id="agent_avatar_upload" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                       const reader = new FileReader();
+                       reader.onload = (e) => {
+                          const img = new Image();
+                          img.onload = () => {
+                             // auto crop to square 200x200
+                             const canvas = document.createElement("canvas");
+                             canvas.width = 200; canvas.height = 200;
+                             const ctx = canvas.getContext("2d");
+                             if (ctx) {
+                               const size = Math.min(img.width, img.height);
+                               const x = (img.width - size) / 2;
+                               const y = (img.height - size) / 2;
+                               ctx.drawImage(img, x, y, size, size, 0, 0, 200, 200);
+                               setAgentInfo({ ...agentInfo, avatar: canvas.toDataURL("image/jpeg", 0.9) });
+                             }
+                          };
+                          img.src = e.target?.result as string;
+                       };
+                       reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </div>
               <input
-                type="text" defaultValue="Gabriel Prode" placeholder="Agent name"
+                type="text" value={agentInfo.name || ""} onChange={(e) => setAgentInfo({ ...agentInfo, name: e.target.value })} placeholder="Agent name"
                 className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
               />
               <input
-                type="text" defaultValue="Real Estate Agent" placeholder="Title"
+                type="text" value={agentInfo.title || ""} onChange={(e) => setAgentInfo({ ...agentInfo, title: e.target.value })} placeholder="Title"
                 className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
               />
               <input
-                type="text" defaultValue="0722 000 000" placeholder="Phone"
+                type="text" value={agentInfo.phone || ""} onChange={(e) => setAgentInfo({ ...agentInfo, phone: e.target.value })} placeholder="Phone"
                 className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
               />
               <input
-                type="text" defaultValue="gabriel@prode.ro" placeholder="Email"
+                type="text" value={agentInfo.email || ""} onChange={(e) => setAgentInfo({ ...agentInfo, email: e.target.value })} placeholder="Email"
                 className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
               />
+              </div>
             </div>
           </section>
 
@@ -1682,6 +1752,7 @@ export default function App() {
   const [showHelpPanel, setShowHelpPanel] = useState(false);
 
   const [propertyInfo, setPropertyInfo] = useState(initialConfig?.propertyInfo || INITIAL_PROPERTY_INFO);
+  const [agentInfo, setAgentInfo] = useState(initialConfig?.agentInfo || INITIAL_AGENT_INFO);
 
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -2385,7 +2456,7 @@ export default function App() {
     try {
       const config = {
         scenes, activeId, startView, hotspotSize, hasFloors, floorsList, floorConfigs, accentColor, transitionType, transitionDuration,
-        bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, floorModels, propertyInfo
+        bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, floorModels, propertyInfo, agentInfo
       };
       const res = await fetch('/api/export', {
         method: 'POST',
@@ -2406,6 +2477,147 @@ export default function App() {
       setIsExporting(false);
     }
   };
+
+  // ─── Keyboard Navigation (Matterport-style) ──────────────────────────────
+  useEffect(() => {
+    if (viewMode !== "walk" || !viewerRef.current) return;
+
+    let rotateLeft = false;
+    let rotateRight = false;
+    let animationFrameId: number;
+
+    const renderLoop = () => {
+      const view = viewerRef.current?.view();
+      if (view) {
+        if (rotateLeft) view.setYaw(view.yaw() - 0.016);
+        if (rotateRight) view.setYaw(view.yaw() + 0.016);
+      }
+      animationFrameId = requestAnimationFrame(renderLoop);
+    };
+    animationFrameId = requestAnimationFrame(renderLoop);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        rotateLeft = true;
+        e.preventDefault();
+      }
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        rotateRight = true;
+        e.preventDefault();
+      }
+
+      if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
+        const view = viewerRef.current?.view();
+        if (!view || !loadedSceneId) return;
+
+        const currentScene = scenes.find(s => s.id === loadedSceneId);
+        if (!currentScene || !currentScene.hotspots) return;
+
+        let bestHotspot = null;
+        let minScore = Infinity;
+
+        const currentYaw = view.yaw();
+        const currentPitch = view.pitch();
+
+        currentScene.hotspots.forEach(hs => {
+          if (!hs.targetId) return;
+          if (typeof hs.yaw !== 'number' || typeof hs.pitch !== 'number') return;
+
+          let yawDiff = Math.abs(hs.yaw - currentYaw);
+          yawDiff = yawDiff % (2 * Math.PI);
+          if (yawDiff > Math.PI) yawDiff = 2 * Math.PI - yawDiff;
+
+          if (yawDiff < Math.PI / 3) {
+            let pitchDiff = Math.abs(hs.pitch - currentPitch);
+            pitchDiff = pitchDiff % (2 * Math.PI);
+            if (pitchDiff > Math.PI) pitchDiff = 2 * Math.PI - pitchDiff;
+
+            const score = yawDiff + pitchDiff * 0.5;
+            if (score < minScore) {
+              minScore = score;
+              bestHotspot = hs;
+            }
+          }
+        });
+
+        if (bestHotspot) {
+          e.preventDefault();
+          e.stopPropagation();
+          const hs = bestHotspot as any;
+          switchScene(hs.targetId, hs.targetYaw, hs.targetPitch, hs.targetFov);
+        }
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") rotateLeft = false;
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") rotateRight = false;
+    };
+
+    window.addEventListener("keydown", handleKeyDown, { capture: true });
+    window.addEventListener("keyup", handleKeyUp, { capture: true });
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("keydown", handleKeyDown, { capture: true });
+      window.removeEventListener("keyup", handleKeyUp, { capture: true });
+    };
+  }, [viewMode, scenes, loadedSceneId, switchScene]);
+
+  // ─── Double Tap / Click Navigation ─────────────────────────────────────────
+  useEffect(() => {
+    if (viewMode !== "walk" || !panoRef.current) return;
+
+    const handleDoubleClick = (e: MouseEvent) => {
+      const view = viewerRef.current?.view();
+      if (!view || !loadedSceneId) return;
+
+      const currentScene = scenes.find(s => s.id === loadedSceneId);
+      if (!currentScene || !currentScene.hotspots || currentScene.hotspots.length === 0) return;
+
+      const rect = panoRef.current!.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const coords = view.screenToCoordinates({ x, y });
+      if (!coords) return;
+
+      let bestHotspot = null;
+      let minScore = Infinity;
+
+      currentScene.hotspots.forEach(hs => {
+        if (!hs.targetId || typeof hs.yaw !== 'number' || typeof hs.pitch !== 'number') return;
+        
+        let yawDiff = Math.abs(hs.yaw - coords.yaw);
+        yawDiff = yawDiff % (2 * Math.PI);
+        if (yawDiff > Math.PI) yawDiff = 2 * Math.PI - yawDiff;
+
+        // Consider hotspots within ~45 degrees (PI/4) of the click
+        if (yawDiff < Math.PI / 4) {
+          let pitchDiff = Math.abs(hs.pitch - coords.pitch);
+          pitchDiff = pitchDiff % (2 * Math.PI);
+          if (pitchDiff > Math.PI) pitchDiff = 2 * Math.PI - pitchDiff;
+
+          const score = yawDiff + pitchDiff * 0.5;
+          if (score < minScore) {
+            minScore = score;
+            bestHotspot = hs;
+          }
+        }
+      });
+
+      if (bestHotspot) {
+        const hs = bestHotspot as any;
+        switchScene(hs.targetId, hs.targetYaw, hs.targetPitch, hs.targetFov);
+      }
+    };
+
+    const el = panoRef.current;
+    el.addEventListener("dblclick", handleDoubleClick);
+    return () => el.removeEventListener("dblclick", handleDoubleClick);
+  }, [viewMode, scenes, loadedSceneId, switchScene]);
 
   // ─── Scene Modification ─────────────────────────────────────────────────
   const updateScene = useCallback((id: string, updates: Partial<SceneData>) => {
@@ -2771,6 +2983,7 @@ export default function App() {
           untexturedModelUrl={untexturedModelUrl} onUntexturedModelUpload={handleUntexturedModelUpload} onUntexturedModelRemove={handleUntexturedModelRemove}
           floorModels={floorModels} onFloorModelUpload={handleFloorModelUpload} onFloorModelRemove={handleFloorModelRemove}
           propertyInfo={propertyInfo} setPropertyInfo={setPropertyInfo}
+          agentInfo={agentInfo} setAgentInfo={setAgentInfo}
         />
       )}
 
@@ -2883,10 +3096,10 @@ export default function App() {
               }}
             >
               <div className="flex items-center gap-3 p-4 pb-3">
-                <img src={AGENT.avatar} alt={AGENT.name} className="w-11 h-11 rounded-xl object-cover flex-shrink-0" />
+                <img src={agentInfo.avatar} alt={agentInfo.name} className="w-11 h-11 rounded-xl object-cover flex-shrink-0" />
                 <div className="min-w-0">
-                  <div className="font-semibold text-white text-sm leading-tight">{AGENT.name}</div>
-                  <div className="text-xs text-white/60 mt-0.5">{AGENT.title}</div>
+                  <div className="font-semibold text-white text-sm leading-tight">{agentInfo.name}</div>
+                  <div className="text-xs text-white/60 mt-0.5">{agentInfo.title}</div>
                 </div>
                 <button onClick={() => setAgentOpen(false)} className="ml-auto text-white/50 hover:text-white transition-colors flex-shrink-0">
                   <X size={14} />
@@ -2895,23 +3108,23 @@ export default function App() {
               <div className="border-t border-white/10 px-4 py-3 space-y-2">
                 <div className="flex items-center gap-2 text-xs text-white/75">
                   <Phone size={12} className="text-accent flex-shrink-0" />
-                  <span className="font-medium">{AGENT.phone}</span>
-                  <CopyButton text={AGENT.phone} />
+                  <span className="font-medium">{agentInfo.phone}</span>
+                  <CopyButton text={agentInfo.phone} />
                 </div>
                 <div className="flex items-center gap-2 text-xs text-white/75">
                   <Mail size={12} className="text-accent flex-shrink-0" />
-                  <span className="font-medium truncate">{AGENT.email}</span>
-                  <CopyButton text={AGENT.email} />
+                  <span className="font-medium truncate">{agentInfo.email}</span>
+                  <CopyButton text={agentInfo.email} />
                 </div>
               </div>
               <div className="px-4 pb-4 flex gap-2">
-                <button type="button" onClick={() => openExternalLink(`tel:${AGENT.phone.replace(/\s/g, "")}`)} aria-label="Call now" className="flex-1 flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-2 py-2 hover:bg-white/15 transition-colors">
+                <button type="button" onClick={() => openExternalLink(`tel:${agentInfo.phone.replace(/\s/g, "")}`)} aria-label="Call now" className="flex-1 flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-2 py-2 hover:bg-white/15 transition-colors">
                   <img src={phoneIcon} alt="Call now" className="h-5 w-auto object-contain brightness-0 invert" draggable={false} />
                 </button>
-                <a href={getWhatsAppHref(AGENT.phone)} target="_blank" rel="noreferrer" aria-label="Open WhatsApp conversation" className="flex-1 flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-2 py-2 hover:bg-white/15 transition-colors">
+                <a href={getWhatsAppHref(agentInfo.phone)} target="_blank" rel="noreferrer" aria-label="Open WhatsApp conversation" className="flex-1 flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-2 py-2 hover:bg-white/15 transition-colors">
                   <img src={whatsappLogo} alt="WhatsApp" className="h-5 w-auto object-contain brightness-0 invert" draggable={false} />
                 </a>
-                <button type="button" onClick={() => openExternalLink(`mailto:${AGENT.email}`)} aria-label="Email" className="flex-1 flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-2 py-2 hover:bg-white/15 transition-colors">
+                <button type="button" onClick={() => openExternalLink(`mailto:${agentInfo.email}`)} aria-label="Email" className="flex-1 flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-2 py-2 hover:bg-white/15 transition-colors">
                   <img src={mailIcon} alt="Email" className="h-5 w-auto object-contain brightness-0 invert" draggable={false} />
                 </button>
               </div>
@@ -2927,8 +3140,8 @@ export default function App() {
                 border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              <img src={AGENT.avatar} alt={AGENT.name} className="w-7 h-7 rounded-lg object-cover" />
-              <span className="text-xs font-semibold text-white">{AGENT.name}</span>
+              <img src={agentInfo.avatar} alt={agentInfo.name} className="w-7 h-7 rounded-lg object-cover" />
+              <span className="text-xs font-semibold text-white">{agentInfo.name}</span>
             </button>
           )}
         </div>
