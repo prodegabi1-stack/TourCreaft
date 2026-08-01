@@ -152,6 +152,7 @@ interface HotspotData {
   targetPitch?: number;
   targetFov?: number;
   style?: "glow" | "floor-glow" | "floor-circle" | "door-enter" | "door-exit" | "elevator-up" | "elevator-down" | "stair-up" | "stair-down";
+  size?: number;
 }
 
 interface SceneData {
@@ -177,7 +178,7 @@ interface FloorConfig {
   targetPitch?: number;
   targetFov?: number;
 }
-type TargetCaptureModeType = 
+type TargetCaptureModeType =
   | { type: "hotspot"; sourceSceneId: string; hotspotId: string }
   | { type: "floor"; sourceSceneId: string; floorIndex: number };
 
@@ -264,6 +265,7 @@ function ViewModeSwitch({
 function LeftPanel({
   transitionType, setTransitionType,
   transitionDuration, setTransitionDuration,
+  hotspotSize, setHotspotSize,
   bubbleBg, setBubbleBg,
   bubbleOpacity, setBubbleOpacity,
   bubbleColor, setBubbleColor,
@@ -276,7 +278,8 @@ function LeftPanel({
   scenes, activeId,
   onExport, isExporting,
   modelUrl, onModelUpload, onModelRemove,
-  untexturedModelUrl, onUntexturedModelUpload, onUntexturedModelRemove
+  untexturedModelUrl, onUntexturedModelUpload, onUntexturedModelRemove,
+  floorModels, onFloorModelUpload, onFloorModelRemove
 }: any) {
   const modelInputRef = useRef<HTMLInputElement>(null);
   const untexturedModelInputRef = useRef<HTMLInputElement>(null);
@@ -315,6 +318,25 @@ function LeftPanel({
                   value={transitionDuration}
                   onChange={(e) => setTransitionDuration(parseFloat(e.target.value))}
                   className="bg-white/8 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none w-16 text-center focus:border-accent"
+                />
+              </label>
+            </div>
+          </section>
+
+          {/* Hotspots */}
+          <section className="px-4 py-3 border-b border-white/6">
+            <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-2">Hotspots</p>
+            <div className="flex flex-col gap-2">
+              <label className="flex flex-col gap-2 text-xs text-white/60">
+                <div className="flex items-center justify-between">
+                  <span>Size (Scale)</span>
+                  <span className="text-white/40">{hotspotSize.toFixed(1)}x</span>
+                </div>
+                <input
+                  type="range" min={0.5} max={2.5} step={0.1}
+                  value={hotspotSize}
+                  onChange={(e) => setHotspotSize(parseFloat(e.target.value))}
+                  className="w-full accent-accent"
                 />
               </label>
             </div>
@@ -405,12 +427,12 @@ function LeftPanel({
                       className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-white outline-none focus:border-accent w-full"
                     />
                   </label>
-                  
+
                   <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 pr-1 mt-1 border-t border-white/10 pt-2">
                     {Array.from({ length: (parseInt(floorsList) || 0) + 1 }).map((_, idx) => (
                       <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-2 flex flex-col gap-1.5 relative">
                         <div className="text-[11px] font-semibold text-accent">Etaj {idx} {idx === 0 ? "(Parter)" : ""}</div>
-                        
+
                         <label className="flex flex-col gap-1 text-[10px] text-white/50">
                           Target Scene
                           <select
@@ -430,6 +452,35 @@ function LeftPanel({
                           >
                             {floorConfigs[idx]?.targetYaw !== undefined ? "Update Target Angle" : "Set Target Angle"}
                           </button>
+                        )}
+
+                        {has3D && (
+                          <div className="flex flex-col gap-1.5 mt-1 border-t border-white/10 pt-1.5">
+                            <span className="text-[9px] font-bold tracking-widest uppercase text-white/30">Modele 3D Etaj</span>
+                            <input id={`floor_model_${idx}`} type="file" accept=".glb,.gltf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if(f) onFloorModelUpload(idx, 'textured', f); }} />
+                            {floorModels?.[idx]?.textured ? (
+                              <div className="flex items-center gap-1.5 bg-black/20 border border-white/5 rounded px-2 py-1">
+                                <span className="text-white/60 text-[9px] truncate flex-1">Texturat setat</span>
+                                <button onClick={() => onFloorModelRemove(idx, 'textured')} className="text-white/30 hover:text-red-400"><X size={10} /></button>
+                              </div>
+                            ) : (
+                              <button onClick={() => document.getElementById(`floor_model_${idx}`)?.click()} className="text-[9px] text-accent/80 hover:text-accent transition-colors text-left">
+                                + Adaugă Texturat (.glb)
+                              </button>
+                            )}
+
+                            <input id={`floor_untextured_${idx}`} type="file" accept=".glb,.gltf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if(f) onFloorModelUpload(idx, 'untextured', f); }} />
+                            {floorModels?.[idx]?.untextured ? (
+                              <div className="flex items-center gap-1.5 bg-black/20 border border-white/5 rounded px-2 py-1">
+                                <span className="text-white/60 text-[9px] truncate flex-1">Netexturat setat</span>
+                                <button onClick={() => onFloorModelRemove(idx, 'untextured')} className="text-white/30 hover:text-red-400"><X size={10} /></button>
+                              </div>
+                            ) : (
+                              <button onClick={() => document.getElementById(`floor_untextured_${idx}`)?.click()} className="text-[9px] text-accent/80 hover:text-accent transition-colors text-left">
+                                + Adaugă Netexturat (.glb)
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     ))}
@@ -475,63 +526,63 @@ function LeftPanel({
                 Proiectul are model 3D
               </label>
             </div>
-            
+
             {has3D && (
               <>
                 <div>
                   <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3">Textured 3D Model</p>
-              <input
-                ref={modelInputRef} type="file" accept=".glb,.gltf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) onModelUpload(file);
-                }}
-              />
-              {modelUrl ? (
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-accent flex-shrink-0"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
-                    <span className="text-white/60 text-xs truncate flex-1">Textured Model</span>
-                    <button onClick={onModelRemove} className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"><X size={14} /></button>
-                  </div>
-                  <button onClick={() => modelInputRef.current?.click()} className="text-xs text-accent hover:underline text-left">Replace model...</button>
+                  <input
+                    ref={modelInputRef} type="file" accept=".glb,.gltf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) onModelUpload(file);
+                    }}
+                  />
+                  {modelUrl ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-accent flex-shrink-0"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+                        <span className="text-white/60 text-xs truncate flex-1">Textured Model</span>
+                        <button onClick={onModelRemove} className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"><X size={14} /></button>
+                      </div>
+                      <button onClick={() => modelInputRef.current?.click()} className="text-xs text-accent hover:underline text-left">Replace model...</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => modelInputRef.current?.click()} className="w-full border-2 border-dashed border-white/15 hover:border-accent/50 rounded-xl py-4 text-center transition-all cursor-pointer">
+                      <svg className="mx-auto mb-1.5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+                      <p className="text-xs text-white/40"><span className="text-accent">Upload</span> .GLB / .GLTF</p>
+                    </button>
+                  )}
                 </div>
-              ) : (
-                <button onClick={() => modelInputRef.current?.click()} className="w-full border-2 border-dashed border-white/15 hover:border-accent/50 rounded-xl py-4 text-center transition-all cursor-pointer">
-                  <svg className="mx-auto mb-1.5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                  <p className="text-xs text-white/40"><span className="text-accent">Upload</span> .GLB / .GLTF</p>
-                </button>
-              )}
-            </div>
 
-            <div>
-              <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3">Untextured 3D Model</p>
-              <input
-                ref={untexturedModelInputRef} type="file" accept=".glb,.gltf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) onUntexturedModelUpload(file);
-                }}
-              />
-              {untexturedModelUrl ? (
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-accent flex-shrink-0"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
-                    <span className="text-white/60 text-xs truncate flex-1">Untextured Model</span>
-                    <button onClick={onUntexturedModelRemove} className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"><X size={14} /></button>
-                  </div>
-                  <button onClick={() => untexturedModelInputRef.current?.click()} className="text-xs text-accent hover:underline text-left">Replace model...</button>
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3">Untextured 3D Model</p>
+                  <input
+                    ref={untexturedModelInputRef} type="file" accept=".glb,.gltf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) onUntexturedModelUpload(file);
+                    }}
+                  />
+                  {untexturedModelUrl ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-accent flex-shrink-0"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+                        <span className="text-white/60 text-xs truncate flex-1">Untextured Model</span>
+                        <button onClick={onUntexturedModelRemove} className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"><X size={14} /></button>
+                      </div>
+                      <button onClick={() => untexturedModelInputRef.current?.click()} className="text-xs text-accent hover:underline text-left">Replace model...</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => untexturedModelInputRef.current?.click()} className="w-full border-2 border-dashed border-white/15 hover:border-accent/50 rounded-xl py-4 text-center transition-all cursor-pointer">
+                      <svg className="mx-auto mb-1.5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+                      <p className="text-xs text-white/40"><span className="text-accent">Upload</span> .GLB / .GLTF</p>
+                    </button>
+                  )}
                 </div>
-              ) : (
-                <button onClick={() => untexturedModelInputRef.current?.click()} className="w-full border-2 border-dashed border-white/15 hover:border-accent/50 rounded-xl py-4 text-center transition-all cursor-pointer">
-                  <svg className="mx-auto mb-1.5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                  <p className="text-xs text-white/40"><span className="text-accent">Upload</span> .GLB / .GLTF</p>
-                </button>
-              )}
-            </div>
-            </>
+              </>
             )}
           </section>
 
@@ -953,7 +1004,7 @@ function ShareModal({
 // ΓöÇΓöÇΓöÇ Right Scenes Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function RightPanel({
   scenes, activeId, activeHotspotId, setActiveHotspotId, hasFloors, floorsList, onSceneClick, onUpload, onDeleteScene, onUpdateScene, onReorderScenes, onCaptureHighlight,
-  onAddHotspot, onUpdateHotspot, onDeleteHotspot, onStartTargetCapture
+  onAddHotspot, onUpdateHotspot, onDeleteHotspot, onStartTargetCapture, startView, onSetStartView
 }: {
   scenes: SceneData[]; activeId: string | null; activeHotspotId: string | null; setActiveHotspotId: (id: string | null) => void; hasFloors: boolean; floorsList: string; onSceneClick: (id: string) => void;
   onUpload: (files: FileList) => void; onDeleteScene: (id: string) => void;
@@ -964,6 +1015,8 @@ function RightPanel({
   onUpdateHotspot: (sceneId: string, hotspotId: string, updates: Partial<HotspotData>) => void;
   onDeleteHotspot: (sceneId: string, hotspotId: string) => void;
   onStartTargetCapture: (sourceSceneId: string, hotspotId: string, targetId: string) => void;
+  startView: {sceneId: string, yaw: number, pitch: number, fov: number} | null;
+  onSetStartView: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -1070,7 +1123,7 @@ function RightPanel({
             />
             Show in bottom gallery (Highlight)
           </label>
-          
+
           {hasFloors && (
             <label className="flex flex-col gap-1 text-[11px] text-white/60 mt-3">
               Etaj
@@ -1103,6 +1156,12 @@ function RightPanel({
                 className="bg-white/10 text-white text-[10px] py-1 rounded hover:bg-white/20 transition-colors border border-white/10"
               >
                 Set Thumbnail
+              </button>
+              <button
+                onClick={() => onSetStartView()}
+                className={`text-[10px] py-1 rounded transition-colors border ${startView?.sceneId === activeId ? "bg-accent/20 border-accent/30 text-accent hover:bg-accent/30" : "bg-white/10 border-white/10 text-white hover:bg-white/20"}`}
+              >
+                {startView?.sceneId === activeId ? "Start View (Click to Update)" : "Set as Start View"}
               </button>
             </div>
           )}
@@ -1145,6 +1204,19 @@ function RightPanel({
                       <option value="floor-glow">Floor Glow (Tilted)</option>
                       <option value="glow">Glow (Default)</option>
                     </select>
+                  </label>
+
+                  <label className="flex flex-col gap-1 text-[10px] text-white/50">
+                    <div className="flex items-center justify-between">
+                      <span>Size</span>
+                      <span>{hs.size ? hs.size.toFixed(1) : "Default"}</span>
+                    </div>
+                    <input
+                      type="range" min={0.5} max={3.0} step={0.1}
+                      value={hs.size ?? 1.0}
+                      onChange={(e) => onUpdateHotspot(activeId!, hs.id, { size: parseFloat(e.target.value) })}
+                      className="w-full accent-accent"
+                    />
                   </label>
 
                   {hs.targetId && (
@@ -1190,6 +1262,10 @@ const MAX_TEXTURE_SIZE = getMaxTextureSize();
 export default function App() {
   const initialConfig = isExported ? (window as any).__TOUR_CONFIG__ : null;
 
+  // New state for 3D floors
+  const [activeFloor3D, setActiveFloor3D] = useState<number | null>(null);
+  const [floorModels, setFloorModels] = useState<Record<number, { textured?: string, untextured?: string }>>(initialConfig?.floorModels || {});
+
   // UI state
   const [showThumbnails, setShowThumbnails] = useState(true);
   const galleryInitDone = useRef(false);
@@ -1225,7 +1301,7 @@ export default function App() {
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
+      document.documentElement.requestFullscreen().catch(() => { });
     } else {
       document.exitFullscreen();
     }
@@ -1258,6 +1334,8 @@ export default function App() {
     toggleFullscreen();
   };
 
+  const [startView, setStartView] = useState<{sceneId: string, yaw: number, pitch: number, fov: number} | null>(initialConfig?.startView || null);
+  const [hotspotSize, setHotspotSize] = useState<number>(initialConfig?.hotspotSize ?? 1.0);
   const [floorConfigs, setFloorConfigs] = useState<Record<number, FloorConfig>>(initialConfig?.floorConfigs || {});
   const [accentColor, setAccentColor] = useState(initialConfig?.accentColor || "#c8a96e");
   const [transitionType, setTransitionType] = useState(initialConfig?.transitionType || "fade");
@@ -1269,6 +1347,7 @@ export default function App() {
 
   // Triggers re-renders when Marzipano async loading finishes
   const [sceneLoadedToken, setSceneLoadedToken] = useState<number>(0);
+  const [loadedSceneId, setLoadedSceneId] = useState<string | null>(initialConfig?.activeId || "demo_1");
 
   const [isLoading, setIsLoading] = useState(!isExported);
   const [isExporting, setIsExporting] = useState(false);
@@ -1297,9 +1376,22 @@ export default function App() {
       }
       try {
         const storedScenes = await get("scenes");
+        const storedStartView = await get("startView");
+        if (storedStartView) setStartView(storedStartView);
+        
+        const storedHotspotSize = await get("hotspotSize");
+        if (storedHotspotSize !== undefined) setHotspotSize(storedHotspotSize);
+
         if (storedScenes && storedScenes.length > 0) {
           setScenes(storedScenes);
-          setActiveId(storedScenes[0].id);
+          const storedActiveId = await get("activeId");
+          if (storedActiveId && storedScenes.some((s: any) => s.id === storedActiveId)) {
+            setActiveId(storedActiveId);
+          } else if (storedStartView && storedScenes.some((s: any) => s.id === storedStartView.sceneId)) {
+            setActiveId(storedStartView.sceneId);
+          } else {
+            setActiveId(storedScenes[0].id);
+          }
         } else {
           setActiveId(DEMO_ROOMS[0].id);
         }
@@ -1329,6 +1421,8 @@ export default function App() {
         if (model) setModelUrl(model);
         const untexturedModel = await get("untexturedModelUrl");
         if (untexturedModel) setUntexturedModelUrl(untexturedModel);
+        const savedFloorModels = await get("floorModels");
+        if (savedFloorModels) setFloorModels(savedFloorModels);
       } catch (err) {
         console.error("Failed to load settings from DB", err);
       } finally {
@@ -1361,12 +1455,17 @@ export default function App() {
     set("bubbleOpacity", bubbleOpacity).catch(console.error);
     set("bubbleColor", bubbleColor).catch(console.error);
     set("bubbleBlur", bubbleBlur).catch(console.error);
+    if (startView) set("startView", startView).catch(console.error);
+    else set("startView", null).catch(console.error);
+    set("hotspotSize", hotspotSize).catch(console.error);
     if (modelUrl) set("modelUrl", modelUrl).catch(console.error);
     else set("modelUrl", null).catch(console.error);
 
     if (untexturedModelUrl) set("untexturedModelUrl", untexturedModelUrl).catch(console.error);
     else set("untexturedModelUrl", null).catch(console.error);
-  }, [hasFloors, has3D, floorsList, accentColor, transitionType, transitionDuration, bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, isLoading]);
+
+    set("floorModels", floorModels).catch(console.error);
+  }, [hasFloors, has3D, floorsList, accentColor, transitionType, transitionDuration, bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, floorModels, startView, hotspotSize, isLoading]);
 
   // Marzipano refs
   const panoRef = useRef<HTMLDivElement>(null);
@@ -1402,7 +1501,9 @@ export default function App() {
     panoRef.current.addEventListener("wheel", stop);
 
     // Load initial scene
-    if (activeId) {
+    if (isExported && initialConfig?.startView) {
+      switchScene(initialConfig.startView.sceneId, initialConfig.startView.yaw, initialConfig.startView.pitch, initialConfig.startView.fov);
+    } else if (activeId) {
       switchScene(activeId);
     }
 
@@ -1434,7 +1535,7 @@ export default function App() {
     const geometry = new Marzipano.EquirectGeometry([{ width: imgWidth }]);
     const limiter = Marzipano.RectilinearView.limit.traditional(imgWidth, 100 * Math.PI / 180, 120 * Math.PI / 180, 30 * Math.PI / 180);
     const view = new Marzipano.RectilinearView({ yaw: 0, pitch: 0, fov: 75 * Math.PI / 180 }, limiter);
-    const scene = viewerRef.current.createScene({ source, geometry, view, pinFirstLevel: true });
+    const scene = viewerRef.current.createScene({ source, geometry, view });
     marzScenes.current.set(sceneData.id, scene);
     return scene;
   }, []);
@@ -1461,21 +1562,124 @@ export default function App() {
       }
     }
 
+    // Apply fade-out animation to current scene's hotspots
+    if (hotspotObjsRef.current[loadedSceneId]) {
+      hotspotObjsRef.current[loadedSceneId].forEach((hsObj: any) => {
+        const wrapper = hsObj.domElement();
+        if (wrapper && wrapper.firstChild) {
+          (wrapper.firstChild as HTMLElement).style.animation = `hotspotFadeOut ${transitionDuration}s forwards`;
+        }
+      });
+    }
+
+    // CLEAR any lingering hotspots from the TARGET scene before transitioning to it
+    // This prevents old hotspots from showing up during the crossfade if the scene was visited before.
+    if (hotspotObjsRef.current[id] && mScene) {
+      const container = mScene.hotspotContainer();
+      if (container) {
+        hotspotObjsRef.current[id].forEach((hsObj: any) => {
+          try { container.destroyHotspot(hsObj); } catch (e) { }
+        });
+        hotspotObjsRef.current[id] = [];
+      }
+    }
+
     try {
       let transition = undefined;
       if (transitionType !== "none" && transitionDuration > 0) {
         if (transitionType === "fade") transition = { transitionDuration: transitionDuration * 1000, transitionUpdate: Marzipano.TransitionUpdate.opacity() };
         else if (transitionType === "zoom") transition = { transitionDuration: transitionDuration * 1000, transitionUpdate: Marzipano.TransitionUpdate.zoom() };
       }
-      mScene.switchTo(transition);
-      setSceneLoadedToken((t) => t + 1); // Trigger hotspot rendering now that the scene is guaranteed in marzScenes
+
+      const oldSceneId = loadedSceneId;
+      const onComplete = () => {
+        // Forcefully destroy old scene's hotspots completely so they don't linger for the next visit
+        if (oldSceneId && oldSceneId !== id && hotspotObjsRef.current[oldSceneId]) {
+          const oldScene = marzScenes.current.get(oldSceneId);
+          if (oldScene) {
+            const oldContainer = oldScene.hotspotContainer();
+            hotspotObjsRef.current[oldSceneId].forEach((hsObj: any) => {
+              try { 
+                const el = hsObj.domElement();
+                if (el && el.parentNode) el.parentNode.removeChild(el); // Force DOM removal
+                if (oldContainer) oldContainer.destroyHotspot(hsObj);
+              } catch (e) { }
+            });
+          }
+          hotspotObjsRef.current[oldSceneId] = [];
+        }
+
+        setSceneLoadedToken((t) => t + 1); // Trigger hotspot rendering now that the transition is complete
+        setLoadedSceneId(id);
+      };
+
+      mScene.switchTo(transition, onComplete);
     } catch {
       try {
-        mScene.switchTo();
-        setSceneLoadedToken((t) => t + 1);
+        const oldSceneId = loadedSceneId;
+        mScene.switchTo(undefined, () => {
+          if (oldSceneId && oldSceneId !== id && hotspotObjsRef.current[oldSceneId]) {
+            const oldScene = marzScenes.current.get(oldSceneId);
+            if (oldScene) {
+              const oldContainer = oldScene.hotspotContainer();
+              hotspotObjsRef.current[oldSceneId].forEach((hsObj: any) => {
+                try { 
+                  const el = hsObj.domElement();
+                  if (el && el.parentNode) el.parentNode.removeChild(el);
+                  if (oldContainer) oldContainer.destroyHotspot(hsObj);
+                } catch (e) { }
+              });
+            }
+            hotspotObjsRef.current[oldSceneId] = [];
+          }
+          setSceneLoadedToken((t) => t + 1);
+          setLoadedSceneId(id);
+        });
       } catch (_) { }
     }
   }, [scenes, loadMarzipanoScene, transitionType, transitionDuration]);
+
+  // ΓöÇΓöÇ Preload connected scenes & highlights ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  useEffect(() => {
+    if (!activeId) return;
+    const currentScene = scenes.find(s => s.id === activeId);
+    if (!currentScene) return;
+
+    // Use a small timeout to ensure the main image gets maximum bandwidth first
+    const preloadTimer = setTimeout(() => {
+      const targetsToPreload = new Set<string>();
+      
+      // Add all hotspot targets
+      if (currentScene.hotspots) {
+        currentScene.hotspots.forEach(hs => {
+          if (hs.targetId) targetsToPreload.add(hs.targetId);
+        });
+      }
+
+      // Add all highlights
+      scenes.forEach(s => {
+        if (s.isHighlight) targetsToPreload.add(s.id);
+      });
+
+      // Execute preloads using standard browser network cache (avoids WebGL VRAM crashes on iOS)
+      targetsToPreload.forEach(targetId => {
+        if (targetId === activeId) return; // already loaded
+        const targetData = scenes.find(s => s.id === targetId);
+        if (targetData) {
+          // Detect if we should preload 4K or 8K based on device capability
+          const use4k = MAX_TEXTURE_SIZE < 8192 || /iPhone|iPad|iPod/i.test(navigator.userAgent);
+          const imgSrc = (use4k && targetData.img4k) ? targetData.img4k : targetData.img;
+          
+          if (imgSrc) {
+            const img = new Image();
+            img.src = imgSrc; // Triggers network download, caches in browser RAM/Disk without hitting WebGL limits
+          }
+        }
+      });
+    }, 500); // 500ms delay after the transition completes
+
+    return () => clearTimeout(preloadTimer);
+  }, [activeId, scenes, loadMarzipanoScene, sceneLoadedToken]);
 
 
   // ΓöÇΓöÇ Upload handler (with image optimization) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
@@ -1578,17 +1782,17 @@ export default function App() {
         setActiveId((cur) => {
           const curScene = prev.find(s => s.id === cur);
           const highlights = prev.filter(s => s.isHighlight);
-          
+
           let targetScene = curScene;
           if (highlights.length > 0 && !curScene?.isHighlight) {
-             targetScene = highlights[0];
+            targetScene = highlights[0];
           }
 
           if (targetScene) {
-             const pitch = targetScene.highlightPitch ?? 0;
-             const fov = targetScene.highlightFov ?? (75 * Math.PI / 180);
-             const startYaw = (targetScene.highlightYaw ?? 0) - (30 * Math.PI / 180);
-             setTimeout(() => switchScene(targetScene!.id, startYaw, pitch, fov), 0);
+            const pitch = targetScene.highlightPitch ?? 0;
+            const fov = targetScene.highlightFov ?? (75 * Math.PI / 180);
+            const startYaw = (targetScene.highlightYaw ?? 0) - (30 * Math.PI / 180);
+            setTimeout(() => switchScene(targetScene!.id, startYaw, pitch, fov), 0);
           }
           return targetScene?.id ?? cur;
         });
@@ -1601,7 +1805,7 @@ export default function App() {
           setActiveId((cur) => {
             const highlights = prev.filter(s => s.isHighlight);
             if (highlights.length === 0) return cur;
-            
+
             const curIsHighlight = prev.find(s => s.id === cur)?.isHighlight;
             let next: SceneData;
             if (curIsHighlight) {
@@ -1610,7 +1814,7 @@ export default function App() {
             } else {
               next = highlights[0];
             }
-            
+
             if (next) {
               const pitch = next.highlightPitch ?? 0;
               const fov = next.highlightFov ?? (75 * Math.PI / 180);
@@ -1631,7 +1835,7 @@ export default function App() {
   // ΓöÇΓöÇ Auto-rotate logic ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   useEffect(() => {
     if (!viewerRef.current) return;
-    
+
     if (autoRotateRef.current) {
       viewerRef.current.stopMovement();
       autoRotateRef.current = null;
@@ -1640,20 +1844,20 @@ export default function App() {
     if (isPlaying) {
       // 60 degrees over 6 seconds = 10 degrees per second
       const view = viewerRef.current.view();
-      const ar = Marzipano.autorotate({ 
-        yawSpeed: 10 * Math.PI / 180, 
+      const ar = Marzipano.autorotate({
+        yawSpeed: 10 * Math.PI / 180,
         yawAccel: 10,
-        targetPitch: view.pitch(), 
-        targetFov: view.fov() 
+        targetPitch: view.pitch(),
+        targetFov: view.fov()
       });
       viewerRef.current.startMovement(ar);
       autoRotateRef.current = ar;
     } else if (viewMode === "3d") {
-      const ar = Marzipano.autorotate({ 
-        yawSpeed: 0.2, 
-        yawAccel: 0.1, 
-        targetPitch: 0, 
-        targetFov: 75 * Math.PI / 180 
+      const ar = Marzipano.autorotate({
+        yawSpeed: 0.2,
+        yawAccel: 0.1,
+        targetPitch: 0,
+        targetFov: 75 * Math.PI / 180
       });
       viewerRef.current.startMovement(ar);
       autoRotateRef.current = ar;
@@ -1708,6 +1912,34 @@ export default function App() {
   };
   const handleUntexturedModelRemove = () => setUntexturedModelUrl(null);
 
+  const handleFloorModelUpload = (floorIndex: number, type: 'textured' | 'untextured', file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setFloorModels(prev => ({
+        ...prev,
+        [floorIndex]: {
+          ...prev[floorIndex],
+          [type]: e.target?.result as string
+        }
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFloorModelRemove = (floorIndex: number, type: 'textured' | 'untextured') => {
+    setFloorModels(prev => {
+      const next = { ...prev };
+      if (next[floorIndex]) {
+        next[floorIndex] = { ...next[floorIndex] };
+        delete next[floorIndex][type];
+        if (!next[floorIndex].textured && !next[floorIndex].untextured) {
+          delete next[floorIndex];
+        }
+      }
+      return next;
+    });
+  };
+
   // ΓöÇΓöÇ Auto-open-then-close gallery on first load ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   useEffect(() => {
     if (galleryInitDone.current) return;
@@ -1756,8 +1988,8 @@ export default function App() {
     setIsExporting(true);
     try {
       const config = {
-        scenes, activeId, hasFloors, floorsList, floorConfigs, accentColor, transitionType, transitionDuration,
-        bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl
+        scenes, activeId, startView, hotspotSize, hasFloors, floorsList, floorConfigs, accentColor, transitionType, transitionDuration,
+        bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, floorModels
       };
       const res = await fetch('/api/export', {
         method: 'POST',
@@ -1874,7 +2106,7 @@ export default function App() {
   const saveTargetCapture = useCallback(() => {
     if (!targetCaptureMode || !viewerRef.current) return;
     const view = viewerRef.current.view();
-    
+
     if (targetCaptureMode.type === "hotspot") {
       updateHotspot(targetCaptureMode.sourceSceneId, targetCaptureMode.hotspotId, {
         targetYaw: view.yaw(),
@@ -1893,7 +2125,7 @@ export default function App() {
         }
       }));
     }
-    
+
     switchScene(targetCaptureMode.sourceSceneId);
     setTargetCaptureMode(null);
   }, [targetCaptureMode, updateHotspot, switchScene]);
@@ -1905,26 +2137,27 @@ export default function App() {
   }, [targetCaptureMode, switchScene]);
 
   // ΓöÇΓöÇ Hotspot Rendering & Dragging ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-  const activeHotspots = useMemo(() => scenes.find((s) => s.id === activeId)?.hotspots || [], [scenes, activeId]);
+  const renderedHotspots = useMemo(() => scenes.find((s) => s.id === loadedSceneId)?.hotspots || [], [scenes, loadedSceneId]);
 
   useEffect(() => {
-    const marzScene = marzScenes.current.get(activeId);
+    if (!loadedSceneId) return;
+    const marzScene = marzScenes.current.get(loadedSceneId);
     if (!marzScene || !viewerRef.current) return;
     const container = marzScene.hotspotContainer();
     if (!container) return;
 
     // Clear existing DOM hotspots to avoid duplicates
-    if (hotspotObjsRef.current[activeId]) {
-      hotspotObjsRef.current[activeId].forEach((hsObj: any) => {
+    if (hotspotObjsRef.current[loadedSceneId]) {
+      hotspotObjsRef.current[loadedSceneId].forEach((hsObj: any) => {
         try { container.destroyHotspot(hsObj); } catch (e) { }
       });
     }
-    hotspotObjsRef.current[activeId] = [];
+    hotspotObjsRef.current[loadedSceneId] = [];
 
     if (isPlaying) return;
 
     try {
-      activeHotspots.forEach((hsData) => {
+      renderedHotspots.forEach((hsData) => {
         if (typeof hsData.yaw !== 'number' || typeof hsData.pitch !== 'number') return; // Strict check to ignore corrupted hotspots
 
         const wrapper = document.createElement("div");
@@ -1974,6 +2207,10 @@ export default function App() {
         else {
           el.className = "hs-glow"; // default
         }
+        
+        el.style.setProperty('--hotspot-size', (hsData.size ?? hotspotSize).toString());
+        el.style.scale = "var(--hotspot-size, 1)";
+        el.style.animation = "hotspotFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards";
         wrapper.appendChild(el);
 
         const options = (hsData.style === "floor-glow" || hsData.style === "floor-circle")
@@ -2073,12 +2310,12 @@ export default function App() {
           });
         }
 
-        hotspotObjsRef.current[activeId].push(hotspotObj);
+        hotspotObjsRef.current[loadedSceneId].push(hotspotObj);
       });
     } catch (err) {
       console.error("Hotspot rendering error:", err);
     }
-  }, [activeHotspots, activeId, switchScene, updateHotspot, scenes, sceneLoadedToken, isExported, isPlaying]);
+  }, [renderedHotspots, loadedSceneId, switchScene, updateHotspot, scenes, sceneLoadedToken, isExported, isPlaying]);
 
   if (isLoading) {
     return (
@@ -2099,6 +2336,7 @@ export default function App() {
         "--color-primary": accentColor,
         "--ring": accentColor,
         "--color-ring": accentColor,
+        "--hotspot-size": hotspotSize,
       } as any}
     >
       {targetCaptureMode && (
@@ -2119,6 +2357,7 @@ export default function App() {
         <LeftPanel
           transitionType={transitionType} setTransitionType={setTransitionType}
           transitionDuration={transitionDuration} setTransitionDuration={setTransitionDuration}
+          hotspotSize={hotspotSize} setHotspotSize={setHotspotSize}
           bubbleBg={bubbleBg} setBubbleBg={setBubbleBg}
           bubbleOpacity={bubbleOpacity} setBubbleOpacity={setBubbleOpacity}
           bubbleColor={bubbleColor} setBubbleColor={setBubbleColor}
@@ -2134,6 +2373,7 @@ export default function App() {
           onExport={handleExport} isExporting={isExporting}
           modelUrl={modelUrl} onModelUpload={handleModelUpload} onModelRemove={handleModelRemove}
           untexturedModelUrl={untexturedModelUrl} onUntexturedModelUpload={handleUntexturedModelUpload} onUntexturedModelRemove={handleUntexturedModelRemove}
+          floorModels={floorModels} onFloorModelUpload={handleFloorModelUpload} onFloorModelRemove={handleFloorModelRemove}
         />
       )}
 
@@ -2156,11 +2396,20 @@ export default function App() {
         )}
 
         {/* 3D Model Viewer (visible in 3d mode) */}
-        {viewMode === "3d" && (
-          (showTexturedModel ? modelUrl : untexturedModelUrl) ? (
+        {viewMode === "3d" && (() => {
+          let current3dSrc = showTexturedModel ? modelUrl : untexturedModelUrl;
+          if (activeFloor3D !== null && floorModels[activeFloor3D]) {
+            const f = floorModels[activeFloor3D];
+            if (showTexturedModel && f.textured) current3dSrc = f.textured;
+            else if (!showTexturedModel && f.untextured) current3dSrc = f.untextured;
+            else if (f.textured) current3dSrc = f.textured;
+            else if (f.untextured) current3dSrc = f.untextured;
+          }
+
+          return current3dSrc ? (
             // @ts-ignore
             <model-viewer
-              src={(showTexturedModel ? modelUrl : untexturedModelUrl)!}
+              src={current3dSrc}
               alt="3D Model"
               camera-controls
               touch-action="pan-y"
@@ -2187,8 +2436,8 @@ export default function App() {
                 <p className="text-white/20 text-xs mt-1">Upload a .GLB or .GLTF file in Settings</p>
               </div>
             </div>
-          )
-        )}
+          );
+        })()}
 
         {/* Gradient overlays for UI legibility */}
         <div className={`absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none z-10 transition-opacity duration-500 ${viewMode === "3d" ? "opacity-40" : "opacity-100"}`} />
@@ -2413,19 +2662,35 @@ export default function App() {
                       scrollbarWidth: "none"
                     }}
                   >
+                    {viewMode === "3d" && (
+                      <button
+                        onClick={() => {
+                          setActiveFloor3D(null);
+                          setShowFloorsMenu(false);
+                        }}
+                        className={`w-full h-10 px-3 text-xs font-semibold text-center rounded-xl transition-colors whitespace-nowrap flex-shrink-0 flex items-center justify-center ${activeFloor3D === null ? "bg-accent" : "hover:bg-white/15"}`}
+                        style={{ color: activeFloor3D === null ? "#000" : bubbleColor }}
+                      >
+                        Toată clădirea
+                      </button>
+                    )}
                     {Array.from({ length: (parseInt(floorsList) || 0) + 1 }).map((_, idx) => {
-                      const isActive = activeScene?.floor === ("Etaj " + idx);
+                      const isActive = viewMode === "3d" ? activeFloor3D === idx : activeScene?.floor === ("Etaj " + idx);
                       return (
                         <button
                           key={idx}
                           onClick={() => {
-                            if (isActive) {
-                              setShowFloorsMenu(false);
-                              return;
-                            }
-                            const config = floorConfigs[idx];
-                            if (config?.targetId) {
-                              switchScene(config.targetId, config.targetYaw, config.targetPitch, config.targetFov);
+                            if (viewMode === "3d") {
+                              setActiveFloor3D(idx);
+                            } else {
+                              if (isActive) {
+                                setShowFloorsMenu(false);
+                                return;
+                              }
+                              const config = floorConfigs[idx];
+                              if (config?.targetId) {
+                                switchScene(config.targetId, config.targetYaw, config.targetPitch, config.targetFov);
+                              }
                             }
                             setShowFloorsMenu(false);
                           }}
@@ -2640,6 +2905,14 @@ export default function App() {
           onUpdateHotspot={updateHotspot}
           onDeleteHotspot={deleteHotspot}
           onStartTargetCapture={startTargetCapture}
+          startView={startView}
+          onSetStartView={() => {
+            if (viewerRef.current) {
+              const view = viewerRef.current.view();
+              setStartView({ sceneId: activeId!, yaw: view.yaw(), pitch: view.pitch(), fov: view.fov() });
+              window.alert("Start view set! This will be the initial scene and angle when the exported tour is opened.");
+            }
+          }}
         />
       )}
 
@@ -2651,6 +2924,14 @@ export default function App() {
       />
 
       <style>{`
+        @keyframes hotspotFadeIn {
+          from { opacity: 0; scale: calc(var(--hotspot-size, 1) * 0.5); }
+          to { opacity: 1; scale: var(--hotspot-size, 1); }
+        }
+        @keyframes hotspotFadeOut {
+          from { opacity: 1; scale: var(--hotspot-size, 1); }
+          to { opacity: 0; scale: calc(var(--hotspot-size, 1) * 0.8); }
+        }
         @keyframes tourprogress {
           from { width: 0%; }
           to { width: 100%; }
@@ -2739,11 +3020,11 @@ export default function App() {
         }
         .hs-door:hover svg { transform: scale(1.05); }
 
-        .hs-door-enter svg { transform: translateX(-5px); }
-        .hs-door-enter:hover svg { transform: translateX(-5px) scale(1.05); }
+        .hs-door-enter svg { transform: translateX(-2px); }
+        .hs-door-enter:hover svg { transform: translateX(-2px) scale(1.05); }
 
-        .hs-door-exit svg { transform: translateX(5px); }
-        .hs-door-exit:hover svg { transform: translateX(5px) scale(1.05); }
+        .hs-door-exit svg { transform: translateX(3px); }
+        .hs-door-exit:hover svg { transform: translateX(3px) scale(1.05); }
 
         .hs-floor-circle {
           width: 120px; height: 120px;
