@@ -2489,8 +2489,8 @@ export default function App() {
     const renderLoop = () => {
       const view = viewerRef.current?.view();
       if (view) {
-        if (rotateLeft) view.setYaw(view.yaw() - 0.025);
-        if (rotateRight) view.setYaw(view.yaw() + 0.025);
+        if (rotateLeft) view.setYaw(view.yaw() - 0.016);
+        if (rotateRight) view.setYaw(view.yaw() + 0.016);
       }
       animationFrameId = requestAnimationFrame(renderLoop);
     };
