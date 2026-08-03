@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { get, set } from "idb-keyval";
-import { Phone, Mail, Copy, X, MapPin, Compass, ChevronLeft, ChevronRight, Maximize, Minimize, CircleHelp, Glasses, Info, Share2, Check, Link2, BedDouble, Ruler, CalendarDays, Trees, GraduationCap, ShoppingBag, TrainFront, Stethoscope, Dumbbell, ChevronDown } from "lucide-react";
+import { Phone, Mail, Copy, X, MapPin, Compass, ChevronLeft, ChevronRight, Maximize, Minimize, CircleHelp, Glasses, Info, Share2, Check, Link2, BedDouble, Ruler, CalendarDays, Trees, GraduationCap, ShoppingBag, TrainFront, Stethoscope, Dumbbell, ChevronDown, Train, Bus, ShoppingCart, Pill, Banknote, Utensils, Plane, Coffee, Library, Move, MousePointer2 } from "lucide-react";
 import whatsappLogo from "../../whatsapp-svgrepo-com.svg";
 import phoneIcon from "../../phone-svgrepo-com (1).svg";
 import mailIcon from "../../email-svgrepo-com.svg";
+import owlLogo from "../owl-logo.svg";
 
 // ΓöÇΓöÇΓöÇ Marzipano global type ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 declare const Marzipano: any;
@@ -727,6 +728,15 @@ function LeftPanel({
                             <option value="train">Transport</option>
                             <option value="medical">Medical</option>
                             <option value="gym">Gym</option>
+                            <option value="metro">Metro</option>
+                            <option value="bus">Bus Stop</option>
+                            <option value="supermarket">Supermarket</option>
+                            <option value="pharmacy">Pharmacy</option>
+                            <option value="atm">ATM</option>
+                            <option value="restaurant">Restaurant</option>
+                            <option value="airport">Airport</option>
+                            <option value="coffee">Coffee shop</option>
+                            <option value="university">University Campus</option>
                           </select>
                         </div>
                       </div>
@@ -855,6 +865,15 @@ function SpaceInfoPanel({
       case "train": return <TrainFront size={15} />;
       case "medical": return <Stethoscope size={15} />;
       case "gym": return <Dumbbell size={15} />;
+      case "metro": return <Train size={15} />;
+      case "bus": return <Bus size={15} />;
+      case "supermarket": return <ShoppingCart size={15} />;
+      case "pharmacy": return <Pill size={15} />;
+      case "atm": return <Banknote size={15} />;
+      case "restaurant": return <Utensils size={15} />;
+      case "airport": return <Plane size={15} />;
+      case "coffee": return <Coffee size={15} />;
+      case "university": return <Library size={15} />;
       default: return <MapPin size={15} />;
     }
   };
@@ -1068,6 +1087,32 @@ function HelpPanel({
 }) {
   // Each help item: icon element, label, description
   const helpItems: { icon: React.ReactNode; label: string; description: string; section: string }[] = [
+    // ── Interactions (360° View) ──
+    {
+      section: "Interactions (360° View)",
+      icon: <MousePointer2 size={16} />,
+      label: "Look Around",
+      description: "Left-click and drag (or swipe on touch screens) to rotate the camera and look around the room.",
+    },
+    {
+      section: "Interactions (360° View)",
+      icon: <Maximize size={16} />,
+      label: "Zoom",
+      description: "Use the scroll wheel (or pinch-to-zoom on touch screens) to zoom in and out of the panorama.",
+    },
+    // ── Interactions (3D Model) ──
+    {
+      section: "Interactions (3D Model)",
+      icon: <Compass size={16} />,
+      label: "Rotate Model",
+      description: "Left-click and drag (or one-finger swipe) to orbit and rotate the 3D model.",
+    },
+    {
+      section: "Interactions (3D Model)",
+      icon: <Move size={16} />,
+      label: "Pan Model",
+      description: "Right-click and drag (or two-finger drag on touch screens) to pan and move the 3D model sideways.",
+    },
     // ── Navigation ──
     {
       section: "Navigation",
@@ -1080,6 +1125,19 @@ function HelpPanel({
       icon: <ChevronRight size={16} />,
       label: "Next Room",
       description: "Navigate to the next room in the tour.",
+    },
+    // ── View Mode ──
+    {
+      section: "View Mode",
+      icon: <IcoWalkthrough size={18} />,
+      label: "Walkthrough Mode",
+      description: "Explore the property room by room in a panoramic 360° view. Drag to look around.",
+    },
+    {
+      section: "View Mode",
+      icon: <Ico3D size={18} />,
+      label: "3D Model Mode",
+      description: "View the entire property as an interactive 3D model. Rotate, zoom, and explore the structure.",
     },
     // ── Left Toolbar ──
     {
@@ -1135,26 +1193,13 @@ function HelpPanel({
       section: "Settings Menu",
       icon: <Glasses size={16} />,
       label: "VR Mode",
-      description: "Switch to the 3D model view for an immersive VR-like experience.",
+      description: "Enable gyroscope control to look around the room by moving your device physically.",
     },
     {
       section: "Settings Menu",
       icon: <Maximize size={16} />,
       label: "Fullscreen",
       description: "Enter or exit fullscreen mode for a more immersive viewing experience.",
-    },
-    // ── View Mode ──
-    {
-      section: "View Mode",
-      icon: <IcoWalkthrough size={18} />,
-      label: "Walkthrough Mode",
-      description: "Explore the property room by room in a panoramic 360° view. Drag to look around.",
-    },
-    {
-      section: "View Mode",
-      icon: <Ico3D size={18} />,
-      label: "3D Model Mode",
-      description: "View the entire property as an interactive 3D model. Rotate, zoom, and explore the structure.",
     },
   ];
 
@@ -1789,12 +1834,56 @@ export default function App() {
     setShowShareModal(true);
   };
 
-  const enterVr = () => {
+  const gyroControlRef = useRef<any>(null);
+  const [gyroEnabled, setGyroEnabled] = useState(false);
+
+  const toggleGyroscope = useCallback(async () => {
     setShowSettingsMenu(false);
-    if (has3D) {
-      setViewMode("3d");
+    if (!viewerRef.current || typeof Marzipano === "undefined") return;
+
+    if (gyroEnabled) {
+      // Disable gyroscope
+      if (gyroControlRef.current) {
+        const controls = viewerRef.current.controls();
+        controls.unregisterMethod(gyroControlRef.current);
+        gyroControlRef.current.destroy();
+        gyroControlRef.current = null;
+      }
+      setGyroEnabled(false);
+      return;
     }
-  };
+
+    // Make sure we're in walk mode
+    if (viewMode !== "walk") setViewMode("walk");
+
+    // Request permission on iOS 13+
+    const doe = (DeviceOrientationEvent as any);
+    if (typeof doe.requestPermission === "function") {
+      try {
+        const permission = await doe.requestPermission();
+        if (permission !== "granted") return;
+      } catch {
+        return;
+      }
+    }
+
+    // Enable gyroscope via Marzipano's DeviceOrientationControlMethod
+    try {
+      const controls = viewerRef.current.controls();
+      const DeviceOrientationMethod = Marzipano.controls.DeviceOrientationControlMethod;
+      if (!DeviceOrientationMethod) {
+        console.warn("DeviceOrientationControlMethod not available in this Marzipano version");
+        return;
+      }
+      const gyroMethod = new DeviceOrientationMethod();
+      controls.registerMethod("deviceOrientation", gyroMethod);
+      controls.enableMethod("deviceOrientation");
+      gyroControlRef.current = gyroMethod;
+      setGyroEnabled(true);
+    } catch (err) {
+      console.error("Failed to enable gyroscope:", err);
+    }
+  }, [gyroEnabled, viewMode]);
 
   const handleFullscreenMenuAction = () => {
     setShowSettingsMenu(false);
@@ -3070,18 +3159,10 @@ export default function App() {
 
         {/* ΓöÇΓöÇ Top bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div className={`absolute top-0 left-0 right-0 flex items-start justify-between p-5 pt-[calc(1.25rem+env(safe-area-inset-top))] pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] z-20 pointer-events-none transition-all duration-500 ease-in-out ${isPlaying ? "opacity-0 -translate-y-4" : "opacity-100 translate-y-0"}`}>
-          {/* Logo + address */}
-          <div className="pointer-events-auto flex items-center gap-2">
-            <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-xl px-3 py-2">
-              <Compass size={16} className="text-accent" />
-              <span className="text-white font-semibold text-sm tracking-wide">Prode<span className="text-accent">Go</span></span>
-            </div>
-            <div className="bg-black/30 backdrop-blur-md border border-white/10 rounded-xl px-3 py-2">
-              <span className="text-white/70 text-xs font-medium flex items-center gap-1.5">
-                <MapPin size={11} className="text-accent" />
-                Str. Florilor 12, Cluj-Napoca
-              </span>
-            </div>
+          
+          {/* Logo */}
+          <div className="pointer-events-auto flex items-center drop-shadow-md">
+            <img src={owlLogo} alt="Logo" className="h-12 w-auto object-contain" draggable={false} />
           </div>
 
           {/* Agent card */}
@@ -3232,12 +3313,12 @@ export default function App() {
                       <span>Share</span>
                     </button>
                     <button
-                      onClick={enterVr}
-                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
-                      style={{ color: bubbleColor }}
+                      onClick={toggleGyroscope}
+                      className={`w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors ${gyroEnabled ? "bg-accent" : "hover:bg-white/12"}`}
+                      style={{ color: gyroEnabled ? "#000" : bubbleColor }}
                     >
                       <Glasses size={16} />
-                      <span>VR</span>
+                      <span>{gyroEnabled ? "Exit VR" : "VR"}</span>
                     </button>
                     <button
                       onClick={handleFullscreenMenuAction}
@@ -3487,12 +3568,12 @@ export default function App() {
                       <span>Share</span>
                     </button>
                     <button
-                      onClick={enterVr}
-                      className="w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors hover:bg-white/12"
-                      style={{ color: bubbleColor }}
+                      onClick={toggleGyroscope}
+                      className={`w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors ${gyroEnabled ? "bg-accent" : "hover:bg-white/12"}`}
+                      style={{ color: gyroEnabled ? "#000" : bubbleColor }}
                     >
                       <Glasses size={16} />
-                      <span>VR</span>
+                      <span>{gyroEnabled ? "Exit VR" : "VR"}</span>
                     </button>
                   </div>
                 </div>
