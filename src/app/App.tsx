@@ -1949,9 +1949,6 @@ export default function App() {
   }, [gyroEnabled]);
 
   const toggleGyroscope = useCallback(() => {
-    // NOTE: This must NOT be async before requestPermission on iOS!
-    // iOS requires requestPermission to be called directly in a user gesture.
-
     if (gyroEnabled) {
       setGyroEnabled(false);
       setShowSettingsMenu(false);
@@ -1961,30 +1958,18 @@ export default function App() {
     setShowSettingsMenu(false);
 
     const startGyro = () => {
-      // Ensure walk mode
-      if (viewMode !== "walk") {
-        setViewMode("walk");
-      }
+      if (viewMode !== "walk") setViewMode("walk");
       setGyroEnabled(true);
     };
 
-    // Request iOS 13+ motion permission if needed
+    // Request iOS 13+ motion permission if needed (must be sync in user gesture)
     const doe = (DeviceOrientationEvent as any);
     if (typeof doe !== "undefined" && typeof doe.requestPermission === "function") {
-      // iOS: requestPermission MUST be called synchronously within a user gesture
       doe.requestPermission().then((permission: string) => {
-        if (permission === "granted") {
-          startGyro();
-        } else {
-          window.alert("Permisiunea pentru senzori a fost refuzată. Activează accesul la Mișcare și Orientare în setările Safari.");
-        }
-      }).catch((e: any) => {
-        console.error("Permission error:", e);
-        // Try anyway - some browsers throw but still fire events
-        startGyro();
-      });
+        if (permission === "granted") startGyro();
+        else window.alert("Permisiunea pentru giroscop a fost refuzată în setările Safari.");
+      }).catch(() => startGyro()); // Try anyway
     } else {
-      // Android / desktop: just start directly
       startGyro();
     }
   }, [gyroEnabled, viewMode]);
@@ -3155,16 +3140,16 @@ export default function App() {
       )}
       {gyroEnabled && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-accent text-black px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
-          <Glasses size={20} />
+          <Compass size={20} />
           <div className="flex flex-col">
-            <span className="font-bold text-xs tracking-wide">Mod VR activ — Mișcă telefonul</span>
+            <span className="font-bold text-xs tracking-wide">Giroscop activ — Mișcă telefonul</span>
             <span className="text-[10px] opacity-60 font-mono">{gyroDebugText}</span>
           </div>
           <button
             onClick={() => setGyroEnabled(false)}
             className="bg-black/90 text-white text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-black transition-colors ml-2 flex-shrink-0"
           >
-            Ieșire VR
+            Oprire
           </button>
         </div>
       )}
@@ -3277,7 +3262,7 @@ export default function App() {
         />
 
         {/* ΓöÇΓöÇ Top bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
-        <div className={`absolute top-0 left-0 right-0 flex items-start justify-between p-5 pt-[calc(1.25rem+env(safe-area-inset-top))] pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] z-20 pointer-events-none transition-all duration-500 ease-in-out ${isPlaying ? "opacity-0 -translate-y-4" : "opacity-100 translate-y-0"}`}>
+        <div className={`absolute top-0 left-0 right-0 flex items-start justify-between p-5 pt-[calc(1.25rem+env(safe-area-inset-top))] pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] z-20 pointer-events-none transition-all duration-500 ease-in-out ${(isPlaying || gyroEnabled) ? "opacity-0 -translate-y-4" : "opacity-100 translate-y-0"}`}>
           
           {/* Logo */}
           <div className="pointer-events-auto flex items-center drop-shadow-md">
@@ -3349,7 +3334,7 @@ export default function App() {
         {/* ΓöÇΓöÇ Bottom controls ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div className="absolute bottom-0 left-0 right-0 z-20 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] flex flex-col gap-3 pointer-events-none">
           {/* Room label + Prev/Next */}
-          <div className={`flex items-end justify-between transition-all duration-500 ease-in-out ${(viewMode === "walk" && (!isPlaying || showTitleTemp) && !showFloorsMenu && !showSettingsMenu) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
+          <div className={`flex items-end justify-between transition-all duration-500 ease-in-out ${(viewMode === "walk" && (!isPlaying || showTitleTemp) && !showFloorsMenu && !showSettingsMenu && !gyroEnabled) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
             <div className="flex-1 min-w-0 pr-4">
               <p className="text-white/40 text-xs font-medium tracking-widest uppercase mb-1">
                 {activeIdx + 1} / {scenes.length}
@@ -3390,7 +3375,7 @@ export default function App() {
                       setShowFloorsMenu(false);
                       setShowSettingsMenu(prev => !prev);
                     }}
-                    className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showSettingsMenu ? "bg-accent" : "hover:bg-white/12"} ${isPlaying ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
+                    className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showSettingsMenu ? "bg-accent" : "hover:bg-white/12"} ${(isPlaying || gyroEnabled) ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
                     style={{ color: showSettingsMenu ? "#000" : bubbleColor }}
                     title="Settings"
                   >
@@ -3436,8 +3421,8 @@ export default function App() {
                       className={`w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors ${gyroEnabled ? "bg-accent" : "hover:bg-white/12"}`}
                       style={{ color: gyroEnabled ? "#000" : bubbleColor }}
                     >
-                      <Glasses size={16} />
-                      <span>{gyroEnabled ? "Exit VR" : "VR"}</span>
+                      <Compass size={16} />
+                      <span>{gyroEnabled ? "Oprire Giroscop" : "Giroscop"}</span>
                     </button>
                     <button
                       onClick={handleFullscreenMenuAction}
@@ -3460,7 +3445,7 @@ export default function App() {
                       setShowSettingsMenu(false);
                       setShowFloorsMenu(prev => !prev);
                     }}
-                    className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showFloorsMenu ? "bg-accent" : "hover:bg-white/12"} ${isPlaying ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
+                    className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showFloorsMenu ? "bg-accent" : "hover:bg-white/12"} ${(isPlaying || gyroEnabled) ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
                     style={{ color: showFloorsMenu ? "#000" : bubbleColor }}
                     title="Floors / Etaje"
                   >
@@ -3543,7 +3528,7 @@ export default function App() {
               <button
                 id="btn-play-topview"
                 onClick={() => viewMode === "walk" ? handlePlayPause() : handleTopView()}
-                className={`relative w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-all overflow-hidden ${viewMode === "walk" && isPlaying ? "bg-accent" : "hover:bg-white/12"}`}
+                className={`relative shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${viewMode === "walk" && isPlaying ? "bg-accent" : "hover:bg-white/12"} ${gyroEnabled ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
                 style={{ color: viewMode === "walk" && isPlaying ? "#000" : bubbleColor }}
                 title={viewMode === "walk" ? (isPlaying ? "Pause tour" : "Play tour") : "Top View"}
               >
@@ -3606,7 +3591,7 @@ export default function App() {
             </div>
 
             {/* ΓöÇΓöÇ Right side ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
-            <div className={`pointer-events-auto flex gap-2 flex-shrink-0 transition-all duration-500 ease-in-out order-2 landscape:order-3 landscape:ml-auto ${isPlaying ? "opacity-0 translate-x-8 pointer-events-none" : "opacity-100 translate-x-0"}`}>
+            <div className={`pointer-events-auto flex gap-2 flex-shrink-0 transition-all duration-500 ease-in-out order-2 landscape:order-3 landscape:ml-auto ${(isPlaying || gyroEnabled) ? "opacity-0 translate-x-8 pointer-events-none" : "opacity-100 translate-x-0"}`}>
               {has3D ? (
                 <ViewModeSwitch
                   value={viewMode}
@@ -3691,8 +3676,8 @@ export default function App() {
                       className={`w-full h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold text-left transition-colors ${gyroEnabled ? "bg-accent" : "hover:bg-white/12"}`}
                       style={{ color: gyroEnabled ? "#000" : bubbleColor }}
                     >
-                      <Glasses size={16} />
-                      <span>{gyroEnabled ? "Exit VR" : "VR"}</span>
+                      <Compass size={16} />
+                      <span>{gyroEnabled ? "Oprire Giroscop" : "Giroscop"}</span>
                     </button>
                   </div>
                 </div>
