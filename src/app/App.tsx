@@ -1836,6 +1836,100 @@ export default function App() {
 
   const gyroControlRef = useRef<any>(null);
   const [gyroEnabled, setGyroEnabled] = useState(false);
+  const pendingGyroRef = useRef(false);
+
+  // Helper: Create a DeviceOrientationControlMethod compatible with Marzipano.
+  // This is based on the official Marzipano demo (not included in core Marzipano).
+  const createDeviceOrientationMethod = useCallback(() => {
+    // Euler rotation helper (from krpano gyro plugin by Aldo Hoeben)
+    function rotateEuler(euler: any, result: any) {
+      const ch = Math.cos(euler.yaw), sh = Math.sin(euler.yaw);
+      const ca = Math.cos(euler.pitch), sa = Math.sin(euler.pitch);
+      const cb = Math.cos(euler.roll), sb = Math.sin(euler.roll);
+      const matrix = [
+        sh * sb - ch * sa * cb, -ch * ca, ch * sa * sb + sh * cb,
+        ca * cb, -sa, -ca * sb,
+        sh * sa * cb + ch * sb, sh * ca, -sh * sa * sb + ch * cb,
+      ];
+      let heading: number, attitude: number, bank: number;
+      if (matrix[3] > 0.9999) {
+        heading = Math.atan2(matrix[2], matrix[8]);
+        attitude = Math.PI / 2;
+        bank = 0;
+      } else if (matrix[3] < -0.9999) {
+        heading = Math.atan2(matrix[2], matrix[8]);
+        attitude = -Math.PI / 2;
+        bank = 0;
+      } else {
+        heading = Math.atan2(-matrix[6], matrix[0]);
+        bank = Math.atan2(-matrix[5], matrix[4]);
+        attitude = Math.asin(matrix[3]);
+      }
+      result.yaw = heading;
+      result.pitch = attitude;
+      result.roll = bank;
+    }
+
+    const dynamics = {
+      yaw: new Marzipano.Dynamics(),
+      pitch: new Marzipano.Dynamics(),
+    };
+    const previous: any = {};
+    const current: any = {};
+    const tmp: any = {};
+
+    const handler = (data: DeviceOrientationEvent) => {
+      if (data.alpha == null || data.beta == null || data.gamma == null) return;
+      tmp.yaw = Marzipano.util.degToRad(data.alpha);
+      tmp.pitch = Marzipano.util.degToRad(data.beta);
+      tmp.roll = Marzipano.util.degToRad(data.gamma);
+      rotateEuler(tmp, current);
+
+      if (previous.yaw != null && previous.pitch != null) {
+        dynamics.yaw.offset = -(current.yaw - previous.yaw);
+        dynamics.pitch.offset = current.pitch - previous.pitch;
+        method.emit("parameterDynamics", "yaw", dynamics.yaw);
+        method.emit("parameterDynamics", "pitch", dynamics.pitch);
+      }
+      previous.yaw = current.yaw;
+      previous.pitch = current.pitch;
+      previous.roll = current.roll;
+    };
+
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener("deviceorientation", handler);
+    }
+
+    const method: any = {
+      destroy() {
+        if (window.DeviceOrientationEvent) {
+          window.removeEventListener("deviceorientation", handler);
+        }
+      },
+    };
+    // Attach Marzipano's eventEmitter mixin so emit() works
+    Marzipano.dependencies.eventEmitter(method);
+    return method;
+  }, []);
+
+  // Effect: when pending gyro activation and we're back in walk mode, register the control
+  useEffect(() => {
+    if (!pendingGyroRef.current) return;
+    if (viewMode !== "walk") return;
+    if (!viewerRef.current) return;
+    pendingGyroRef.current = false;
+
+    try {
+      const controls = viewerRef.current.controls();
+      const gyroMethod = createDeviceOrientationMethod();
+      controls.registerMethod("deviceOrientation", gyroMethod);
+      controls.enableMethod("deviceOrientation");
+      gyroControlRef.current = gyroMethod;
+      setGyroEnabled(true);
+    } catch (err) {
+      console.error("Failed to enable gyroscope:", err);
+    }
+  }, [viewMode, createDeviceOrientationMethod]);
 
   const toggleGyroscope = useCallback(async () => {
     setShowSettingsMenu(false);
@@ -1845,16 +1939,13 @@ export default function App() {
       // Disable gyroscope
       if (gyroControlRef.current) {
         const controls = viewerRef.current.controls();
-        controls.unregisterMethod(gyroControlRef.current);
+        controls.unregisterMethod("deviceOrientation");
         gyroControlRef.current.destroy();
         gyroControlRef.current = null;
       }
       setGyroEnabled(false);
       return;
     }
-
-    // Make sure we're in walk mode
-    if (viewMode !== "walk") setViewMode("walk");
 
     // Request permission on iOS 13+
     const doe = (DeviceOrientationEvent as any);
@@ -1867,15 +1958,18 @@ export default function App() {
       }
     }
 
-    // Enable gyroscope via Marzipano's DeviceOrientationControlMethod
+    // Make sure we're in walk mode (the 360 image viewer)
+    if (viewMode !== "walk") {
+      // Switch to walk mode first; the useEffect above will pick up the pending flag
+      pendingGyroRef.current = true;
+      setViewMode("walk");
+      return;
+    }
+
+    // Already in walk mode — enable gyroscope directly
     try {
       const controls = viewerRef.current.controls();
-      const DeviceOrientationMethod = Marzipano.controls.DeviceOrientationControlMethod;
-      if (!DeviceOrientationMethod) {
-        console.warn("DeviceOrientationControlMethod not available in this Marzipano version");
-        return;
-      }
-      const gyroMethod = new DeviceOrientationMethod();
+      const gyroMethod = createDeviceOrientationMethod();
       controls.registerMethod("deviceOrientation", gyroMethod);
       controls.enableMethod("deviceOrientation");
       gyroControlRef.current = gyroMethod;
@@ -1883,7 +1977,7 @@ export default function App() {
     } catch (err) {
       console.error("Failed to enable gyroscope:", err);
     }
-  }, [gyroEnabled, viewMode]);
+  }, [gyroEnabled, viewMode, createDeviceOrientationMethod]);
 
   const handleFullscreenMenuAction = () => {
     setShowSettingsMenu(false);
