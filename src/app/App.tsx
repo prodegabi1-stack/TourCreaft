@@ -1949,6 +1949,16 @@ export default function App() {
   }, [gyroEnabled]);
 
   const toggleGyroscope = useCallback(() => {
+    // Mobile/gyroscope detection
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      || ('ontouchstart' in window)
+      || (navigator.maxTouchPoints > 0);
+
+    if (!isMobileDevice) {
+      window.alert("Giroscopul este disponibil doar pe dispozitive mobile.\nDeschide tur-ul pe telefon sau tabletă.");
+      return;
+    }
+
     if (gyroEnabled) {
       setGyroEnabled(false);
       setShowSettingsMenu(false);
@@ -1968,7 +1978,7 @@ export default function App() {
       doe.requestPermission().then((permission: string) => {
         if (permission === "granted") startGyro();
         else window.alert("Permisiunea pentru giroscop a fost refuzată în setările Safari.");
-      }).catch(() => startGyro()); // Try anyway
+      }).catch(() => startGyro());
     } else {
       startGyro();
     }
@@ -2008,10 +2018,15 @@ export default function App() {
   useEffect(() => {
     if (isPlaying) {
       setShowTitleTemp(true);
-      const timer = setTimeout(() => setShowTitleTemp(false), 2500); // slightly longer for initial read
+      const timer = setTimeout(() => setShowTitleTemp(false), 2500);
       return () => clearTimeout(timer);
     }
-  }, [sceneLoadedToken, isPlaying]);
+    if (gyroEnabled) {
+      setShowTitleTemp(true);
+      const timer = setTimeout(() => setShowTitleTemp(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [sceneLoadedToken, isPlaying, gyroEnabled]);
 
   useEffect(() => {
     async function loadData() {
@@ -3336,7 +3351,7 @@ export default function App() {
         {/* ΓöÇΓöÇ Bottom controls ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div className="absolute bottom-0 left-0 right-0 z-20 px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] flex flex-col gap-3 pointer-events-none">
           {/* Room label + Prev/Next */}
-          <div className={`flex items-end justify-between transition-all duration-500 ease-in-out ${(viewMode === "walk" && (!isPlaying || showTitleTemp) && !showFloorsMenu && !showSettingsMenu && !gyroEnabled) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
+          <div className={`flex items-end justify-between transition-all duration-500 ease-in-out ${(viewMode === "walk" && (!isPlaying || showTitleTemp) && !showFloorsMenu && !showSettingsMenu && (!gyroEnabled || showTitleTemp)) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
             <div className="flex-1 min-w-0 pr-4">
               <p className="text-white/40 text-xs font-medium tracking-widest uppercase mb-1">
                 {activeIdx + 1} / {scenes.length}
@@ -3377,7 +3392,7 @@ export default function App() {
                       setShowFloorsMenu(false);
                       setShowSettingsMenu(prev => !prev);
                     }}
-                    className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showSettingsMenu ? "bg-accent" : "hover:bg-white/12"} ${(isPlaying || gyroEnabled) ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
+                    className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showSettingsMenu ? "bg-accent" : "hover:bg-white/12"} ${isPlaying ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
                     style={{ color: showSettingsMenu ? "#000" : bubbleColor }}
                     title="Settings"
                   >
@@ -3447,7 +3462,7 @@ export default function App() {
                       setShowSettingsMenu(false);
                       setShowFloorsMenu(prev => !prev);
                     }}
-                    className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showFloorsMenu ? "bg-accent" : "hover:bg-white/12"} ${(isPlaying || gyroEnabled) ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
+                    className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showFloorsMenu ? "bg-accent" : "hover:bg-white/12"} ${isPlaying ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
                     style={{ color: showFloorsMenu ? "#000" : bubbleColor }}
                     title="Floors / Etaje"
                   >
