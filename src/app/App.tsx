@@ -1834,150 +1834,199 @@ export default function App() {
     setShowShareModal(true);
   };
 
-  const gyroControlRef = useRef<any>(null);
+  // ─── Gyro / VR Mode State & Direct Orientation Loop ───────────────────────
   const [gyroEnabled, setGyroEnabled] = useState(false);
-  const pendingGyroRef = useRef(false);
+  const [gyroDebugText, setGyroDebugText] = useState<string>("Asteapta senzor...");
+  const gyroEnabledRef = useRef(false);
+  const gyroAnimFrameRef = useRef<number | null>(null);
+  const gyroInitialCamRef = useRef<{ yaw: number; pitch: number }>({ yaw: 0, pitch: 0 });
+  const gyroInitialSensorRef = useRef<{ yaw: number; pitch: number } | null>(null);
+  const gyroTargetRef = useRef<{ yaw: number; pitch: number }>({ yaw: 0, pitch: 0 });
+  const gyroCurrentRef = useRef<{ yaw: number; pitch: number }>({ yaw: 0, pitch: 0 });
+  const gyroEventCountRef = useRef(0);
 
-  // Helper: Create a DeviceOrientationControlMethod compatible with Marzipano.
-  // This is based on the official Marzipano demo (not included in core Marzipano).
-  const createDeviceOrientationMethod = useCallback(() => {
-    // Euler rotation helper (from krpano gyro plugin by Aldo Hoeben)
-    function rotateEuler(euler: any, result: any) {
-      const ch = Math.cos(euler.yaw), sh = Math.sin(euler.yaw);
-      const ca = Math.cos(euler.pitch), sa = Math.sin(euler.pitch);
-      const cb = Math.cos(euler.roll), sb = Math.sin(euler.roll);
-      const matrix = [
-        sh * sb - ch * sa * cb, -ch * ca, ch * sa * sb + sh * cb,
-        ca * cb, -sa, -ca * sb,
-        sh * sa * cb + ch * sb, sh * ca, -sh * sa * sb + ch * cb,
-      ];
-      let heading: number, attitude: number, bank: number;
-      if (matrix[3] > 0.9999) {
-        heading = Math.atan2(matrix[2], matrix[8]);
-        attitude = Math.PI / 2;
-        bank = 0;
-      } else if (matrix[3] < -0.9999) {
-        heading = Math.atan2(matrix[2], matrix[8]);
-        attitude = -Math.PI / 2;
-        bank = 0;
-      } else {
-        heading = Math.atan2(-matrix[6], matrix[0]);
-        bank = Math.atan2(-matrix[5], matrix[4]);
-        attitude = Math.asin(matrix[3]);
-      }
-      result.yaw = heading;
-      result.pitch = attitude;
-      result.roll = bank;
-    }
+  // Keep ref in sync with state
+  useEffect(() => {
+    gyroEnabledRef.current = gyroEnabled;
+  }, [gyroEnabled]);
 
-    const dynamics = {
-      yaw: new Marzipano.Dynamics(),
-      pitch: new Marzipano.Dynamics(),
-    };
-    const previous: any = {};
-    const current: any = {};
-    const tmp: any = {};
-
-    const handler = (data: DeviceOrientationEvent) => {
-      if (data.alpha == null || data.beta == null || data.gamma == null) return;
-      tmp.yaw = Marzipano.util.degToRad(data.alpha);
-      tmp.pitch = Marzipano.util.degToRad(data.beta);
-      tmp.roll = Marzipano.util.degToRad(data.gamma);
-      rotateEuler(tmp, current);
-
-      if (previous.yaw != null && previous.pitch != null) {
-        dynamics.yaw.offset = -(current.yaw - previous.yaw);
-        dynamics.pitch.offset = current.pitch - previous.pitch;
-        method.emit("parameterDynamics", "yaw", dynamics.yaw);
-        method.emit("parameterDynamics", "pitch", dynamics.pitch);
-      }
-      previous.yaw = current.yaw;
-      previous.pitch = current.pitch;
-      previous.roll = current.roll;
+  // Helper: compute Euler yaw and pitch from deviceorientation event
+  const computeDeviceYawPitch = useCallback((alphaDeg: number, betaDeg: number, gammaDeg: number) => {
+    const getScreenAngle = () => {
+      if (typeof window.orientation !== "undefined") return Number(window.orientation) || 0;
+      if (window.screen?.orientation?.angle !== undefined) return window.screen.orientation.angle || 0;
+      return 0;
     };
 
-    if (window.DeviceOrientationEvent) {
-      window.addEventListener("deviceorientation", handler);
-    }
+    const alpha = typeof Marzipano !== "undefined" ? Marzipano.util.degToRad(alphaDeg) : (alphaDeg * Math.PI / 180);
+    const beta = typeof Marzipano !== "undefined" ? Marzipano.util.degToRad(betaDeg) : (betaDeg * Math.PI / 180);
+    const gamma = typeof Marzipano !== "undefined" ? Marzipano.util.degToRad(gammaDeg) : (gammaDeg * Math.PI / 180);
+    const orient = typeof Marzipano !== "undefined" ? Marzipano.util.degToRad(getScreenAngle()) : (getScreenAngle() * Math.PI / 180);
 
-    const method: any = {
-      destroy() {
-        if (window.DeviceOrientationEvent) {
-          window.removeEventListener("deviceorientation", handler);
-        }
-      },
-    };
-    // Attach Marzipano's eventEmitter mixin so emit() works
-    Marzipano.dependencies.eventEmitter(method);
-    return method;
+    const cA = Math.cos(alpha), sA = Math.sin(alpha);
+    const cB = Math.cos(beta), sB = Math.sin(beta);
+    const cG = Math.cos(gamma), sG = Math.sin(gamma);
+
+    const m11 = cA * cG - sA * sB * sG;
+    const m12 = -cB * sA;
+    const m21 = cG * sA + cA * sB * sG;
+    const m22 = cA * cB;
+    const m31 = -cB * sG;
+    const m32 = sB;
+
+    const cO = Math.cos(-orient), sO = Math.sin(-orient);
+    const r12 = m11 * sO + m12 * cO;
+    const r22 = m21 * sO + m22 * cO;
+    const r32 = m31 * sO + m32 * cO;
+
+    const yaw = Math.atan2(r12, r22);
+    const pitch = Math.asin(Math.max(-1, Math.min(1, r32)));
+    return { yaw, pitch };
   }, []);
 
-  // Effect: when pending gyro activation and we're back in walk mode, register the control
+  // Main gyro event listener & render loop
   useEffect(() => {
-    if (!pendingGyroRef.current) return;
-    if (viewMode !== "walk") return;
-    if (!viewerRef.current) return;
-    pendingGyroRef.current = false;
-
-    try {
-      const controls = viewerRef.current.controls();
-      const gyroMethod = createDeviceOrientationMethod();
-      controls.registerMethod("deviceOrientation", gyroMethod);
-      controls.enableMethod("deviceOrientation");
-      gyroControlRef.current = gyroMethod;
-      setGyroEnabled(true);
-    } catch (err) {
-      console.error("Failed to enable gyroscope:", err);
-    }
-  }, [viewMode, createDeviceOrientationMethod]);
-
-  const toggleGyroscope = useCallback(async () => {
-    setShowSettingsMenu(false);
-    if (!viewerRef.current || typeof Marzipano === "undefined") return;
-
-    if (gyroEnabled) {
-      // Disable gyroscope
-      if (gyroControlRef.current) {
-        const controls = viewerRef.current.controls();
-        controls.unregisterMethod("deviceOrientation");
-        gyroControlRef.current.destroy();
-        gyroControlRef.current = null;
+    if (!gyroEnabled) {
+      if (gyroAnimFrameRef.current) {
+        cancelAnimationFrame(gyroAnimFrameRef.current);
+        gyroAnimFrameRef.current = null;
       }
-      setGyroEnabled(false);
+      gyroInitialSensorRef.current = null;
       return;
     }
 
-    // Request permission on iOS 13+
-    const doe = (DeviceOrientationEvent as any);
-    if (typeof doe.requestPermission === "function") {
+    // Capture starting camera orientation
+    if (viewerRef.current) {
       try {
-        const permission = await doe.requestPermission();
-        if (permission !== "granted") return;
-      } catch {
+        const v = viewerRef.current.view();
+        gyroInitialCamRef.current = { yaw: v.yaw(), pitch: v.pitch() };
+        gyroCurrentRef.current = { yaw: v.yaw(), pitch: v.pitch() };
+        gyroTargetRef.current = { yaw: v.yaw(), pitch: v.pitch() };
+      } catch (_) {}
+    }
+
+    const onDeviceOrientation = (e: DeviceOrientationEvent) => {
+      if (!gyroEnabledRef.current) return;
+
+      gyroEventCountRef.current += 1;
+
+      if (e.alpha == null || e.beta == null || e.gamma == null) {
+        if (gyroEventCountRef.current <= 3) {
+          setGyroDebugText(`Event ${gyroEventCountRef.current}: date null!`);
+        }
         return;
       }
-    }
 
-    // Make sure we're in walk mode (the 360 image viewer)
-    if (viewMode !== "walk") {
-      // Switch to walk mode first; the useEffect above will pick up the pending flag
-      pendingGyroRef.current = true;
-      setViewMode("walk");
+      if (gyroEventCountRef.current <= 5) {
+        const msg = `α${e.alpha.toFixed(1)} β${e.beta.toFixed(1)} γ${e.gamma.toFixed(1)}`;
+        console.log("[Gyro]", msg);
+        setGyroDebugText(msg);
+      } else if (gyroEventCountRef.current === 6) {
+        setGyroDebugText("Senzor activ ✓");
+      }
+
+      const sensor = computeDeviceYawPitch(e.alpha, e.beta, e.gamma);
+
+      if (!gyroInitialSensorRef.current) {
+        gyroInitialSensorRef.current = sensor;
+        return;
+      }
+
+      let dYaw = sensor.yaw - gyroInitialSensorRef.current.yaw;
+      while (dYaw > Math.PI) dYaw -= 2 * Math.PI;
+      while (dYaw < -Math.PI) dYaw += 2 * Math.PI;
+
+      let dPitch = sensor.pitch - gyroInitialSensorRef.current.pitch;
+      while (dPitch > Math.PI) dPitch -= 2 * Math.PI;
+      while (dPitch < -Math.PI) dPitch += 2 * Math.PI;
+
+      gyroTargetRef.current = {
+        yaw: gyroInitialCamRef.current.yaw - dYaw,
+        pitch: Math.max(-Math.PI / 2 + 0.01, Math.min(Math.PI / 2 - 0.01, gyroInitialCamRef.current.pitch + dPitch))
+      };
+    };
+
+    // RAF loop for ultra-smooth 60fps view updates
+    const updateViewLoop = () => {
+      if (!gyroEnabledRef.current) return;
+
+      if (viewerRef.current) {
+        try {
+          const v = viewerRef.current.view();
+          const target = gyroTargetRef.current;
+          const curr = gyroCurrentRef.current;
+
+          // Smooth lerp (0.25) towards target
+          let dYaw = target.yaw - curr.yaw;
+          while (dYaw > Math.PI) dYaw -= 2 * Math.PI;
+          while (dYaw < -Math.PI) dYaw += 2 * Math.PI;
+          curr.yaw += dYaw * 0.25;
+
+          const dPitch = target.pitch - curr.pitch;
+          curr.pitch += dPitch * 0.25;
+
+          v.setYaw(curr.yaw);
+          v.setPitch(curr.pitch);
+        } catch (_) {}
+      }
+
+      gyroAnimFrameRef.current = requestAnimationFrame(updateViewLoop);
+    };
+
+    window.addEventListener("deviceorientation", onDeviceOrientation, true);
+    gyroAnimFrameRef.current = requestAnimationFrame(updateViewLoop);
+
+    return () => {
+      window.removeEventListener("deviceorientation", onDeviceOrientation, true);
+      if (gyroAnimFrameRef.current) {
+        cancelAnimationFrame(gyroAnimFrameRef.current);
+        gyroAnimFrameRef.current = null;
+      }
+      gyroEventCountRef.current = 0;
+      setGyroDebugText("Asteapta senzor...");
+    };
+  }, [gyroEnabled, computeDeviceYawPitch]);
+
+  const toggleGyroscope = useCallback(() => {
+    // NOTE: This must NOT be async before requestPermission on iOS!
+    // iOS requires requestPermission to be called directly in a user gesture.
+
+    if (gyroEnabled) {
+      setGyroEnabled(false);
+      setShowSettingsMenu(false);
       return;
     }
 
-    // Already in walk mode — enable gyroscope directly
-    try {
-      const controls = viewerRef.current.controls();
-      const gyroMethod = createDeviceOrientationMethod();
-      controls.registerMethod("deviceOrientation", gyroMethod);
-      controls.enableMethod("deviceOrientation");
-      gyroControlRef.current = gyroMethod;
+    setShowSettingsMenu(false);
+
+    const startGyro = () => {
+      // Ensure walk mode
+      if (viewMode !== "walk") {
+        setViewMode("walk");
+      }
       setGyroEnabled(true);
-    } catch (err) {
-      console.error("Failed to enable gyroscope:", err);
+    };
+
+    // Request iOS 13+ motion permission if needed
+    const doe = (DeviceOrientationEvent as any);
+    if (typeof doe !== "undefined" && typeof doe.requestPermission === "function") {
+      // iOS: requestPermission MUST be called synchronously within a user gesture
+      doe.requestPermission().then((permission: string) => {
+        if (permission === "granted") {
+          startGyro();
+        } else {
+          window.alert("Permisiunea pentru senzori a fost refuzată. Activează accesul la Mișcare și Orientare în setările Safari.");
+        }
+      }).catch((e: any) => {
+        console.error("Permission error:", e);
+        // Try anyway - some browsers throw but still fire events
+        startGyro();
+      });
+    } else {
+      // Android / desktop: just start directly
+      startGyro();
     }
-  }, [gyroEnabled, viewMode, createDeviceOrientationMethod]);
+  }, [gyroEnabled, viewMode]);
 
   const handleFullscreenMenuAction = () => {
     setShowSettingsMenu(false);
@@ -3141,6 +3190,21 @@ export default function App() {
               Cancel
             </button>
           </div>
+        </div>
+      )}
+      {gyroEnabled && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-accent text-black px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+          <Glasses size={20} />
+          <div className="flex flex-col">
+            <span className="font-bold text-xs tracking-wide">Mod VR activ — Mișcă telefonul</span>
+            <span className="text-[10px] opacity-60 font-mono">{gyroDebugText}</span>
+          </div>
+          <button
+            onClick={() => setGyroEnabled(false)}
+            className="bg-black/90 text-white text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-black transition-colors ml-2 flex-shrink-0"
+          >
+            Ieșire VR
+          </button>
         </div>
       )}
       {/* ── Left Settings Panel ────────────────────────────────────────────── */}
