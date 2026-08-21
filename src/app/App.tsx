@@ -1834,15 +1834,12 @@ export default function App() {
     setShowShareModal(true);
   };
 
-  // ─── Gyro / VR Mode State & Direct Orientation Loop ───────────────────────
+  // ─── Gyro / VR Mode ────────────────────────────────────────────────────────
   const [gyroEnabled, setGyroEnabled] = useState(false);
   const [gyroDebugText, setGyroDebugText] = useState<string>("Asteapta senzor...");
   const gyroEnabledRef = useRef(false);
-  const gyroAnimFrameRef = useRef<number | null>(null);
-  const gyroInitialCamRef = useRef<{ yaw: number; pitch: number }>({ yaw: 0, pitch: 0 });
-  const gyroInitialSensorRef = useRef<{ yaw: number; pitch: number } | null>(null);
-  const gyroTargetRef = useRef<{ yaw: number; pitch: number }>({ yaw: 0, pitch: 0 });
-  const gyroCurrentRef = useRef<{ yaw: number; pitch: number }>({ yaw: 0, pitch: 0 });
+  const gyroLastAlphaRef = useRef<number | null>(null);
+  const gyroLastBetaRef = useRef<number | null>(null);
   const gyroEventCountRef = useRef(0);
 
   // Keep ref in sync with state
@@ -1850,142 +1847,106 @@ export default function App() {
     gyroEnabledRef.current = gyroEnabled;
   }, [gyroEnabled]);
 
-  // Helper: compute Euler yaw and pitch from deviceorientation event
-  const computeDeviceYawPitch = useCallback((alphaDeg: number, betaDeg: number, gammaDeg: number) => {
-    const getScreenAngle = () => {
-      if (typeof window.orientation !== "undefined") return Number(window.orientation) || 0;
+  // Main gyro event listener — simple direct delta approach
+  useEffect(() => {
+    if (!gyroEnabled) {
+      gyroLastAlphaRef.current = null;
+      gyroLastBetaRef.current = null;
+      gyroEventCountRef.current = 0;
+      setGyroDebugText("Asteapta senzor...");
+      return;
+    }
+
+    const getScreenAngle = (): number => {
+      if (typeof (window as any).orientation !== "undefined") return Number((window as any).orientation) || 0;
       if (window.screen?.orientation?.angle !== undefined) return window.screen.orientation.angle || 0;
       return 0;
     };
 
-    const alpha = typeof Marzipano !== "undefined" ? Marzipano.util.degToRad(alphaDeg) : (alphaDeg * Math.PI / 180);
-    const beta = typeof Marzipano !== "undefined" ? Marzipano.util.degToRad(betaDeg) : (betaDeg * Math.PI / 180);
-    const gamma = typeof Marzipano !== "undefined" ? Marzipano.util.degToRad(gammaDeg) : (gammaDeg * Math.PI / 180);
-    const orient = typeof Marzipano !== "undefined" ? Marzipano.util.degToRad(getScreenAngle()) : (getScreenAngle() * Math.PI / 180);
-
-    const cA = Math.cos(alpha), sA = Math.sin(alpha);
-    const cB = Math.cos(beta), sB = Math.sin(beta);
-    const cG = Math.cos(gamma), sG = Math.sin(gamma);
-
-    const m11 = cA * cG - sA * sB * sG;
-    const m12 = -cB * sA;
-    const m21 = cG * sA + cA * sB * sG;
-    const m22 = cA * cB;
-    const m31 = -cB * sG;
-    const m32 = sB;
-
-    const cO = Math.cos(-orient), sO = Math.sin(-orient);
-    const r12 = m11 * sO + m12 * cO;
-    const r22 = m21 * sO + m22 * cO;
-    const r32 = m31 * sO + m32 * cO;
-
-    const yaw = Math.atan2(r12, r22);
-    const pitch = Math.asin(Math.max(-1, Math.min(1, r32)));
-    return { yaw, pitch };
-  }, []);
-
-  // Main gyro event listener & render loop
-  useEffect(() => {
-    if (!gyroEnabled) {
-      if (gyroAnimFrameRef.current) {
-        cancelAnimationFrame(gyroAnimFrameRef.current);
-        gyroAnimFrameRef.current = null;
-      }
-      gyroInitialSensorRef.current = null;
-      return;
-    }
-
-    // Capture starting camera orientation
-    if (viewerRef.current) {
-      try {
-        const v = viewerRef.current.view();
-        gyroInitialCamRef.current = { yaw: v.yaw(), pitch: v.pitch() };
-        gyroCurrentRef.current = { yaw: v.yaw(), pitch: v.pitch() };
-        gyroTargetRef.current = { yaw: v.yaw(), pitch: v.pitch() };
-      } catch (_) {}
-    }
-
     const onDeviceOrientation = (e: DeviceOrientationEvent) => {
       if (!gyroEnabledRef.current) return;
+      if (e.alpha == null || e.beta == null || e.gamma == null) return;
 
       gyroEventCountRef.current += 1;
 
-      if (e.alpha == null || e.beta == null || e.gamma == null) {
-        if (gyroEventCountRef.current <= 3) {
-          setGyroDebugText(`Event ${gyroEventCountRef.current}: date null!`);
-        }
-        return;
-      }
-
-      if (gyroEventCountRef.current <= 5) {
-        const msg = `α${e.alpha.toFixed(1)} β${e.beta.toFixed(1)} γ${e.gamma.toFixed(1)}`;
-        console.log("[Gyro]", msg);
-        setGyroDebugText(msg);
-      } else if (gyroEventCountRef.current === 6) {
+      // Debug: show first few readings
+      if (gyroEventCountRef.current <= 3) {
+        setGyroDebugText(`α${e.alpha.toFixed(1)} β${e.beta.toFixed(1)} γ${e.gamma.toFixed(1)}`);
+      } else if (gyroEventCountRef.current === 4) {
         setGyroDebugText("Senzor activ ✓");
       }
 
-      const sensor = computeDeviceYawPitch(e.alpha, e.beta, e.gamma);
-
-      if (!gyroInitialSensorRef.current) {
-        gyroInitialSensorRef.current = sensor;
+      // First event: just record, don't move
+      if (gyroLastAlphaRef.current === null) {
+        gyroLastAlphaRef.current = e.alpha;
+        gyroLastBetaRef.current = e.beta;
         return;
       }
 
-      let dYaw = sensor.yaw - gyroInitialSensorRef.current.yaw;
-      while (dYaw > Math.PI) dYaw -= 2 * Math.PI;
-      while (dYaw < -Math.PI) dYaw += 2 * Math.PI;
+      // ── Delta alpha (yaw: compass heading 0-360°) ──
+      let dAlpha = e.alpha - gyroLastAlphaRef.current;
+      // Handle 360→0 wrap-around
+      if (dAlpha > 180) dAlpha -= 360;
+      if (dAlpha < -180) dAlpha += 360;
 
-      let dPitch = sensor.pitch - gyroInitialSensorRef.current.pitch;
-      while (dPitch > Math.PI) dPitch -= 2 * Math.PI;
-      while (dPitch < -Math.PI) dPitch += 2 * Math.PI;
+      // ── Delta beta (pitch: tilt -180 to 180°) ──
+      // When phone is upright (portrait), beta ≈ 90°
+      // When phone is flat on table, beta ≈ 0°
+      let dBeta = e.beta - gyroLastBetaRef.current!;
+      if (dBeta > 180) dBeta -= 360;
+      if (dBeta < -180) dBeta += 360;
 
-      gyroTargetRef.current = {
-        yaw: gyroInitialCamRef.current.yaw - dYaw,
-        pitch: Math.max(-Math.PI / 2 + 0.01, Math.min(Math.PI / 2 - 0.01, gyroInitialCamRef.current.pitch + dPitch))
-      };
-    };
+      gyroLastAlphaRef.current = e.alpha;
+      gyroLastBetaRef.current = e.beta;
 
-    // RAF loop for ultra-smooth 60fps view updates
-    const updateViewLoop = () => {
-      if (!gyroEnabledRef.current) return;
+      // ── Apply to camera ──
+      const view = viewerRef.current?.view();
+      if (!view) return;
 
-      if (viewerRef.current) {
-        try {
-          const v = viewerRef.current.view();
-          const target = gyroTargetRef.current;
-          const curr = gyroCurrentRef.current;
+      const screenAngle = getScreenAngle(); // 0 = portrait, 90 = landscape-right, -90 = landscape-left
 
-          // Smooth lerp (0.25) towards target
-          let dYaw = target.yaw - curr.yaw;
-          while (dYaw > Math.PI) dYaw -= 2 * Math.PI;
-          while (dYaw < -Math.PI) dYaw += 2 * Math.PI;
-          curr.yaw += dYaw * 0.25;
+      const toRad = (d: number) => d * Math.PI / 180;
 
-          const dPitch = target.pitch - curr.pitch;
-          curr.pitch += dPitch * 0.25;
+      // In portrait mode:
+      //   rotating phone right (alpha+) → camera should pan right (+yaw)
+      //   tilting phone up (beta-) → camera should look up (-pitch in Marzipano)
+      //
+      // In landscape mode, axes swap.
 
-          v.setYaw(curr.yaw);
-          v.setPitch(curr.pitch);
-        } catch (_) {}
+      let yawDelta: number;
+      let pitchDelta: number;
+
+      if (Math.abs(screenAngle) < 45) {
+        // Portrait
+        yawDelta = toRad(dAlpha);    // rotating right → yaw+
+        pitchDelta = toRad(-dBeta);  // tilting up (beta decreases) → pitch-
+      } else if (screenAngle > 0) {
+        // Landscape-right (rotated 90° clockwise)
+        yawDelta = toRad(dAlpha);
+        pitchDelta = toRad(dAlpha * 0); // gamma drives pitch in landscape, skip for now
+      } else {
+        // Landscape-left (rotated 90° counter-clockwise)
+        yawDelta = toRad(dAlpha);
+        pitchDelta = toRad(-dBeta);
       }
 
-      gyroAnimFrameRef.current = requestAnimationFrame(updateViewLoop);
+      const newYaw = view.yaw() + yawDelta;
+      const newPitch = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, view.pitch() + pitchDelta));
+
+      view.setYaw(newYaw);
+      view.setPitch(newPitch);
     };
 
     window.addEventListener("deviceorientation", onDeviceOrientation, true);
-    gyroAnimFrameRef.current = requestAnimationFrame(updateViewLoop);
 
     return () => {
       window.removeEventListener("deviceorientation", onDeviceOrientation, true);
-      if (gyroAnimFrameRef.current) {
-        cancelAnimationFrame(gyroAnimFrameRef.current);
-        gyroAnimFrameRef.current = null;
-      }
+      gyroLastAlphaRef.current = null;
+      gyroLastBetaRef.current = null;
       gyroEventCountRef.current = 0;
       setGyroDebugText("Asteapta senzor...");
     };
-  }, [gyroEnabled, computeDeviceYawPitch]);
+  }, [gyroEnabled]);
 
   const toggleGyroscope = useCallback(() => {
     // NOTE: This must NOT be async before requestPermission on iOS!
