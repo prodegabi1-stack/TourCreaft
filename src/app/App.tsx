@@ -2625,6 +2625,8 @@ export default function App() {
     if (isPlaying) {
       stopAutoPlay();
     } else {
+      setShowSettingsMenu(false);
+      setShowFloorsMenu(false);
       setIsPlaying(true);
     }
   };
