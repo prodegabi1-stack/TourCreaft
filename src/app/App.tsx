@@ -880,17 +880,20 @@ function SpaceInfoPanel({
 
   return (
     <div
-      className={`absolute top-0 left-0 bottom-0 z-30 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"}`}
-      style={{ width: "clamp(320px, 28vw, 400px)" }}
+      className={`fixed top-0 left-0 bottom-0 z-30 w-screen sm:w-[clamp(320px,28vw,400px)] pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"}`}
+      style={{ height: "100dvh" }}
     >
       <div
-        className="pointer-events-auto h-full flex flex-col overflow-hidden"
+        className="pointer-events-auto flex flex-col overflow-hidden"
         style={{
-          background: "rgba(12, 12, 12, 0.92)",
+          background: "rgba(12, 12, 12, 0.97)",
           backdropFilter: "blur(40px)",
           WebkitBackdropFilter: "blur(40px)",
           borderRight: "1px solid rgba(255,255,255,0.08)",
           boxShadow: "8px 0 32px rgba(0,0,0,0.4)",
+          height: "100%",
+          paddingTop: "env(safe-area-inset-top)",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {/* Header */}
@@ -1211,17 +1214,20 @@ function HelpPanel({
 
   return (
     <div
-      className={`absolute top-0 left-0 bottom-0 z-30 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"}`}
-      style={{ width: "clamp(320px, 30vw, 420px)" }}
+      className={`fixed top-0 left-0 bottom-0 z-30 w-screen sm:w-[clamp(320px,30vw,420px)] pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"}`}
+      style={{ height: "100dvh" }}
     >
       <div
-        className="pointer-events-auto h-full flex flex-col overflow-hidden"
+        className="pointer-events-auto flex flex-col overflow-hidden"
         style={{
-          background: "rgba(12, 12, 12, 0.92)",
+          background: "rgba(12, 12, 12, 0.97)",
           backdropFilter: "blur(40px)",
           WebkitBackdropFilter: "blur(40px)",
           borderRight: "1px solid rgba(255,255,255,0.08)",
           boxShadow: "8px 0 32px rgba(0,0,0,0.4)",
+          height: "100%",
+          paddingTop: "env(safe-area-inset-top)",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {/* Header */}
