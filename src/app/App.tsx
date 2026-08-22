@@ -5,6 +5,8 @@ import whatsappLogo from "../../whatsapp-svgrepo-com.svg";
 import phoneIcon from "../../phone-svgrepo-com (1).svg";
 import mailIcon from "../../email-svgrepo-com.svg";
 import owlLogo from "../owl-logo.svg";
+import ukFlag from "../../united-kingdom-uk-svgrepo-com.svg";
+import roFlag from "../../romania-svgrepo-com.svg";
 
 // ΓöÇΓöÇΓöÇ Marzipano global type ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 declare const Marzipano: any;
@@ -208,17 +210,219 @@ function openExternalLink(url: string) {
   window.location.href = url;
 }
 
+// ─── i18n Translations ────────────────────────────────────────────────────────
+type Lang = "en" | "ro";
+
+const T: Record<string, Record<Lang, string>> = {
+  welcomeTitle: { en: "Welcome", ro: "Bine ați venit" },
+  welcomeSubtitle: { en: "Choose your language", ro: "Alegeți limba" },
+  welcomeHelp: { en: "How to navigate the tour?", ro: "Cum navigați turul?" },
+  welcomeStart: { en: "Start Tour", ro: "Începe Turul" },
+  spaceInfo: { en: "Space Info", ro: "Informații Spațiu" },
+  help: { en: "Help", ro: "Ajutor" },
+  share: { en: "Share", ro: "Distribuie" },
+  vr: { en: "VR", ro: "VR" },
+  exitVr: { en: "Exit VR", ro: "Ieși din VR" },
+  fullscreen: { en: "Fullscreen", ro: "Ecran complet" },
+  exitFullscreen: { en: "Exit Fullscreen", ro: "Ieși din ecran complet" },
+  helpTitle: { en: "Help & Controls", ro: "Ajutor & Comenzi" },
+  helpIntro: { en: "Learn how to navigate and use every control in the virtual tour. Each button is explained below with its icon.", ro: "Aflați cum să navigați și să utilizați fiecare control în turul virtual. Fiecare buton este explicat mai jos cu pictograma sa." },
+  helpTip: { en: "Tip:", ro: "Sfat:" },
+  helpTipText: { en: "In walkthrough mode, click and drag on the panorama to look around. Use scroll to zoom in and out. Click on floor hotspots to move between rooms.", ro: "În modul de vizită, faceți clic și trageți pe panoramă pentru a privi în jur. Folosiți scroll-ul pentru a mări și micșora. Faceți clic pe punctele de pe podea pentru a vă deplasa între camere." },
+  spaceInfoTitle: { en: "Space Info", ro: "Informații Spațiu" },
+  rooms: { en: "Rooms", ro: "Camere" },
+  area: { en: "Area", ro: "Suprafață" },
+  bathrooms: { en: "Bathrooms", ro: "Băi" },
+  yearBuilt: { en: "Year Built", ro: "An construcție" },
+  propertyDetails: { en: "Property Details", ro: "Detalii Proprietate" },
+  neighbourhood: { en: "Neighbourhood", ro: "Cartier" },
+  nearbyLocations: { en: "Nearby Locations", ro: "Locații în apropiere" },
+  location: { en: "Location", ro: "Locație" },
+  openInMaps: { en: "Open in Google Maps", ro: "Deschide în Google Maps" },
+  settings: { en: "Settings", ro: "Setări" },
+  walkthrough: { en: "Walkthrough", ro: "Vizită" },
+  threeDSpace: { en: "3D Space", ro: "Spațiu 3D" },
+  shareTitle: { en: "Share", ro: "Distribuie" },
+  tourLink: { en: "Tour Link", ro: "Link Tur" },
+  copy: { en: "Copy", ro: "Copiază" },
+  copied: { en: "Copied!", ro: "Copiat!" },
+  shareVia: { en: "Share via", ro: "Distribuie prin" },
+  floors: { en: "Floors", ro: "Etaje" },
+  helpSectionInteractions360: { en: "Interactions (360° View)", ro: "Interacțiuni (Vedere 360°)" },
+  helpLookAround: { en: "Look Around", ro: "Privește în jur" },
+  helpLookAroundDesc: { en: "Left-click and drag (or swipe on touch screens) to rotate the camera and look around the room.", ro: "Faceți clic stânga și trageți (sau glisați pe ecranele tactile) pentru a roti camera și a privi în jurul camerei." },
+  helpZoom: { en: "Zoom", ro: "Zoom" },
+  helpZoomDesc: { en: "Use the scroll wheel (or pinch-to-zoom on touch screens) to zoom in and out of the panorama.", ro: "Folosiți rotița de derulare (sau apropiați degetele pe ecranele tactile) pentru a mări și micșora panorama." },
+  helpSectionInteractions3D: { en: "Interactions (3D Model)", ro: "Interacțiuni (Model 3D)" },
+  helpRotateModel: { en: "Rotate Model", ro: "Rotește modelul" },
+  helpRotateModelDesc: { en: "Left-click and drag (or one-finger swipe) to orbit and rotate the 3D model.", ro: "Faceți clic stânga și trageți (sau glisați cu un deget) pentru a orbita și roti modelul 3D." },
+  helpPanModel: { en: "Pan Model", ro: "Mișcă modelul" },
+  helpPanModelDesc: { en: "Right-click and drag (or two-finger drag on touch screens) to pan and move the 3D model sideways.", ro: "Faceți clic dreapta și trageți (sau trageți cu două degete pe ecranele tactile) pentru a mișca modelul 3D în lateral." },
+  helpSectionNavigation: { en: "Navigation", ro: "Navigare" },
+  helpPrevRoom: { en: "Previous Room", ro: "Camera anterioară" },
+  helpPrevRoomDesc: { en: "Navigate to the previous room in the tour.", ro: "Navigați la camera anterioară din tur." },
+  helpNextRoom: { en: "Next Room", ro: "Camera următoare" },
+  helpNextRoomDesc: { en: "Navigate to the next room in the tour.", ro: "Navigați la camera următoare din tur." },
+  helpSectionViewMode: { en: "View Mode", ro: "Mod de vizualizare" },
+  helpWalkMode: { en: "Walkthrough Mode", ro: "Mod vizită" },
+  helpWalkModeDesc: { en: "Explore the property room by room in a panoramic 360° view. Drag to look around.", ro: "Explorați proprietatea cameră cu cameră într-o vedere panoramică la 360°. Trageți pentru a privi în jur." },
+  help3DMode: { en: "3D Model Mode", ro: "Mod Model 3D" },
+  help3DModeDesc: { en: "View the entire property as an interactive 3D model. Rotate, zoom, and explore the structure.", ro: "Vizualizați întreaga proprietate ca un model 3D interactiv. Rotiți, măriți și explorați structura." },
+  helpSectionLeftToolbar: { en: "Left Toolbar", ro: "Bara de instrumente stânga" },
+  helpSettingsDesc: { en: "Open the settings menu to access Space Info, Help, Share, VR mode, and Fullscreen options.", ro: "Deschideți meniul de setări pentru a accesa Informații Spațiu, Ajutor, Distribuie, Mod VR și opțiuni pentru ecran complet." },
+  helpFloorsDesc: { en: "Switch between different floors of the building. Only visible when the property has multiple floors.", ro: "Comutați între diferitele etaje ale clădirii. Vizibil doar când proprietatea are mai multe etaje." },
+  helpGallery: { en: "Gallery (Walk Mode)", ro: "Galerie (Mod vizită)" },
+  helpGalleryDesc: { en: "Show or hide the room thumbnail strip at the bottom. Click a thumbnail to jump to that room.", ro: "Afișați sau ascundeți banda cu miniaturi ale camerelor din partea de jos. Faceți clic pe o miniatură pentru a sări la acea cameră." },
+  helpTexture: { en: "Texture (3D Mode)", ro: "Textură (Mod 3D)" },
+  helpTextureDesc: { en: "Toggle between the textured and un-textured 3D model view.", ro: "Comutați între vizualizarea modelului 3D texturat și ne-texturat." },
+  helpAutoplay: { en: "Autoplay (Walk Mode)", ro: "Redare automată (Mod vizită)" },
+  helpAutoplayDesc: { en: "Start an automatic slideshow that cycles through all rooms. Press again to pause.", ro: "Porniți o prezentare automată care trece prin toate camerele. Apăsați din nou pentru a pune pe pauză." },
+  helpTopView: { en: "Top View (3D Mode)", ro: "Vedere de sus (Mod 3D)" },
+  helpTopViewDesc: { en: "Switch the camera to a bird's-eye, top-down perspective of the 3D model.", ro: "Schimbați camera la o perspectivă de sus în jos a modelului 3D." },
+  helpSectionSettingsMenu: { en: "Settings Menu", ro: "Meniul de setări" },
+  helpSpaceInfoDesc: { en: "View property details like rooms, area, year built, neighbourhood info, and nearby locations.", ro: "Vizualizați detaliile proprietății precum camerele, suprafața, anul construcției, informații despre cartier și locațiile din apropiere." },
+  helpShareDesc: { en: "Share the tour via a link, or directly on Facebook, X (Twitter), LinkedIn, or WhatsApp.", ro: "Distribuiți turul printr-un link sau direct pe Facebook, X (Twitter), LinkedIn sau WhatsApp." },
+  helpVrDesc: { en: "Enable gyroscope control to look around the room by moving your device physically.", ro: "Activați controlul giroscopului pentru a privi în jurul camerei mișcând fizic dispozitivul." },
+  helpFullscreenDesc: { en: "Enter or exit fullscreen mode for a more immersive viewing experience.", ro: "Intrați sau ieșiți din modul ecran complet pentru o experiență de vizualizare mai imersivă." },
+};
+
+// ─── Welcome Modal ────────────────────────────────────────────────────────────
+function WelcomeModal({
+  open,
+  onSelectLanguage,
+  onOpenHelp,
+  accentColor,
+}: {
+  open: boolean;
+  onSelectLanguage: (lang: Lang) => void;
+  onOpenHelp: () => void;
+  accentColor: string;
+}) {
+  const [selected, setSelected] = useState<Lang | null>(null);
+
+  if (!open) return null;
+
+  const handleSelect = (lang: Lang) => {
+    setSelected(lang);
+  };
+
+  const handleStart = () => {
+    if (selected) onSelectLanguage(selected);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+
+      {/* Modal */}
+      <div
+        className="relative w-[340px] max-w-[calc(100vw-2rem)] rounded-3xl overflow-hidden flex flex-col items-center"
+        style={{
+          background: "rgba(18, 18, 18, 0.95)",
+          backdropFilter: "blur(40px)",
+          WebkitBackdropFilter: "blur(40px)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 32px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05) inset",
+          animation: "welcomeModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
+        {/* Accent glow */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 rounded-b-full"
+          style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
+        />
+
+        {/* Title */}
+        <div className="pt-8 pb-2 text-center">
+          <h2 className="text-white font-bold text-lg tracking-wide">Welcome</h2>
+          <p className="text-white/40 text-xs mt-1.5 font-medium">Choose your language / Alegeți limba</p>
+        </div>
+
+        {/* Language Buttons */}
+        <div className="flex gap-4 px-8 py-5 w-full justify-center">
+          {/* English */}
+          <button
+            onClick={() => handleSelect("en")}
+            className={`flex flex-col items-center gap-2.5 px-5 py-4 rounded-2xl border transition-all duration-300 flex-1 ${
+              selected === "en"
+                ? "border-accent bg-accent/10 scale-[1.03]"
+                : "border-white/10 bg-white/4 hover:bg-white/8 hover:border-white/20"
+            }`}
+            style={selected === "en" ? { borderColor: accentColor, background: `${accentColor}15` } : {}}
+          >
+            <img src={ukFlag} alt="UK" className="w-8 h-8 rounded-full object-cover" />
+            <span className={`text-xs font-semibold ${selected === "en" ? "text-white" : "text-white/60"}`}>English</span>
+            {selected === "en" && (
+              <div className="w-2 h-2 rounded-full" style={{ background: accentColor }} />
+            )}
+          </button>
+
+          {/* Romanian */}
+          <button
+            onClick={() => handleSelect("ro")}
+            className={`flex flex-col items-center gap-2.5 px-5 py-4 rounded-2xl border transition-all duration-300 flex-1 ${
+              selected === "ro"
+                ? "border-accent bg-accent/10 scale-[1.03]"
+                : "border-white/10 bg-white/4 hover:bg-white/8 hover:border-white/20"
+            }`}
+            style={selected === "ro" ? { borderColor: accentColor, background: `${accentColor}15` } : {}}
+          >
+            <img src={roFlag} alt="Romania" className="w-8 h-8 rounded-full object-cover" />
+            <span className={`text-xs font-semibold ${selected === "ro" ? "text-white" : "text-white/60"}`}>Română</span>
+            {selected === "ro" && (
+              <div className="w-2 h-2 rounded-full" style={{ background: accentColor }} />
+            )}
+          </button>
+        </div>
+
+        {/* Separator */}
+        <div className="mx-8 h-px bg-white/8 w-[calc(100%-4rem)]" />
+
+        {/* Help Button */}
+        <div className="px-8 py-4 w-full">
+          <button
+            onClick={onOpenHelp}
+            className="w-full h-11 px-4 rounded-xl flex items-center justify-center gap-2.5 text-xs font-semibold transition-all hover:bg-white/8 border border-white/8"
+            style={{ color: "rgba(255,255,255,0.7)" }}
+          >
+            <CircleHelp size={16} />
+            <span>How to navigate? / Cum navigați?</span>
+          </button>
+        </div>
+
+        {/* Start Button */}
+        <div className="px-8 pb-7 pt-1 w-full">
+          <button
+            onClick={handleStart}
+            disabled={!selected}
+            className="w-full h-12 rounded-xl font-bold text-sm uppercase tracking-wider transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed hover:brightness-110"
+            style={{
+              background: selected ? accentColor : "rgba(255,255,255,0.1)",
+              color: selected ? "#000" : "rgba(255,255,255,0.3)",
+            }}
+          >
+            {selected === "ro" ? "Începe Turul" : "Start Tour"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ΓöÇΓöÇΓöÇ View mode pill ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function ViewModeSwitch({
   value,
   onChange,
   bgStyle,
   blurStyle,
+  t,
 }: {
   value: "walk" | "3d";
   onChange: (v: "walk" | "3d") => void;
   bgStyle?: string;
   blurStyle?: string;
+  t: (key: string) => string;
 }) {
   return (
     <div
@@ -244,7 +448,7 @@ function ViewModeSwitch({
         onClick={() => onChange("walk")}
         className={`relative z-10 w-10 h-10 flex items-center justify-center rounded-xl transition-colors duration-200 ${value === "walk" ? "text-black" : "text-white"
           }`}
-        title="Walkthrough"
+        title={t("walkthrough")}
       >
         <IcoWalkthrough size={22} />
       </button>
@@ -254,7 +458,7 @@ function ViewModeSwitch({
         onClick={() => onChange("3d")}
         className={`relative z-10 w-10 h-10 flex items-center justify-center rounded-xl transition-colors duration-200 ${value === "3d" ? "text-black" : "text-white"
           }`}
-        title="3D Space"
+        title={t("threeDSpace")}
       >
         <Ico3D size={22} />
       </button>
@@ -282,7 +486,9 @@ function LeftPanel({
   untexturedModelUrl, onUntexturedModelUpload, onUntexturedModelRemove,
   floorModels, onFloorModelUpload, onFloorModelRemove,
   propertyInfo, setPropertyInfo,
-  agentInfo, setAgentInfo
+  agentInfo, setAgentInfo,
+  showLogo, setShowLogo,
+  showContactCard, setShowContactCard
 }: any) {
   const modelInputRef = useRef<HTMLInputElement>(null);
   const untexturedModelInputRef = useRef<HTMLInputElement>(null);
@@ -369,6 +575,15 @@ function LeftPanel({
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showControlsMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
               <div className="flex flex-col gap-2 px-5 pb-4">
+              <label className="flex items-center gap-2 text-[11px] text-white/80 cursor-pointer mt-1 mb-1">
+                <input
+                  type="checkbox"
+                  checked={showLogo}
+                  onChange={(e) => setShowLogo(e.target.checked)}
+                  className="accent-accent"
+                />
+                Show Logo
+              </label>
               <label className="flex items-center justify-between text-xs text-white/60">
                 <span>Background</span>
                 <div className="flex items-center gap-2">
@@ -527,6 +742,15 @@ function LeftPanel({
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showAgentMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
               <div className="flex flex-col gap-2 px-5 pb-4">
+              <label className="flex items-center gap-2 text-[11px] text-white/80 cursor-pointer mt-1 mb-2">
+                <input
+                  type="checkbox"
+                  checked={showContactCard}
+                  onChange={(e) => setShowContactCard(e.target.checked)}
+                  className="accent-accent"
+                />
+                Show Contact Card
+              </label>
               <div className="flex items-center gap-3 mb-2">
                 <img src={agentInfo.avatar} alt="Agent" className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-white/10" />
                 <button 
@@ -845,11 +1069,13 @@ function SpaceInfoPanel({
   onClose,
   accentColor,
   propertyInfo,
+  t,
 }: {
   open: boolean;
   onClose: () => void;
   accentColor: string;
   propertyInfo: typeof INITIAL_PROPERTY_INFO;
+  t: (key: string) => string;
 }) {
   const [expandedSection, setExpandedSection] = useState<string | null>("details");
 
@@ -905,7 +1131,7 @@ function SpaceInfoPanel({
             >
               <Info size={15} />
             </div>
-            <h3 className="text-white font-semibold text-sm">Space Info</h3>
+            <h3 className="text-white font-semibold text-sm">{t("spaceInfoTitle")}</h3>
           </div>
           <button
             onClick={onClose}
@@ -932,7 +1158,7 @@ function SpaceInfoPanel({
               onClick={() => toggleSection("details")}
               className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/3 transition-colors"
             >
-              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Property Details</span>
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">{t("propertyDetails")}</span>
               <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${expandedSection === "details" ? "rotate-180" : ""}`} />
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedSection === "details" ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
@@ -943,7 +1169,7 @@ function SpaceInfoPanel({
                   </div>
                   <div>
                     <div className="text-white font-semibold text-sm leading-none">{propertyInfo.rooms}</div>
-                    <div className="text-white/35 text-[10px] mt-0.5">Rooms</div>
+                    <div className="text-white/35 text-[10px] mt-0.5">{t("rooms")}</div>
                   </div>
                 </div>
                 <div className="bg-white/4 border border-white/6 rounded-xl p-3 flex items-center gap-3">
@@ -952,7 +1178,7 @@ function SpaceInfoPanel({
                   </div>
                   <div>
                     <div className="text-white font-semibold text-sm leading-none">{propertyInfo.area} m&sup2;</div>
-                    <div className="text-white/35 text-[10px] mt-0.5">Area</div>
+                    <div className="text-white/35 text-[10px] mt-0.5">{t("area")}</div>
                   </div>
                 </div>
                 <div className="bg-white/4 border border-white/6 rounded-xl p-3 flex items-center gap-3">
@@ -967,7 +1193,7 @@ function SpaceInfoPanel({
                   </div>
                   <div>
                     <div className="text-white font-semibold text-sm leading-none">{propertyInfo.bathrooms}</div>
-                    <div className="text-white/35 text-[10px] mt-0.5">Bathrooms</div>
+                    <div className="text-white/35 text-[10px] mt-0.5">{t("bathrooms")}</div>
                   </div>
                 </div>
                 <div className="bg-white/4 border border-white/6 rounded-xl p-3 flex items-center gap-3">
@@ -976,7 +1202,7 @@ function SpaceInfoPanel({
                   </div>
                   <div>
                     <div className="text-white font-semibold text-sm leading-none">{propertyInfo.yearBuilt}</div>
-                    <div className="text-white/35 text-[10px] mt-0.5">Year Built</div>
+                    <div className="text-white/35 text-[10px] mt-0.5">{t("yearBuilt")}</div>
                   </div>
                 </div>
               </div>
@@ -989,7 +1215,7 @@ function SpaceInfoPanel({
               onClick={() => toggleSection("neighbourhood")}
               className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/3 transition-colors"
             >
-              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Neighbourhood</span>
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">{t("neighbourhood")}</span>
               <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${expandedSection === "neighbourhood" ? "rotate-180" : ""}`} />
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedSection === "neighbourhood" ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
@@ -1042,7 +1268,7 @@ function SpaceInfoPanel({
               onClick={() => toggleSection("map")}
               className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/3 transition-colors"
             >
-              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Location</span>
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">{t("location")}</span>
               <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${expandedSection === "map" ? "rotate-180" : ""}`} />
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedSection === "map" ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}>
@@ -1067,7 +1293,7 @@ function SpaceInfoPanel({
                   style={{ background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}25` }}
                 >
                   <MapPin size={12} />
-                  Open in Google Maps
+                  {t("openInMaps")}
                 </a>
               </div>
             </div>
@@ -1083,126 +1309,128 @@ function HelpPanel({
   open,
   onClose,
   accentColor,
+  t,
 }: {
   open: boolean;
   onClose: () => void;
   accentColor: string;
+  t: (key: string) => string;
 }) {
   // Each help item: icon element, label, description
   const helpItems: { icon: React.ReactNode; label: string; description: string; section: string }[] = [
     // ── Interactions (360° View) ──
     {
-      section: "Interactions (360° View)",
+      section: t("helpSectionInteractions360"),
       icon: <MousePointer2 size={16} />,
-      label: "Look Around",
-      description: "Left-click and drag (or swipe on touch screens) to rotate the camera and look around the room.",
+      label: t("helpLookAround"),
+      description: t("helpLookAroundDesc"),
     },
     {
-      section: "Interactions (360° View)",
+      section: t("helpSectionInteractions360"),
       icon: <Maximize size={16} />,
-      label: "Zoom",
-      description: "Use the scroll wheel (or pinch-to-zoom on touch screens) to zoom in and out of the panorama.",
+      label: t("helpZoom"),
+      description: t("helpZoomDesc"),
     },
     // ── Interactions (3D Model) ──
     {
-      section: "Interactions (3D Model)",
+      section: t("helpSectionInteractions3D"),
       icon: <Compass size={16} />,
-      label: "Rotate Model",
-      description: "Left-click and drag (or one-finger swipe) to orbit and rotate the 3D model.",
+      label: t("helpRotateModel"),
+      description: t("helpRotateModelDesc"),
     },
     {
-      section: "Interactions (3D Model)",
+      section: t("helpSectionInteractions3D"),
       icon: <Move size={16} />,
-      label: "Pan Model",
-      description: "Right-click and drag (or two-finger drag on touch screens) to pan and move the 3D model sideways.",
+      label: t("helpPanModel"),
+      description: t("helpPanModelDesc"),
     },
     // ── Navigation ──
     {
-      section: "Navigation",
+      section: t("helpSectionNavigation"),
       icon: <ChevronLeft size={16} />,
-      label: "Previous Room",
-      description: "Navigate to the previous room in the tour.",
+      label: t("helpPrevRoom"),
+      description: t("helpPrevRoomDesc"),
     },
     {
-      section: "Navigation",
+      section: t("helpSectionNavigation"),
       icon: <ChevronRight size={16} />,
-      label: "Next Room",
-      description: "Navigate to the next room in the tour.",
+      label: t("helpNextRoom"),
+      description: t("helpNextRoomDesc"),
     },
     // ── View Mode ──
     {
-      section: "View Mode",
+      section: t("helpSectionViewMode"),
       icon: <IcoWalkthrough size={18} />,
-      label: "Walkthrough Mode",
-      description: "Explore the property room by room in a panoramic 360° view. Drag to look around.",
+      label: t("helpWalkMode"),
+      description: t("helpWalkModeDesc"),
     },
     {
-      section: "View Mode",
+      section: t("helpSectionViewMode"),
       icon: <Ico3D size={18} />,
-      label: "3D Model Mode",
-      description: "View the entire property as an interactive 3D model. Rotate, zoom, and explore the structure.",
+      label: t("help3DMode"),
+      description: t("help3DModeDesc"),
     },
     // ── Left Toolbar ──
     {
-      section: "Left Toolbar",
+      section: t("helpSectionLeftToolbar"),
       icon: <IcoSettings size={20} />,
-      label: "Settings",
-      description: "Open the settings menu to access Space Info, Help, Share, VR mode, and Fullscreen options.",
+      label: t("helpSettings"),
+      description: t("helpSettingsDesc"),
     },
     {
-      section: "Left Toolbar",
+      section: t("helpSectionLeftToolbar"),
       icon: <IcoFloors size={18} />,
-      label: "Floors",
-      description: "Switch between different floors of the building. Only visible when the property has multiple floors.",
+      label: t("floors"),
+      description: t("helpFloorsDesc"),
     },
     {
-      section: "Left Toolbar",
+      section: t("helpSectionLeftToolbar"),
       icon: <IcoGallery size={16} />,
-      label: "Gallery (Walk Mode)",
-      description: "Show or hide the room thumbnail strip at the bottom. Click a thumbnail to jump to that room.",
+      label: t("helpGallery"),
+      description: t("helpGalleryDesc"),
     },
     {
-      section: "Left Toolbar",
+      section: t("helpSectionLeftToolbar"),
       icon: <IcoTexture size={16} />,
-      label: "Texture (3D Mode)",
-      description: "Toggle between the textured and un-textured 3D model view.",
+      label: t("helpTexture"),
+      description: t("helpTextureDesc"),
     },
     {
-      section: "Left Toolbar",
+      section: t("helpSectionLeftToolbar"),
       icon: <IcoPlay size={16} />,
-      label: "Autoplay (Walk Mode)",
-      description: "Start an automatic slideshow that cycles through all rooms. Press again to pause.",
+      label: t("helpAutoplay"),
+      description: t("helpAutoplayDesc"),
     },
     {
-      section: "Left Toolbar",
+      section: t("helpSectionLeftToolbar"),
       icon: <IcoTopView size={16} />,
-      label: "Top View (3D Mode)",
-      description: "Switch the camera to a bird's-eye, top-down perspective of the 3D model.",
+      label: t("helpTopView"),
+      description: t("helpTopViewDesc"),
     },
     // ── Settings Menu ──
     {
-      section: "Settings Menu",
+      section: t("helpSectionSettingsMenu"),
       icon: <Info size={16} />,
-      label: "Space Info",
-      description: "View property details like rooms, area, year built, neighbourhood info, and nearby locations.",
+      label: t("spaceInfoTitle"),
+      description: t("helpSpaceInfoDesc"),
     },
     {
-      section: "Settings Menu",
+      section: t("helpSectionSettingsMenu"),
       icon: <Share2 size={16} />,
-      label: "Share",
-      description: "Share the tour via a link, or directly on Facebook, X (Twitter), LinkedIn, or WhatsApp.",
+      label: t("shareTitle"),
+      description: t("helpShareDesc"),
     },
     {
-      section: "Settings Menu",
+      section: t("helpSectionSettingsMenu"),
       icon: <Glasses size={16} />,
-      label: "VR Mode",
-      description: "Enable gyroscope control to look around the room by moving your device physically.",
+      label: t("vr"),
+      description: t("helpVrDesc"),
     },
     {
-      section: "Settings Menu",
+      section: t("helpSectionSettingsMenu"),
       icon: <Maximize size={16} />,
-      label: "Fullscreen",
-      description: "Enter or exit fullscreen mode for a more immersive viewing experience.",
+      label: t("fullscreen"),
+      description: t("helpFullscreenDesc"),
     },
   ];
 
@@ -1214,7 +1442,7 @@ function HelpPanel({
 
   return (
     <div
-      className={`fixed top-0 left-0 bottom-0 z-30 w-screen sm:w-[clamp(320px,30vw,420px)] pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"}`}
+      className={`fixed top-0 left-0 bottom-0 z-[210] w-screen sm:w-[clamp(320px,30vw,420px)] pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${open ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"}`}
       style={{ height: "100dvh" }}
     >
       <div
@@ -1239,7 +1467,7 @@ function HelpPanel({
             >
               <CircleHelp size={15} />
             </div>
-            <h3 className="text-white font-semibold text-sm">Help &amp; Controls</h3>
+            <h3 className="text-white font-semibold text-sm">{t("helpTitle")}</h3>
           </div>
           <button
             onClick={onClose}
@@ -1254,7 +1482,7 @@ function HelpPanel({
           {/* Intro text */}
           <div className="px-5 py-4 border-b border-white/6">
             <p className="text-white/45 text-xs leading-relaxed">
-              Learn how to navigate and use every control in the virtual tour. Each button is explained below with its icon.
+              {t("helpIntro")}
             </p>
           </div>
 
@@ -1294,7 +1522,7 @@ function HelpPanel({
               style={{ background: `${accentColor}08`, borderColor: `${accentColor}20` }}
             >
               <p className="text-[11px] leading-relaxed" style={{ color: `${accentColor}cc` }}>
-                <strong>Tip:</strong> In walkthrough mode, click and drag on the panorama to look around. Use scroll to zoom in and out. Click on floor hotspots to move between rooms.
+                <strong>{t("helpTip")}</strong> {t("helpTipText")}
               </p>
             </div>
           </div>
@@ -1309,10 +1537,12 @@ function ShareModal({
   open,
   onClose,
   accentColor,
+  t,
 }: {
   open: boolean;
   onClose: () => void;
   accentColor: string;
+  t: (key: string) => string;
 }) {
   const [copied, setCopied] = useState(false);
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -1411,7 +1641,7 @@ function ShareModal({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-2">
-          <h3 className="text-lg font-semibold tracking-widest uppercase text-white">Share</h3>
+          <h3 className="text-lg font-semibold tracking-widest uppercase text-white">{t("shareTitle")}</h3>
           <button
             id="share-modal-close"
             onClick={onClose}
@@ -1426,7 +1656,7 @@ function ShareModal({
 
         {/* Copy Link */}
         <div className="px-6 mb-5">
-          <label className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-2 block">Tour Link</label>
+          <label className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-2 block">{t("tourLink")}</label>
           <div
             className="flex items-center gap-2 rounded-xl overflow-hidden transition-all"
             style={{
@@ -1452,12 +1682,12 @@ function ShareModal({
               {copied ? (
                 <>
                   <Check size={13} />
-                  <span>Copied!</span>
+                  <span>{t("copied")}</span>
                 </>
               ) : (
                 <>
                   <Copy size={13} />
-                  <span>Copy</span>
+                  <span>{t("copy")}</span>
                 </>
               )}
             </button>
@@ -1466,7 +1696,7 @@ function ShareModal({
 
         {/* Social Share */}
         <div className="px-6 pb-6">
-          <label className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3 block">Share via</label>
+          <label className="text-[10px] font-bold tracking-widest uppercase text-white/30 mb-3 block">{t("shareVia")}</label>
           <div className="flex items-center justify-between gap-2">
             {socials.map((s) => (
               <a
@@ -1787,7 +2017,9 @@ export default function App() {
   // Viewer
   const [viewMode, setViewMode] = useState<"walk" | "3d">("walk");
   const [isPlaying, setIsPlaying] = useState(false);
-  const [agentOpen, setAgentOpen] = useState(true);
+  const [agentOpen, setAgentOpen] = useState(false);
+  const [showLogo, setShowLogo] = useState(initialConfig?.showLogo ?? true);
+  const [showContactCard, setShowContactCard] = useState(initialConfig?.showContactCard ?? true);
   const [scenes, setScenes] = useState<SceneData[]>(initialConfig?.scenes || DEMO_ROOMS);
   const [activeId, setActiveId] = useState<string>(initialConfig?.activeId || "demo_1");
   const [activeHotspotId, setActiveHotspotId] = useState<string | null>(null);
@@ -1801,6 +2033,11 @@ export default function App() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showSpaceInfo, setShowSpaceInfo] = useState(false);
   const [showHelpPanel, setShowHelpPanel] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [language, setLanguage] = useState<Lang>("en");
+
+  // Translation helper
+  const t = useCallback((key: string) => T[key]?.[language] ?? key, [language]);
 
   const [propertyInfo, setPropertyInfo] = useState(initialConfig?.propertyInfo || INITIAL_PROPERTY_INFO);
   const [agentInfo, setAgentInfo] = useState(initialConfig?.agentInfo || INITIAL_AGENT_INFO);
@@ -2645,7 +2882,8 @@ export default function App() {
     try {
       const config = {
         scenes, activeId, startView, hotspotSize, hasFloors, floorsList, floorConfigs, accentColor, transitionType, transitionDuration,
-        bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, floorModels, propertyInfo, agentInfo
+        bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, floorModels, propertyInfo, agentInfo,
+        showLogo, showContactCard
       };
       const res = await fetch('/api/export', {
         method: 'POST',
@@ -3117,7 +3355,7 @@ export default function App() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[100dvh] w-full bg-[#0a0c0b]">
-        <div className="animate-spin w-8 h-8 border-4 border-white/20 border-t-accent rounded-full" />
+        <img src={owlLogo} alt="Loading..." className="h-20 w-auto object-contain animate-[spin_2s_linear_infinite]" draggable={false} />
       </div>
     );
   }
@@ -3173,6 +3411,8 @@ export default function App() {
           floorModels={floorModels} onFloorModelUpload={handleFloorModelUpload} onFloorModelRemove={handleFloorModelRemove}
           propertyInfo={propertyInfo} setPropertyInfo={setPropertyInfo}
           agentInfo={agentInfo} setAgentInfo={setAgentInfo}
+          showLogo={showLogo} setShowLogo={setShowLogo}
+          showContactCard={showContactCard} setShowContactCard={setShowContactCard}
         />
       )}
 
@@ -3248,6 +3488,7 @@ export default function App() {
           onClose={() => setShowSpaceInfo(false)}
           accentColor={accentColor}
           propertyInfo={propertyInfo}
+          t={t}
         />
 
         {/* ── Help Panel ──────────────────────────────────────────────── */}
@@ -3255,18 +3496,34 @@ export default function App() {
           open={showHelpPanel}
           onClose={() => setShowHelpPanel(false)}
           accentColor={accentColor}
+          t={t}
+        />
+
+        {/* ── Welcome Modal ────────────────────────────────────────────── */}
+        <WelcomeModal
+          open={showWelcome}
+          onSelectLanguage={(lang) => {
+            setLanguage(lang);
+            setShowWelcome(false);
+          }}
+          onOpenHelp={() => {
+            setShowHelpPanel(true);
+          }}
+          accentColor={accentColor}
         />
 
         {/* ΓöÇΓöÇ Top bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div className={`absolute top-0 left-0 right-0 flex items-start justify-between p-5 pt-[calc(1.25rem+env(safe-area-inset-top))] pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] z-20 pointer-events-none transition-all duration-500 ease-in-out ${isPlaying ? "opacity-0 -translate-y-4" : "opacity-100 translate-y-0"}`}>
           
           {/* Logo */}
-          <div className="pointer-events-auto flex items-center drop-shadow-md">
-            <img src={owlLogo} alt="Logo" className="h-12 w-auto object-contain" draggable={false} />
-          </div>
+          {showLogo && (
+            <div className="pointer-events-auto flex items-center drop-shadow-md">
+              <img src={owlLogo} alt="Logo" className="h-12 w-auto object-contain" draggable={false} />
+            </div>
+          )}
 
           {/* Agent card */}
-          {agentOpen ? (
+          {showContactCard && (agentOpen ? (
             <div
               className="pointer-events-auto relative w-64 overflow-hidden rounded-2xl p-1.5"
               style={{
@@ -3323,8 +3580,9 @@ export default function App() {
             >
               <img src={agentInfo.avatar} alt={agentInfo.name} className="w-7 h-7 rounded-lg object-cover" />
               <span className="text-xs font-semibold text-white">{agentInfo.name}</span>
+              <ChevronDown size={14} className="text-white/50 -ml-1" />
             </button>
-          )}
+          ))}
         </div>
 
         {/* ΓöÇΓöÇ Bottom controls ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
@@ -3373,7 +3631,7 @@ export default function App() {
                     }}
                     className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showSettingsMenu ? "bg-accent" : "hover:bg-white/12"} ${isPlaying ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
                     style={{ color: showSettingsMenu ? "#000" : bubbleColor }}
-                    title="Settings"
+                    title={t("settings")}
                   >
                     <IcoSettings size={24} />
                   </button>
@@ -3394,7 +3652,7 @@ export default function App() {
                       style={{ color: bubbleColor }}
                     >
                       <Info size={16} />
-                      <span>Space Info</span>
+                      <span>{t("spaceInfo")}</span>
                     </button>
                     <button
                       onClick={showHelp}
@@ -3402,7 +3660,7 @@ export default function App() {
                       style={{ color: bubbleColor }}
                     >
                       <CircleHelp size={16} />
-                      <span>Help</span>
+                      <span>{t("help")}</span>
                     </button>
                     <button
                       onClick={shareTour}
@@ -3410,7 +3668,7 @@ export default function App() {
                       style={{ color: bubbleColor }}
                     >
                       <Share2 size={16} />
-                      <span>Share</span>
+                      <span>{t("share")}</span>
                     </button>
                     <button
                       onClick={toggleGyroscope}
@@ -3418,7 +3676,7 @@ export default function App() {
                       style={{ color: gyroEnabled ? "#000" : bubbleColor }}
                     >
                       <Glasses size={16} />
-                      <span>{gyroEnabled ? "Exit VR" : "VR"}</span>
+                      <span>{gyroEnabled ? t("exitVr") : t("vr")}</span>
                     </button>
                     <button
                       onClick={handleFullscreenMenuAction}
@@ -3426,7 +3684,7 @@ export default function App() {
                       style={{ color: bubbleColor }}
                     >
                       {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
-                      <span>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
+                      <span>{isFullscreen ? t("exitFullscreen") : t("fullscreen")}</span>
                     </button>
                   </div>
                 </>
@@ -3443,7 +3701,7 @@ export default function App() {
                     }}
                     className={`shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showFloorsMenu ? "bg-accent" : "hover:bg-white/12"} ${isPlaying ? "w-0 h-0 opacity-0 m-0" : "w-10 h-10 opacity-100"}`}
                     style={{ color: showFloorsMenu ? "#000" : bubbleColor }}
-                    title="Floors / Etaje"
+                    title={t("floors")}
                   >
                     <IcoFloors size={19} />
                   </button>
@@ -3597,6 +3855,7 @@ export default function App() {
                   }}
                   bgStyle={bubbleBgStyle}
                   blurStyle={bubbleBlurStyle}
+                  t={t}
                 />
               ) : (
                 <div
@@ -3628,7 +3887,7 @@ export default function App() {
                     }}
                     className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden ${showSettingsMenu ? "bg-accent" : "hover:bg-white/12"}`}
                     style={{ color: showSettingsMenu ? "#000" : bubbleColor }}
-                    title="Settings"
+                    title={t("settings")}
                   >
                     <IcoSettings size={24} />
                   </button>
@@ -3649,7 +3908,7 @@ export default function App() {
                       style={{ color: bubbleColor }}
                     >
                       <Info size={16} />
-                      <span>Space Info</span>
+                      <span>{t("spaceInfo")}</span>
                     </button>
                     <button
                       onClick={showHelp}
@@ -3657,7 +3916,7 @@ export default function App() {
                       style={{ color: bubbleColor }}
                     >
                       <CircleHelp size={16} />
-                      <span>Help</span>
+                      <span>{t("help")}</span>
                     </button>
                     <button
                       onClick={shareTour}
@@ -3665,7 +3924,7 @@ export default function App() {
                       style={{ color: bubbleColor }}
                     >
                       <Share2 size={16} />
-                      <span>Share</span>
+                      <span>{t("share")}</span>
                     </button>
                     <button
                       onClick={toggleGyroscope}
@@ -3673,7 +3932,7 @@ export default function App() {
                       style={{ color: gyroEnabled ? "#000" : bubbleColor }}
                     >
                       <Glasses size={16} />
-                      <span>{gyroEnabled ? "Exit VR" : "VR"}</span>
+                      <span>{gyroEnabled ? t("exitVr") : t("vr")}</span>
                     </button>
                   </div>
                 </div>
@@ -3720,6 +3979,7 @@ export default function App() {
         open={showShareModal}
         onClose={() => setShowShareModal(false)}
         accentColor={accentColor}
+        t={t}
       />
 
       <style>{`
@@ -3739,6 +3999,16 @@ export default function App() {
           from {
             opacity: 0;
             transform: scale(0.92) translateY(12px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        @keyframes welcomeModalIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
           }
           to {
             opacity: 1;
