@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#000"/>
+  <rect width="512" height="341" y="85" fill="#D00"/>
+  <rect width="512" height="171" y="256" fill="#FFCE00"/>
+  <!-- Black stripe -->
+  <rect width="512" height="171" y="0" fill="#000"/>
+  <!-- Red stripe -->
+  <rect width="512" height="170" y="171" fill="#D00"/>
+  <!-- Gold stripe -->
+  <rect width="512" height="171" y="341" fill="#FFCE00"/>
+</svg>

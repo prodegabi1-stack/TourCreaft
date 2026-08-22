@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
+import Cropper from "react-easy-crop";
 import { get, set } from "idb-keyval";
 import { Phone, Mail, Copy, X, MapPin, Compass, ChevronLeft, ChevronRight, Maximize, Minimize, CircleHelp, Glasses, Info, Share2, Check, Link2, BedDouble, Ruler, CalendarDays, Trees, GraduationCap, ShoppingBag, TrainFront, Stethoscope, Dumbbell, ChevronDown, Train, Bus, ShoppingCart, Pill, Banknote, Utensils, Plane, Coffee, Library, Move, MousePointer2 } from "lucide-react";
 import whatsappLogo from "../../whatsapp-svgrepo-com.svg";
@@ -7,6 +9,8 @@ import mailIcon from "../../email-svgrepo-com.svg";
 import owlLogo from "../owl-logo.svg";
 import ukFlag from "../../united-kingdom-uk-svgrepo-com.svg";
 import roFlag from "../../romania-svgrepo-com.svg";
+import deFlag from "../../germany-svgrepo-com.svg";
+import DeviceOrientationControlMethod from "../DeviceOrientationControlMethod.js";
 
 // ΓöÇΓöÇΓöÇ Marzipano global type ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 declare const Marzipano: any;
@@ -211,104 +215,131 @@ function openExternalLink(url: string) {
 }
 
 // ─── i18n Translations ────────────────────────────────────────────────────────
-type Lang = "en" | "ro";
+type Lang = "en" | "ro" | "de";
 
 const T: Record<string, Record<Lang, string>> = {
-  welcomeTitle: { en: "Welcome", ro: "Bine ați venit" },
-  welcomeSubtitle: { en: "Choose your language", ro: "Alegeți limba" },
-  welcomeHelp: { en: "How to navigate the tour?", ro: "Cum navigați turul?" },
-  welcomeStart: { en: "Start Tour", ro: "Începe Turul" },
-  spaceInfo: { en: "Space Info", ro: "Informații Spațiu" },
-  help: { en: "Help", ro: "Ajutor" },
-  share: { en: "Share", ro: "Distribuie" },
-  vr: { en: "VR", ro: "VR" },
-  exitVr: { en: "Exit VR", ro: "Ieși din VR" },
-  fullscreen: { en: "Fullscreen", ro: "Ecran complet" },
-  exitFullscreen: { en: "Exit Fullscreen", ro: "Ieși din ecran complet" },
-  helpTitle: { en: "Help & Controls", ro: "Ajutor & Comenzi" },
-  helpIntro: { en: "Learn how to navigate and use every control in the virtual tour. Each button is explained below with its icon.", ro: "Aflați cum să navigați și să utilizați fiecare control în turul virtual. Fiecare buton este explicat mai jos cu pictograma sa." },
-  helpTip: { en: "Tip:", ro: "Sfat:" },
-  helpTipText: { en: "In walkthrough mode, click and drag on the panorama to look around. Use scroll to zoom in and out. Click on floor hotspots to move between rooms.", ro: "În modul de vizită, faceți clic și trageți pe panoramă pentru a privi în jur. Folosiți scroll-ul pentru a mări și micșora. Faceți clic pe punctele de pe podea pentru a vă deplasa între camere." },
-  spaceInfoTitle: { en: "Space Info", ro: "Informații Spațiu" },
-  rooms: { en: "Rooms", ro: "Camere" },
-  area: { en: "Area", ro: "Suprafață" },
-  bathrooms: { en: "Bathrooms", ro: "Băi" },
-  yearBuilt: { en: "Year Built", ro: "An construcție" },
-  propertyDetails: { en: "Property Details", ro: "Detalii Proprietate" },
-  neighbourhood: { en: "Neighbourhood", ro: "Cartier" },
-  nearbyLocations: { en: "Nearby Locations", ro: "Locații în apropiere" },
-  location: { en: "Location", ro: "Locație" },
-  openInMaps: { en: "Open in Google Maps", ro: "Deschide în Google Maps" },
-  settings: { en: "Settings", ro: "Setări" },
-  walkthrough: { en: "Walkthrough", ro: "Vizită" },
-  threeDSpace: { en: "3D Space", ro: "Spațiu 3D" },
-  shareTitle: { en: "Share", ro: "Distribuie" },
-  tourLink: { en: "Tour Link", ro: "Link Tur" },
-  copy: { en: "Copy", ro: "Copiază" },
-  copied: { en: "Copied!", ro: "Copiat!" },
-  shareVia: { en: "Share via", ro: "Distribuie prin" },
-  floors: { en: "Floors", ro: "Etaje" },
-  helpSectionInteractions360: { en: "Interactions (360° View)", ro: "Interacțiuni (Vedere 360°)" },
-  helpLookAround: { en: "Look Around", ro: "Privește în jur" },
-  helpLookAroundDesc: { en: "Left-click and drag (or swipe on touch screens) to rotate the camera and look around the room.", ro: "Faceți clic stânga și trageți (sau glisați pe ecranele tactile) pentru a roti camera și a privi în jurul camerei." },
-  helpZoom: { en: "Zoom", ro: "Zoom" },
-  helpZoomDesc: { en: "Use the scroll wheel (or pinch-to-zoom on touch screens) to zoom in and out of the panorama.", ro: "Folosiți rotița de derulare (sau apropiați degetele pe ecranele tactile) pentru a mări și micșora panorama." },
-  helpSectionInteractions3D: { en: "Interactions (3D Model)", ro: "Interacțiuni (Model 3D)" },
-  helpRotateModel: { en: "Rotate Model", ro: "Rotește modelul" },
-  helpRotateModelDesc: { en: "Left-click and drag (or one-finger swipe) to orbit and rotate the 3D model.", ro: "Faceți clic stânga și trageți (sau glisați cu un deget) pentru a orbita și roti modelul 3D." },
-  helpPanModel: { en: "Pan Model", ro: "Mișcă modelul" },
-  helpPanModelDesc: { en: "Right-click and drag (or two-finger drag on touch screens) to pan and move the 3D model sideways.", ro: "Faceți clic dreapta și trageți (sau trageți cu două degete pe ecranele tactile) pentru a mișca modelul 3D în lateral." },
-  helpSectionNavigation: { en: "Navigation", ro: "Navigare" },
-  helpPrevRoom: { en: "Previous Room", ro: "Camera anterioară" },
-  helpPrevRoomDesc: { en: "Navigate to the previous room in the tour.", ro: "Navigați la camera anterioară din tur." },
-  helpNextRoom: { en: "Next Room", ro: "Camera următoare" },
-  helpNextRoomDesc: { en: "Navigate to the next room in the tour.", ro: "Navigați la camera următoare din tur." },
-  helpSectionViewMode: { en: "View Mode", ro: "Mod de vizualizare" },
-  helpWalkMode: { en: "Walkthrough Mode", ro: "Mod vizită" },
-  helpWalkModeDesc: { en: "Explore the property room by room in a panoramic 360° view. Drag to look around.", ro: "Explorați proprietatea cameră cu cameră într-o vedere panoramică la 360°. Trageți pentru a privi în jur." },
-  help3DMode: { en: "3D Model Mode", ro: "Mod Model 3D" },
-  help3DModeDesc: { en: "View the entire property as an interactive 3D model. Rotate, zoom, and explore the structure.", ro: "Vizualizați întreaga proprietate ca un model 3D interactiv. Rotiți, măriți și explorați structura." },
-  helpSectionLeftToolbar: { en: "Left Toolbar", ro: "Bara de instrumente stânga" },
-  helpSettingsDesc: { en: "Open the settings menu to access Space Info, Help, Share, VR mode, and Fullscreen options.", ro: "Deschideți meniul de setări pentru a accesa Informații Spațiu, Ajutor, Distribuie, Mod VR și opțiuni pentru ecran complet." },
-  helpFloorsDesc: { en: "Switch between different floors of the building. Only visible when the property has multiple floors.", ro: "Comutați între diferitele etaje ale clădirii. Vizibil doar când proprietatea are mai multe etaje." },
-  helpGallery: { en: "Gallery (Walk Mode)", ro: "Galerie (Mod vizită)" },
-  helpGalleryDesc: { en: "Show or hide the room thumbnail strip at the bottom. Click a thumbnail to jump to that room.", ro: "Afișați sau ascundeți banda cu miniaturi ale camerelor din partea de jos. Faceți clic pe o miniatură pentru a sări la acea cameră." },
-  helpTexture: { en: "Texture (3D Mode)", ro: "Textură (Mod 3D)" },
-  helpTextureDesc: { en: "Toggle between the textured and un-textured 3D model view.", ro: "Comutați între vizualizarea modelului 3D texturat și ne-texturat." },
-  helpAutoplay: { en: "Autoplay (Walk Mode)", ro: "Redare automată (Mod vizită)" },
-  helpAutoplayDesc: { en: "Start an automatic slideshow that cycles through all rooms. Press again to pause.", ro: "Porniți o prezentare automată care trece prin toate camerele. Apăsați din nou pentru a pune pe pauză." },
-  helpTopView: { en: "Top View (3D Mode)", ro: "Vedere de sus (Mod 3D)" },
-  helpTopViewDesc: { en: "Switch the camera to a bird's-eye, top-down perspective of the 3D model.", ro: "Schimbați camera la o perspectivă de sus în jos a modelului 3D." },
-  helpSectionSettingsMenu: { en: "Settings Menu", ro: "Meniul de setări" },
-  helpSpaceInfoDesc: { en: "View property details like rooms, area, year built, neighbourhood info, and nearby locations.", ro: "Vizualizați detaliile proprietății precum camerele, suprafața, anul construcției, informații despre cartier și locațiile din apropiere." },
-  helpShareDesc: { en: "Share the tour via a link, or directly on Facebook, X (Twitter), LinkedIn, or WhatsApp.", ro: "Distribuiți turul printr-un link sau direct pe Facebook, X (Twitter), LinkedIn sau WhatsApp." },
-  helpVrDesc: { en: "Enable gyroscope control to look around the room by moving your device physically.", ro: "Activați controlul giroscopului pentru a privi în jurul camerei mișcând fizic dispozitivul." },
-  helpFullscreenDesc: { en: "Enter or exit fullscreen mode for a more immersive viewing experience.", ro: "Intrați sau ieșiți din modul ecran complet pentru o experiență de vizualizare mai imersivă." },
+  welcomeTitle: { en: "Welcome", ro: "Bine ați venit", de: "Willkommen" },
+  welcomeSubtitle: { en: "Choose your language", ro: "Alegeți limba", de: "Sprache wählen" },
+  welcomeHelp: { en: "How to navigate the tour?", ro: "Cum navigați turul?", de: "Wie navigiert man?" },
+  welcomeStart: { en: "Start Tour", ro: "Începe Turul", de: "Tour Starten" },
+  spaceInfo: { en: "Space Info", ro: "Informații Spațiu", de: "Rauminfo" },
+  help: { en: "Help", ro: "Ajutor", de: "Hilfe" },
+  share: { en: "Share", ro: "Distribuie", de: "Teilen" },
+  vr: { en: "Gyroscope", ro: "Giroscop", de: "Gyroskop" },
+  exitVr: { en: "Exit Gyroscope", ro: "Oprire Giroscop", de: "Gyroskop beenden" },
+  fullscreen: { en: "Fullscreen", ro: "Ecran complet", de: "Vollbild" },
+  exitFullscreen: { en: "Exit Fullscreen", ro: "Ieși din ecran complet", de: "Vollbild beenden" },
+  helpTitle: { en: "Help & Controls", ro: "Ajutor & Comenzi", de: "Hilfe & Steuerung" },
+  helpIntro: { en: "Learn how to navigate and use every control in the virtual tour. Each button is explained below with its icon.", ro: "Află cum să folosești butoanele din turul virtual. Fiecare funcție este explicată mai jos.", de: "Erfahren Sie, wie Sie navigieren und jede Steuerung im virtuellen Rundgang verwenden. Jede Schaltfläche wird unten mit ihrem Symbol erklärt." },
+  helpTip: { en: "Tip:", ro: "Sfat:", de: "Tipp:" },
+  helpTipText: { en: "In walkthrough mode, click and drag on the panorama to look around. Use scroll to zoom in and out. Click on floor hotspots or double click anywhere on the image to move between rooms.", ro: "În turul virtual, apasă și trage pe ecran pentru a privi în jur. Folosește scroll (sau apropie/depărtează degetele) pentru zoom. Apasă pe cercurile de pe podea sau dă dublu-click pe imagine pentru a te muta.", de: "Klicken und ziehen Sie im Rundgangmodus auf das Panorama, um sich umzusehen. Scrollen Sie zum Vergrößern und Verkleinern. Klicken Sie auf Bodenpunkte oder doppelklicken Sie irgendwo auf das Bild, um zwischen Räumen zu wechseln." },
+  spaceInfoTitle: { en: "Space Info", ro: "Informații Spațiu", de: "Rauminfo" },
+  helpSpaceInfoDesc: { en: "View details about the property like area, rooms, and year built.", ro: "Vezi detalii despre proprietate precum suprafața, camerele și anul construcției.", de: "Sehen Sie Details zur Immobilie wie Fläche, Zimmer und Baujahr." },
+  helpShareDesc: { en: "Share the virtual tour via link, WhatsApp, or Email.", ro: "Distribuie turul virtual prin link, WhatsApp sau Email.", de: "Teilen Sie den virtuellen Rundgang per Link, WhatsApp oder E-Mail." },
+  helpVrDesc: { en: "Enable gyroscope to look around by moving your device.", ro: "Activează giroscopul pentru a privi în jur mișcând telefonul.", de: "Aktivieren Sie das Gyroskop, um sich durch Bewegen Ihres Geräts umzusehen." },
+  helpFullscreenDesc: { en: "Expand the tour to fill the entire screen.", ro: "Mărește turul pe tot ecranul pentru o experiență mai bună.", de: "Erweitern Sie die Tour auf den gesamten Bildschirm." },
+  helpTopView: { en: "Top View", ro: "Vedere de sus", de: "Draufsicht" },
+  helpTopViewDesc: { en: "Switch the 3D model to a top-down view to see the floor plan clearly.", ro: "Rotește modelul 3D pentru a-l vedea de sus, ca pe o schiță a planului.", de: "Wechseln Sie das 3D-Modell in eine Draufsicht, um den Grundriss klar zu sehen." },
+  rooms: { en: "Rooms", ro: "Camere", de: "Zimmer" },
+  area: { en: "Area", ro: "Suprafață", de: "Fläche" },
+  bathrooms: { en: "Bathrooms", ro: "Băi", de: "Bäder" },
+  yearBuilt: { en: "Year Built", ro: "An construcție", de: "Baujahr" },
+  propertyDetails: { en: "Property Details", ro: "Detalii Proprietate", de: "Immobiliendetails" },
+  neighbourhood: { en: "Neighbourhood", ro: "Cartier", de: "Umgebung" },
+  nearbyLocations: { en: "Nearby Locations", ro: "Locații în apropiere", de: "Nahegelegene Orte" },
+  location: { en: "Location", ro: "Locație", de: "Lage" },
+  openInMaps: { en: "Open in Google Maps", ro: "Deschide în Google Maps", de: "In Google Maps öffnen" },
+  settings: { en: "Settings", ro: "Setări", de: "Einstellungen" },
+  walkthrough: { en: "Walkthrough", ro: "Vizită", de: "Rundgang" },
+  threeDSpace: { en: "3D Space", ro: "Spațiu 3D", de: "3D-Raum" },
+  pageTitle: { en: "Buho - Virtual Tour", ro: "Buho - Tur Virtual", de: "Buho - Virtueller Rundgang" },
+  shareEmailBody: { en: "Check out this tour:", ro: "Vezi acest tur:", de: "Sehen Sie sich diese Tour an:" },
+  shareTitle: { en: "Share", ro: "Distribuie", de: "Teilen" },
+  tourLink: { en: "Tour Link", ro: "Link Tur", de: "Tour-Link" },
+  copy: { en: "Copy", ro: "Copiază", de: "Kopieren" },
+  copied: { en: "Copied!", ro: "Copiat!", de: "Kopiert!" },
+  shareVia: { en: "Share via", ro: "Distribuie prin", de: "Teilen über" },
+  floors: { en: "Floors", ro: "Etaje", de: "Etagen" },
+  helpSectionInteractions360: { en: "Interactions (360° View)", ro: "Interacțiuni (Vedere 360°)", de: "Interaktionen (360°-Ansicht)" },
+  helpLookAround: { en: "Look Around", ro: "Privește în jur", de: "Umschauen" },
+  helpLookAroundDesc: { en: "Left-click and drag (or swipe on touch screens) to rotate the camera and look around the room.", ro: "Apasă și trage pe ecran pentru a roti camera și a privi în jur.", de: "Linksklick und ziehen (oder wischen auf Touchscreens) um die Kamera zu drehen und sich umzusehen." },
+  helpZoom: { en: "Zoom", ro: "Zoom", de: "Zoom" },
+  helpZoomDesc: { en: "Use the scroll wheel (or pinch-to-zoom on touch screens) to zoom in and out of the panorama.", ro: "Folosește rotița de mouse sau două degete pe ecran pentru a face zoom.", de: "Verwenden Sie das Scrollrad (oder Pinch-to-Zoom auf Touchscreens) zum Vergrößern und Verkleinern des Panoramas." },
+  helpSectionInteractions3D: { en: "Interactions (3D Model)", ro: "Interacțiuni (Model 3D)", de: "Interaktionen (3D-Modell)" },
+  helpRotateModel: { en: "Rotate Model", ro: "Rotește modelul", de: "Modell drehen" },
+  helpRotateModelDesc: { en: "Left-click and drag (or one-finger swipe) to orbit and rotate the 3D model.", ro: "Trage cu un deget pentru a roti modelul 3D pe toate părțile.", de: "Linksklick und ziehen (oder Ein-Finger-Wischen) um das 3D-Modell zu drehen." },
+  helpPanModel: { en: "Pan Model", ro: "Mută modelul", de: "Modell verschieben" },
+  helpPanModelDesc: { en: "Right-click and drag (or two-finger drag on touch screens) to pan and move the 3D model sideways.", ro: "Click dreapta și trage (sau trage cu două degete) pentru a muta modelul stânga-dreapta.", de: "Rechtsklick und ziehen (oder Zwei-Finger-Ziehen auf Touchscreens) um das 3D-Modell seitlich zu verschieben." },
+  helpSectionNavigation: { en: "Navigation", ro: "Navigare", de: "Navigation" },
+  helpPrevRoom: { en: "Previous Room", ro: "Camera anterioară", de: "Vorheriger Raum" },
+  helpPrevRoomDesc: { en: "Navigate to the previous room in the tour.", ro: "Te duce în camera anterioară din listă.", de: "Navigieren Sie zum vorherigen Raum in der Tour." },
+  helpNextRoom: { en: "Next Room", ro: "Camera următoare", de: "Nächster Raum" },
+  helpNextRoomDesc: { en: "Navigate to the next room in the tour.", ro: "Te duce în camera următoare din listă.", de: "Navigieren Sie zum nächsten Raum in der Tour." },
+  helpSectionViewMode: { en: "View Mode", ro: "Mod vizualizare", de: "Anzeigemodus" },
+  helpWalkMode: { en: "Walkthrough Mode", ro: "Mod Vizită", de: "Rundgang-Modus" },
+  helpWalkModeDesc: { en: "Explore the property room by room in a panoramic 360° view. Drag to look around.", ro: "Modul clasic 360°. Explorezi casa din interior, cameră cu cameră.", de: "Erkunden Sie die Immobilie Raum für Raum in einer 360°-Panoramaansicht. Ziehen Sie zum Umschauen." },
+  help3DMode: { en: "3D Model Mode", ro: "Mod 3D", de: "3D-Modell-Modus" },
+  help3DModeDesc: { en: "View the entire property as an interactive 3D model. Rotate, zoom, and explore the structure.", ro: "Vezi toată casa de sus sub formă de machetă 3D interactivă.", de: "Sehen Sie die gesamte Immobilie als interaktives 3D-Modell. Drehen, zoomen und erkunden Sie die Struktur." },
+  helpSectionSettingsMenu: { en: "Settings Menu", ro: "Meniu Setări", de: "Einstellungsmenü" },
+  helpSectionLeftToolbar: { en: "Left Toolbar", ro: "Bara de instrumente", de: "Linke Werkzeugleiste" },
+  helpSettings: { en: "Settings", ro: "Setări", de: "Einstellungen" },
+  helpSettingsDesc: { en: "Open the settings menu to access Space Info, Help, Share, VR mode, and Fullscreen options.", ro: "Deschide meniul cu informații, ajutor, giroscop și ecran complet.", de: "Öffnen Sie das Einstellungsmenü für Rauminfo, Hilfe, Teilen, VR-Modus und Vollbild-Optionen." },
+  helpFloorsDesc: { en: "Switch between different floors of the building. Only visible when the property has multiple floors.", ro: "Schimbă etajul (apare doar la casele cu etaj).", de: "Wechseln Sie zwischen verschiedenen Stockwerken. Nur sichtbar, wenn die Immobilie mehrere Etagen hat." },
+  helpGallery: { en: "Gallery", ro: "Galerie", de: "Galerie" },
+  helpGalleryDesc: { en: "Show or hide the room thumbnail strip at the bottom. Click a thumbnail to jump to that room.", ro: "Afișează pozele cu toate camerele jos pe ecran. Apasă pe o poză pentru a merge acolo.", de: "Zeigen oder verbergen Sie den Miniaturstreifen unten. Klicken Sie auf eine Miniatur, um zu diesem Raum zu springen." },
+  helpTexture: { en: "Texture", ro: "Textură", de: "Textur" },
+  helpTextureDesc: { en: "Toggle between the textured and un-textured 3D model view.", ro: "Comută între modelul 3D cu culori reale și cel simplu (alb).", de: "Wechseln Sie zwischen der texturierten und nicht-texturierten 3D-Modellansicht." },
+  helpAutoplay: { en: "Autoplay", ro: "Tur Automat", de: "Autoplay" },
+  helpAutoplayDesc: {
+    en: "Start an automatic slideshow that cycles through all rooms. Press again to pause.",
+    ro: "Pornește turul automat. Camerele se vor schimba singure, ca într-un clip video.",
+    de: "Starten Sie eine automatische Diashow durch alle Räume. Erneut drücken zum Pausieren.",
+  },
 };
 
 // ─── Welcome Modal ────────────────────────────────────────────────────────────
 function WelcomeModal({
   open,
-  onSelectLanguage,
+  language,
+  onChangeLanguage,
+  onStart,
   onOpenHelp,
   accentColor,
 }: {
   open: boolean;
-  onSelectLanguage: (lang: Lang) => void;
+  language: Lang;
+  onChangeLanguage: (lang: Lang) => void;
+  onStart: () => void;
   onOpenHelp: () => void;
   accentColor: string;
 }) {
-  const [selected, setSelected] = useState<Lang | null>(null);
-
   if (!open) return null;
 
-  const handleSelect = (lang: Lang) => {
-    setSelected(lang);
-  };
+  const LANGS: { id: Lang; flag: string; label: string }[] = [
+    { id: "ro", flag: roFlag, label: "Română" },
+    { id: "en", flag: ukFlag, label: "English" },
+    { id: "de", flag: deFlag, label: "Deutsch" },
+  ];
 
-  const handleStart = () => {
-    if (selected) onSelectLanguage(selected);
-  };
+  const welcomeTitle =
+    language === "ro" ? "Bine ați venit" :
+      language === "de" ? "Willkommen" :
+        "Welcome";
+
+  const welcomeSubtitle =
+    language === "ro" ? "Alegeți limba" :
+      language === "de" ? "Sprache wählen" :
+        "Choose your language";
+
+  const helpLabel =
+    language === "ro" ? "Cum navigați turul?" :
+      language === "de" ? "Wie navigiert man?" :
+        "How to navigate the tour?";
+
+  const startLabel =
+    language === "ro" ? "Începe Turul" :
+      language === "de" ? "Tour Starten" :
+        "Start Tour";
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center">
@@ -317,7 +348,7 @@ function WelcomeModal({
 
       {/* Modal */}
       <div
-        className="relative w-[340px] max-w-[calc(100vw-2rem)] rounded-3xl overflow-hidden flex flex-col items-center"
+        className="relative w-[380px] max-w-[calc(100vw-2rem)] rounded-3xl overflow-hidden flex flex-col items-center"
         style={{
           background: "rgba(18, 18, 18, 0.95)",
           backdropFilter: "blur(40px)",
@@ -329,80 +360,65 @@ function WelcomeModal({
       >
         {/* Accent glow */}
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 rounded-b-full"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-56 h-1 rounded-b-full"
           style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
         />
 
         {/* Title */}
-        <div className="pt-8 pb-2 text-center">
-          <h2 className="text-white font-bold text-lg tracking-wide">Welcome</h2>
-          <p className="text-white/40 text-xs mt-1.5 font-medium">Choose your language / Alegeți limba</p>
+        <div className="pt-8 pb-2 text-center px-6">
+          <h2 className="text-white font-bold text-xl tracking-wide" style={{ transition: "opacity 0.2s" }}>{welcomeTitle}</h2>
+          <p className="text-white/40 text-xs mt-1.5 font-medium" style={{ transition: "opacity 0.2s" }}>{welcomeSubtitle}</p>
         </div>
 
-        {/* Language Buttons */}
-        <div className="flex gap-4 px-8 py-5 w-full justify-center">
-          {/* English */}
-          <button
-            onClick={() => handleSelect("en")}
-            className={`flex flex-col items-center gap-2.5 px-5 py-4 rounded-2xl border transition-all duration-300 flex-1 ${
-              selected === "en"
-                ? "border-accent bg-accent/10 scale-[1.03]"
+        {/* Language Buttons — 3 in a row, no dot indicator */}
+        <div className="flex gap-3 px-6 py-5 w-full justify-center">
+          {LANGS.map(({ id, flag, label }) => (
+            <button
+              key={id}
+              onClick={() => onChangeLanguage(id)}
+              className={`flex flex-col items-center gap-2.5 px-3 py-4 rounded-2xl border transition-all duration-300 flex-1 ${language === id
+                ? "scale-[1.05]"
                 : "border-white/10 bg-white/4 hover:bg-white/8 hover:border-white/20"
-            }`}
-            style={selected === "en" ? { borderColor: accentColor, background: `${accentColor}15` } : {}}
-          >
-            <img src={ukFlag} alt="UK" className="w-8 h-8 rounded-full object-cover" />
-            <span className={`text-xs font-semibold ${selected === "en" ? "text-white" : "text-white/60"}`}>English</span>
-            {selected === "en" && (
-              <div className="w-2 h-2 rounded-full" style={{ background: accentColor }} />
-            )}
-          </button>
-
-          {/* Romanian */}
-          <button
-            onClick={() => handleSelect("ro")}
-            className={`flex flex-col items-center gap-2.5 px-5 py-4 rounded-2xl border transition-all duration-300 flex-1 ${
-              selected === "ro"
-                ? "border-accent bg-accent/10 scale-[1.03]"
-                : "border-white/10 bg-white/4 hover:bg-white/8 hover:border-white/20"
-            }`}
-            style={selected === "ro" ? { borderColor: accentColor, background: `${accentColor}15` } : {}}
-          >
-            <img src={roFlag} alt="Romania" className="w-8 h-8 rounded-full object-cover" />
-            <span className={`text-xs font-semibold ${selected === "ro" ? "text-white" : "text-white/60"}`}>Română</span>
-            {selected === "ro" && (
-              <div className="w-2 h-2 rounded-full" style={{ background: accentColor }} />
-            )}
-          </button>
+                }`}
+              style={
+                language === id
+                  ? { borderColor: accentColor, background: `${accentColor}18`, boxShadow: `0 0 16px ${accentColor}30` }
+                  : {}
+              }
+            >
+              <img src={flag} alt={label} className="w-9 h-9 rounded-full object-cover" />
+              <span className={`text-xs font-semibold ${language === id ? "text-white" : "text-white/60"
+                }`}>{label}</span>
+            </button>
+          ))}
         </div>
 
         {/* Separator */}
-        <div className="mx-8 h-px bg-white/8 w-[calc(100%-4rem)]" />
+        <div className="mx-6 h-px bg-white/8 w-[calc(100%-3rem)]" />
 
-        {/* Help Button */}
-        <div className="px-8 py-4 w-full">
+        {/* Help Button — larger */}
+        <div className="px-6 py-4 w-full">
           <button
             onClick={onOpenHelp}
-            className="w-full h-11 px-4 rounded-xl flex items-center justify-center gap-2.5 text-xs font-semibold transition-all hover:bg-white/8 border border-white/8"
-            style={{ color: "rgba(255,255,255,0.7)" }}
+            className="w-full py-4 px-5 rounded-2xl flex items-center justify-center gap-3 font-semibold transition-all hover:bg-white/10 border border-white/12 group"
+            style={{ color: "rgba(255,255,255,0.75)" }}
           >
-            <CircleHelp size={16} />
-            <span>How to navigate? / Cum navigați?</span>
+            <CircleHelp size={20} className="opacity-70 group-hover:opacity-100 transition-opacity" />
+            <span className="text-sm">{helpLabel}</span>
           </button>
         </div>
 
         {/* Start Button */}
-        <div className="px-8 pb-7 pt-1 w-full">
+        <div className="px-6 pb-7 pt-1 w-full">
           <button
-            onClick={handleStart}
-            disabled={!selected}
-            className="w-full h-12 rounded-xl font-bold text-sm uppercase tracking-wider transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed hover:brightness-110"
+            onClick={onStart}
+            className="w-full h-13 py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:brightness-110"
             style={{
-              background: selected ? accentColor : "rgba(255,255,255,0.1)",
-              color: selected ? "#000" : "rgba(255,255,255,0.3)",
+              background: accentColor,
+              color: "#000",
             }}
           >
-            {selected === "ro" ? "Începe Turul" : "Start Tour"}
+            {startLabel}
           </button>
         </div>
       </div>
@@ -467,6 +483,35 @@ function ViewModeSwitch({
 }
 
 // ΓöÇΓöÇΓöÇ Left Settings Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+const getCroppedImg = (imageSrc: string, pixelCrop: any): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 200;
+      canvas.height = 200;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("No ctx"));
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(
+        image,
+        pixelCrop.x,
+        pixelCrop.y,
+        pixelCrop.width,
+        pixelCrop.height,
+        0,
+        0,
+        200,
+        200
+      );
+      resolve(canvas.toDataURL("image/jpeg", 0.9));
+    };
+    image.onerror = reject;
+    image.src = imageSrc;
+  });
+};
+
 function LeftPanel({
   transitionType, setTransitionType,
   transitionDuration, setTransitionDuration,
@@ -498,6 +543,29 @@ function LeftPanel({
   const [showControlsMenu, setShowControlsMenu] = useState(false);
   const [showFloorsMenu, setShowFloorsMenu] = useState(false);
   const [showAgentMenu, setShowAgentMenu] = useState(false);
+
+  // Avatar Crop States
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+
+  const handleCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const saveCroppedAvatar = async () => {
+    if (cropImageSrc && croppedAreaPixels) {
+      try {
+        const croppedImage = await getCroppedImg(cropImageSrc, croppedAreaPixels);
+        setAgentInfo({ ...agentInfo, avatar: croppedImage });
+        setCropImageSrc(null);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   return (
     <div
       className="flex-shrink-0 flex flex-col border-r border-white/8 bg-[#0f1110] overflow-hidden"
@@ -518,27 +586,27 @@ function LeftPanel({
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showTransitionMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
               <div className="flex flex-col gap-2 px-5 pb-4">
-              <label className="flex items-center justify-between text-xs text-white/60">
-                <span>Type</span>
-                <select
-                  value={transitionType}
-                  onChange={(e) => setTransitionType(e.target.value)}
-                  className="bg-white/8 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-accent cursor-pointer"
-                >
-                  <option value="none">None</option>
-                  <option value="fade">Fade</option>
-                  <option value="zoom">Zoom</option>
-                </select>
-              </label>
-              <label className="flex items-center justify-between text-xs text-white/60">
-                <span>Duration (s)</span>
-                <input
-                  type="number" min={0} max={5} step={0.1}
-                  value={transitionDuration}
-                  onChange={(e) => setTransitionDuration(parseFloat(e.target.value))}
-                  className="bg-white/8 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none w-16 text-center focus:border-accent"
-                />
-              </label>
+                <label className="flex items-center justify-between text-xs text-white/60">
+                  <span>Type</span>
+                  <select
+                    value={transitionType}
+                    onChange={(e) => setTransitionType(e.target.value)}
+                    className="bg-white/8 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-accent cursor-pointer"
+                  >
+                    <option value="none">None</option>
+                    <option value="fade">Fade</option>
+                    <option value="zoom">Zoom</option>
+                  </select>
+                </label>
+                <label className="flex items-center justify-between text-xs text-white/60">
+                  <span>Duration (s)</span>
+                  <input
+                    type="number" min={0} max={5} step={0.1}
+                    value={transitionDuration}
+                    onChange={(e) => setTransitionDuration(parseFloat(e.target.value))}
+                    className="bg-white/8 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none w-16 text-center focus:border-accent"
+                  />
+                </label>
               </div>
             </div>
           </section>
@@ -551,18 +619,18 @@ function LeftPanel({
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showHotspotsMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
               <div className="flex flex-col gap-2 px-5 pb-4">
-              <label className="flex flex-col gap-2 text-xs text-white/60">
-                <div className="flex items-center justify-between">
-                  <span>Size (Scale)</span>
-                  <span className="text-white/40">{hotspotSize.toFixed(1)}x</span>
-                </div>
-                <input
-                  type="range" min={0.5} max={2.5} step={0.1}
-                  value={hotspotSize}
-                  onChange={(e) => setHotspotSize(parseFloat(e.target.value))}
-                  className="w-full accent-accent"
-                />
-              </label>
+                <label className="flex flex-col gap-2 text-xs text-white/60">
+                  <div className="flex items-center justify-between">
+                    <span>Size (Scale)</span>
+                    <span className="text-white/40">{hotspotSize.toFixed(1)}x</span>
+                  </div>
+                  <input
+                    type="range" min={0.5} max={2.5} step={0.1}
+                    value={hotspotSize}
+                    onChange={(e) => setHotspotSize(parseFloat(e.target.value))}
+                    className="w-full accent-accent"
+                  />
+                </label>
               </div>
             </div>
           </section>
@@ -575,69 +643,69 @@ function LeftPanel({
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showControlsMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
               <div className="flex flex-col gap-2 px-5 pb-4">
-              <label className="flex items-center gap-2 text-[11px] text-white/80 cursor-pointer mt-1 mb-1">
-                <input
-                  type="checkbox"
-                  checked={showLogo}
-                  onChange={(e) => setShowLogo(e.target.checked)}
-                  className="accent-accent"
-                />
-                Show Logo
-              </label>
-              <label className="flex items-center justify-between text-xs text-white/60">
-                <span>Background</span>
-                <div className="flex items-center gap-2">
+                <label className="flex items-center gap-2 text-[11px] text-white/80 cursor-pointer mt-1 mb-1">
                   <input
-                    type="color" value={bubbleBg}
-                    onChange={(e) => setBubbleBg(e.target.value)}
-                    className="w-5 h-5 rounded cursor-pointer border border-white/10 bg-transparent"
+                    type="checkbox"
+                    checked={showLogo}
+                    onChange={(e) => setShowLogo(e.target.checked)}
+                    className="accent-accent"
                   />
-                  <span className="text-white/40 font-mono text-[10px]">{bubbleBg}</span>
-                </div>
-              </label>
-              <label className="flex items-center justify-between text-xs text-white/60">
-                <span>Icon Color</span>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color" value={bubbleColor}
-                    onChange={(e) => setBubbleColor(e.target.value)}
-                    className="w-5 h-5 rounded cursor-pointer border border-white/10 bg-transparent"
-                  />
-                  <span className="text-white/40 font-mono text-[10px]">{bubbleColor}</span>
-                </div>
-              </label>
-              <label className="flex items-center justify-between text-xs text-white/60">
-                <span>Accent Color</span>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color" value={accentColor}
-                    onChange={(e) => setAccentColor(e.target.value)}
-                    className="w-5 h-5 rounded cursor-pointer border border-white/10 bg-transparent"
-                  />
-                  <span className="text-white/40 font-mono text-[10px]">{accentColor}</span>
-                </div>
-              </label>
-              <label className="flex items-center justify-between text-xs text-white/60">
-                <span>Opacity</span>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="range" min={0} max={1} step={0.05}
-                    value={bubbleOpacity}
-                    onChange={(e) => setBubbleOpacity(parseFloat(e.target.value))}
-                    className="w-20" style={{ accentColor }}
-                  />
-                  <span className="text-white/40 text-[10px] w-8">{Math.round(bubbleOpacity * 100)}%</span>
-                </div>
-              </label>
-              <label className="flex items-center justify-between text-xs text-white/60 cursor-pointer">
-                <span>Glass Blur</span>
-                <button
-                  onClick={() => setBubbleBlur(!bubbleBlur)}
-                  className={`w-9 h-5 rounded-full transition-colors relative ${bubbleBlur ? "bg-accent" : "bg-white/15"}`}
-                >
-                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${bubbleBlur ? "left-4" : "left-0.5"}`} />
-                </button>
-              </label>
+                  Show Logo
+                </label>
+                <label className="flex items-center justify-between text-xs text-white/60">
+                  <span>Background</span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color" value={bubbleBg}
+                      onChange={(e) => setBubbleBg(e.target.value)}
+                      className="w-5 h-5 rounded cursor-pointer border border-white/10 bg-transparent"
+                    />
+                    <span className="text-white/40 font-mono text-[10px]">{bubbleBg}</span>
+                  </div>
+                </label>
+                <label className="flex items-center justify-between text-xs text-white/60">
+                  <span>Icon Color</span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color" value={bubbleColor}
+                      onChange={(e) => setBubbleColor(e.target.value)}
+                      className="w-5 h-5 rounded cursor-pointer border border-white/10 bg-transparent"
+                    />
+                    <span className="text-white/40 font-mono text-[10px]">{bubbleColor}</span>
+                  </div>
+                </label>
+                <label className="flex items-center justify-between text-xs text-white/60">
+                  <span>Accent Color</span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color" value={accentColor}
+                      onChange={(e) => setAccentColor(e.target.value)}
+                      className="w-5 h-5 rounded cursor-pointer border border-white/10 bg-transparent"
+                    />
+                    <span className="text-white/40 font-mono text-[10px]">{accentColor}</span>
+                  </div>
+                </label>
+                <label className="flex items-center justify-between text-xs text-white/60">
+                  <span>Opacity</span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range" min={0} max={1} step={0.05}
+                      value={bubbleOpacity}
+                      onChange={(e) => setBubbleOpacity(parseFloat(e.target.value))}
+                      className="w-20" style={{ accentColor }}
+                    />
+                    <span className="text-white/40 text-[10px] w-8">{Math.round(bubbleOpacity * 100)}%</span>
+                  </div>
+                </label>
+                <label className="flex items-center justify-between text-xs text-white/60 cursor-pointer">
+                  <span>Glass Blur</span>
+                  <button
+                    onClick={() => setBubbleBlur(!bubbleBlur)}
+                    className={`w-9 h-5 rounded-full transition-colors relative ${bubbleBlur ? "bg-accent" : "bg-white/15"}`}
+                  >
+                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${bubbleBlur ? "left-4" : "left-0.5"}`} />
+                  </button>
+                </label>
               </div>
             </div>
           </section>
@@ -650,86 +718,86 @@ function LeftPanel({
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showFloorsMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
               <div className="flex flex-col gap-2 px-5 pb-4">
-              <label className="flex items-center gap-2 text-[11px] text-white/80 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasFloors}
-                  onChange={(e) => setHasFloors(e.target.checked)}
-                  className="accent-accent"
-                />
-                Proiectul are mai multe etaje
-              </label>
-              {hasFloors && (
-                <div className="flex flex-col gap-2">
-                  <label className="flex flex-col gap-1 text-[10px] text-white/60">
-                    Num─âr etaje
-                    <input
-                      type="number" min={0} max={20}
-                      value={parseInt(floorsList) || 0}
-                      onChange={(e) => setFloorsList(e.target.value)}
-                      className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-white outline-none focus:border-accent w-full"
-                    />
-                  </label>
+                <label className="flex items-center gap-2 text-[11px] text-white/80 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hasFloors}
+                    onChange={(e) => setHasFloors(e.target.checked)}
+                    className="accent-accent"
+                  />
+                  Proiectul are mai multe etaje
+                </label>
+                {hasFloors && (
+                  <div className="flex flex-col gap-2">
+                    <label className="flex flex-col gap-1 text-[10px] text-white/60">
+                      Num─âr etaje
+                      <input
+                        type="number" min={0} max={20}
+                        value={parseInt(floorsList) || 0}
+                        onChange={(e) => setFloorsList(e.target.value)}
+                        className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-white outline-none focus:border-accent w-full"
+                      />
+                    </label>
 
-                  <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 pr-1 mt-1 border-t border-white/10 pt-2">
-                    {Array.from({ length: (parseInt(floorsList) || 0) + 1 }).map((_, idx) => (
-                      <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-2 flex flex-col gap-1.5 relative">
-                        <div className="text-[11px] font-semibold text-accent">Etaj {idx} {idx === 0 ? "(Parter)" : ""}</div>
+                    <div className="flex flex-col gap-2 max-h-[250px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 pr-1 mt-1 border-t border-white/10 pt-2">
+                      {Array.from({ length: (parseInt(floorsList) || 0) + 1 }).map((_, idx) => (
+                        <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-2 flex flex-col gap-1.5 relative">
+                          <div className="text-[11px] font-semibold text-accent">Etaj {idx} {idx === 0 ? "(Parter)" : ""}</div>
 
-                        <label className="flex flex-col gap-1 text-[10px] text-white/50">
-                          Target Scene
-                          <select
-                            value={floorConfigs[idx]?.targetId || ""}
-                            onChange={(e) => onUpdateFloorConfig(idx, { targetId: e.target.value || null })}
-                            className="bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-white outline-none focus:border-accent w-full"
-                          >
-                            <option value="">-- Select Scene --</option>
-                            {scenes.filter((s: any) => s.floor === `Etaj ${idx}`).map((s: any) => <option key={s.id} value={s.id}>{s.label}</option>)}
-                          </select>
-                        </label>
+                          <label className="flex flex-col gap-1 text-[10px] text-white/50">
+                            Target Scene
+                            <select
+                              value={floorConfigs[idx]?.targetId || ""}
+                              onChange={(e) => onUpdateFloorConfig(idx, { targetId: e.target.value || null })}
+                              className="bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-white outline-none focus:border-accent w-full"
+                            >
+                              <option value="">-- Select Scene --</option>
+                              {scenes.filter((s: any) => s.floor === `Etaj ${idx}`).map((s: any) => <option key={s.id} value={s.id}>{s.label}</option>)}
+                            </select>
+                          </label>
 
-                        {floorConfigs[idx]?.targetId && (
-                          <button
-                            onClick={() => onStartFloorTargetCapture(idx, floorConfigs[idx].targetId!)}
-                            className="mt-1 bg-white/10 text-white text-[10px] py-1.5 rounded-lg hover:bg-white/20 transition-colors border border-white/10"
-                          >
-                            {floorConfigs[idx]?.targetYaw !== undefined ? "Update Target Angle" : "Set Target Angle"}
-                          </button>
-                        )}
+                          {floorConfigs[idx]?.targetId && (
+                            <button
+                              onClick={() => onStartFloorTargetCapture(idx, floorConfigs[idx].targetId!)}
+                              className="mt-1 bg-white/10 text-white text-[10px] py-1.5 rounded-lg hover:bg-white/20 transition-colors border border-white/10"
+                            >
+                              {floorConfigs[idx]?.targetYaw !== undefined ? "Update Target Angle" : "Set Target Angle"}
+                            </button>
+                          )}
 
-                        {has3D && (
-                          <div className="flex flex-col gap-1.5 mt-1 border-t border-white/10 pt-1.5">
-                            <span className="text-[9px] font-bold tracking-widest uppercase text-white/30">Modele 3D Etaj</span>
-                            <input id={`floor_model_${idx}`} type="file" accept=".glb,.gltf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if(f) onFloorModelUpload(idx, 'textured', f); }} />
-                            {floorModels?.[idx]?.textured ? (
-                              <div className="flex items-center gap-1.5 bg-black/20 border border-white/5 rounded px-2 py-1">
-                                <span className="text-white/60 text-[9px] truncate flex-1">Texturat setat</span>
-                                <button onClick={() => onFloorModelRemove(idx, 'textured')} className="text-white/30 hover:text-red-400"><X size={10} /></button>
-                              </div>
-                            ) : (
-                              <button onClick={() => document.getElementById(`floor_model_${idx}`)?.click()} className="text-[9px] text-accent/80 hover:text-accent transition-colors text-left">
-                                + Adaugă Texturat (.glb)
-                              </button>
-                            )}
+                          {has3D && (
+                            <div className="flex flex-col gap-1.5 mt-1 border-t border-white/10 pt-1.5">
+                              <span className="text-[9px] font-bold tracking-widest uppercase text-white/30">Modele 3D Etaj</span>
+                              <input id={`floor_model_${idx}`} type="file" accept=".glb,.gltf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFloorModelUpload(idx, 'textured', f); }} />
+                              {floorModels?.[idx]?.textured ? (
+                                <div className="flex items-center gap-1.5 bg-black/20 border border-white/5 rounded px-2 py-1">
+                                  <span className="text-white/60 text-[9px] truncate flex-1">Texturat setat</span>
+                                  <button onClick={() => onFloorModelRemove(idx, 'textured')} className="text-white/30 hover:text-red-400"><X size={10} /></button>
+                                </div>
+                              ) : (
+                                <button onClick={() => document.getElementById(`floor_model_${idx}`)?.click()} className="text-[9px] text-accent/80 hover:text-accent transition-colors text-left">
+                                  + Adaugă Texturat (.glb)
+                                </button>
+                              )}
 
-                            <input id={`floor_untextured_${idx}`} type="file" accept=".glb,.gltf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if(f) onFloorModelUpload(idx, 'untextured', f); }} />
-                            {floorModels?.[idx]?.untextured ? (
-                              <div className="flex items-center gap-1.5 bg-black/20 border border-white/5 rounded px-2 py-1">
-                                <span className="text-white/60 text-[9px] truncate flex-1">Netexturat setat</span>
-                                <button onClick={() => onFloorModelRemove(idx, 'untextured')} className="text-white/30 hover:text-red-400"><X size={10} /></button>
-                              </div>
-                            ) : (
-                              <button onClick={() => document.getElementById(`floor_untextured_${idx}`)?.click()} className="text-[9px] text-accent/80 hover:text-accent transition-colors text-left">
-                                + Adaugă Netexturat (.glb)
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                              <input id={`floor_untextured_${idx}`} type="file" accept=".glb,.gltf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFloorModelUpload(idx, 'untextured', f); }} />
+                              {floorModels?.[idx]?.untextured ? (
+                                <div className="flex items-center gap-1.5 bg-black/20 border border-white/5 rounded px-2 py-1">
+                                  <span className="text-white/60 text-[9px] truncate flex-1">Netexturat setat</span>
+                                  <button onClick={() => onFloorModelRemove(idx, 'untextured')} className="text-white/30 hover:text-red-400"><X size={10} /></button>
+                                </div>
+                              ) : (
+                                <button onClick={() => document.getElementById(`floor_untextured_${idx}`)?.click()} className="text-[9px] text-accent/80 hover:text-accent transition-colors text-left">
+                                  + Adaugă Netexturat (.glb)
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               </div>
             </div>
           </section>
@@ -742,70 +810,57 @@ function LeftPanel({
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${showAgentMenu ? "max-h-[1200px] opacity-100" : "max-h-0 opacity-0"}`}>
               <div className="flex flex-col gap-2 px-5 pb-4">
-              <label className="flex items-center gap-2 text-[11px] text-white/80 cursor-pointer mt-1 mb-2">
+                <label className="flex items-center gap-2 text-[11px] text-white/80 cursor-pointer mt-1 mb-2">
+                  <input
+                    type="checkbox"
+                    checked={showContactCard}
+                    onChange={(e) => setShowContactCard(e.target.checked)}
+                    className="accent-accent"
+                  />
+                  Show Contact Card
+                </label>
+                <div className="flex items-center gap-3 mb-2">
+                  <img src={agentInfo.avatar} alt="Agent" className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-white/10" />
+                  <button
+                    onClick={() => document.getElementById("agent_avatar_upload")?.click()}
+                    className="text-[10px] font-semibold text-accent hover:bg-accent/10 transition-colors bg-white/5 border border-white/10 rounded-lg px-3 py-1.5"
+                  >
+                    Change Photo
+                  </button>
+                  <input
+                    type="file"
+                    id="agent_avatar_upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                          setCropImageSrc(e.target?.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                        e.target.value = "";
+                      }
+                    }}
+                  />
+                </div>
                 <input
-                  type="checkbox"
-                  checked={showContactCard}
-                  onChange={(e) => setShowContactCard(e.target.checked)}
-                  className="accent-accent"
+                  type="text" value={agentInfo.name || ""} onChange={(e) => setAgentInfo({ ...agentInfo, name: e.target.value })} placeholder="Agent name"
+                  className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
                 />
-                Show Contact Card
-              </label>
-              <div className="flex items-center gap-3 mb-2">
-                <img src={agentInfo.avatar} alt="Agent" className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-white/10" />
-                <button 
-                  onClick={() => document.getElementById("agent_avatar_upload")?.click()}
-                  className="text-[10px] font-semibold text-accent hover:bg-accent/10 transition-colors bg-white/5 border border-white/10 rounded-lg px-3 py-1.5"
-                >
-                  Change Photo (Auto Crop)
-                </button>
-                <input 
-                  type="file" 
-                  id="agent_avatar_upload" 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                       const reader = new FileReader();
-                       reader.onload = (e) => {
-                          const img = new Image();
-                          img.onload = () => {
-                             // auto crop to square 200x200
-                             const canvas = document.createElement("canvas");
-                             canvas.width = 200; canvas.height = 200;
-                             const ctx = canvas.getContext("2d");
-                             if (ctx) {
-                               const size = Math.min(img.width, img.height);
-                               const x = (img.width - size) / 2;
-                               const y = (img.height - size) / 2;
-                               ctx.drawImage(img, x, y, size, size, 0, 0, 200, 200);
-                               setAgentInfo({ ...agentInfo, avatar: canvas.toDataURL("image/jpeg", 0.9) });
-                             }
-                          };
-                          img.src = e.target?.result as string;
-                       };
-                       reader.readAsDataURL(file);
-                    }
-                  }}
+                <input
+                  type="text" value={agentInfo.title || ""} onChange={(e) => setAgentInfo({ ...agentInfo, title: e.target.value })} placeholder="Title"
+                  className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
                 />
-              </div>
-              <input
-                type="text" value={agentInfo.name || ""} onChange={(e) => setAgentInfo({ ...agentInfo, name: e.target.value })} placeholder="Agent name"
-                className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
-              />
-              <input
-                type="text" value={agentInfo.title || ""} onChange={(e) => setAgentInfo({ ...agentInfo, title: e.target.value })} placeholder="Title"
-                className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
-              />
-              <input
-                type="text" value={agentInfo.phone || ""} onChange={(e) => setAgentInfo({ ...agentInfo, phone: e.target.value })} placeholder="Phone"
-                className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
-              />
-              <input
-                type="text" value={agentInfo.email || ""} onChange={(e) => setAgentInfo({ ...agentInfo, email: e.target.value })} placeholder="Email"
-                className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
-              />
+                <input
+                  type="text" value={agentInfo.phone || ""} onChange={(e) => setAgentInfo({ ...agentInfo, phone: e.target.value })} placeholder="Phone"
+                  className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
+                />
+                <input
+                  type="text" value={agentInfo.email || ""} onChange={(e) => setAgentInfo({ ...agentInfo, email: e.target.value })} placeholder="Email"
+                  className="bg-white/8 border border-white/10 rounded-lg px-3 py-2 text-white text-xs outline-none focus:border-accent placeholder-white/20 w-full"
+                />
               </div>
             </div>
           </section>
@@ -900,11 +955,11 @@ function LeftPanel({
                       + Add
                     </button>
                   </div>
-                  
+
                   <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 pr-1">
                     {(propertyInfo.nearby || []).map((loc: any, i: number) => (
                       <div key={i} className="bg-white/5 border border-white/10 rounded-lg p-2 flex flex-col gap-2 relative">
-                        <button 
+                        <button
                           onClick={() => {
                             const newNearby = [...propertyInfo.nearby];
                             newNearby.splice(i, 1);
@@ -914,7 +969,7 @@ function LeftPanel({
                         >
                           <X size={12} />
                         </button>
-                        
+
                         <div className="pr-6">
                           <input
                             type="text" value={loc.name} placeholder="Name"
@@ -926,7 +981,7 @@ function LeftPanel({
                             className="bg-white/8 border border-white/10 rounded-md px-2 py-1.5 text-white text-[11px] outline-none focus:border-accent w-full mb-1"
                           />
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-2">
                           <input
                             type="text" value={loc.distance} placeholder="Distance (e.g. 300m)"
@@ -1059,11 +1114,45 @@ function LeftPanel({
           </section>
         </div>
       </div>
+
+      {/* Avatar Cropper Modal */}
+      {cropImageSrc && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black/90 p-5 pointer-events-auto">
+          <div className="relative w-full max-w-md h-[400px] bg-black border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <Cropper
+              image={cropImageSrc}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              cropShape="rect"
+              showGrid={false}
+              onCropChange={setCrop}
+              onCropComplete={handleCropComplete}
+              onZoomChange={setZoom}
+            />
+          </div>
+          <div className="w-full max-w-md mt-6 flex gap-3">
+            <button
+              onClick={() => setCropImageSrc(null)}
+              className="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-xl transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={saveCroppedAvatar}
+              className="flex-1 bg-accent hover:bg-accent/90 text-black font-bold py-3 rounded-xl transition-colors shadow-lg shadow-accent/20"
+            >
+              Save Crop
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
 
-// ΓöÇΓöÇΓöÇ Space Info Panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+// ─── Space Info Panel ────────────────────────────────────────────────────────
 function SpaceInfoPanel({
   open,
   onClose,
@@ -1152,7 +1241,7 @@ function SpaceInfoPanel({
             <p className="text-white/40 text-xs leading-relaxed mt-2">{propertyInfo.description}</p>
           </div>
 
-          {/* Property Details ΓÇö collapsible */}
+          {/* Property Details — collapsible */}
           <div className="border-b border-white/6">
             <button
               onClick={() => toggleSection("details")}
@@ -1231,7 +1320,7 @@ function SpaceInfoPanel({
               onClick={() => toggleSection("nearby")}
               className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/3 transition-colors"
             >
-              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">Nearby Locations</span>
+              <span className="text-[10px] font-bold tracking-widest uppercase text-white/30">{t("nearbyLocations")}</span>
               <ChevronDown size={14} className={`text-white/30 transition-transform duration-300 ${expandedSection === "nearby" ? "rotate-180" : ""}`} />
             </button>
             <div className={`overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${expandedSection === "nearby" ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
@@ -1422,7 +1511,7 @@ function HelpPanel({
     },
     {
       section: t("helpSectionSettingsMenu"),
-      icon: <Glasses size={16} />,
+      icon: <Compass size={16} />,
       label: t("vr"),
       description: t("helpVrDesc"),
     },
@@ -1546,7 +1635,7 @@ function ShareModal({
 }) {
   const [copied, setCopied] = useState(false);
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const shareTitle = typeof document !== "undefined" ? document.title : "Virtual Tour";
+  const shareTitle = t("pageTitle");
 
   const copyLink = async () => {
     try {
@@ -1580,11 +1669,11 @@ function ShareModal({
       ),
     },
     {
-      name: "X",
-      href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+      name: "WhatsApp",
+      href: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
       icon: (
         <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-          <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
         </svg>
       ),
     },
@@ -1598,17 +1687,17 @@ function ShareModal({
       ),
     },
     {
-      name: "Pinterest",
-      href: `https://pinterest.com/pin/create/button/?url=${encodedUrl}&description=${encodedTitle}`,
+      name: "Instagram",
+      href: `https://www.instagram.com/direct/inbox/`,
       icon: (
         <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-          <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12.017 24 18.635 24 24 18.633 24 12.013 24 5.396 18.635.03 12.017.03V0z" />
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
         </svg>
       ),
     },
     {
       name: "Email",
-      href: `mailto:?subject=${encodedTitle}&body=${encodeURIComponent(`Check out this virtual tour: ${shareUrl}`)}`,
+      href: `mailto:?subject=${encodedTitle}&body=${encodeURIComponent(`${t("shareEmailBody")}\n\n${shareUrl}`)}`,
       icon: (
         <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -1759,7 +1848,7 @@ function RightPanel({
   onUpdateHotspot: (sceneId: string, hotspotId: string, updates: Partial<HotspotData>) => void;
   onDeleteHotspot: (sceneId: string, hotspotId: string) => void;
   onStartTargetCapture: (sourceSceneId: string, hotspotId: string, targetId: string) => void;
-  startView: {sceneId: string, yaw: number, pitch: number, fov: number} | null;
+  startView: { sceneId: string, yaw: number, pitch: number, fov: number } | null;
   onSetStartView: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -2024,7 +2113,7 @@ export default function App() {
   const [activeId, setActiveId] = useState<string>(initialConfig?.activeId || "demo_1");
   const [activeHotspotId, setActiveHotspotId] = useState<string | null>(null);
 
-  // Settings state
+  // Keep ref in sync with state
   const [hasFloors, setHasFloors] = useState(initialConfig?.hasFloors || false);
   const [has3D, setHas3D] = useState(initialConfig?.has3D ?? true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -2034,10 +2123,15 @@ export default function App() {
   const [showSpaceInfo, setShowSpaceInfo] = useState(false);
   const [showHelpPanel, setShowHelpPanel] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
-  const [language, setLanguage] = useState<Lang>("en");
+  const [language, setLanguage] = useState<Lang>("ro");
 
   // Translation helper
   const t = useCallback((key: string) => T[key]?.[language] ?? key, [language]);
+
+  // Keep document title synced with language
+  useEffect(() => {
+    document.title = t("pageTitle");
+  }, [language, t]);
 
   const [propertyInfo, setPropertyInfo] = useState(initialConfig?.propertyInfo || INITIAL_PROPERTY_INFO);
   const [agentInfo, setAgentInfo] = useState(initialConfig?.agentInfo || INITIAL_AGENT_INFO);
@@ -2077,130 +2171,31 @@ export default function App() {
     setShowShareModal(true);
   };
 
-  // ─── Gyro / VR Mode ────────────────────────────────────────────────────────
+  // ─── Gyro Mode (Motion View style) ─────────────────────────────────────────
+  // Uses DeviceMotionEvent.rotationRate (angular velocity, °/s) — same approach as
+  // Samsung Motion View: no wrap-around jumps, no drift accumulation, touch-compatible.
   const [gyroEnabled, setGyroEnabled] = useState(false);
-  const [gyroDebugText, setGyroDebugText] = useState<string>("Asteapta senzor...");
-  const gyroEnabledRef = useRef(false);
-  // Absolute orientation offsets — set once at first valid event
-  const gyroInitAlphaRef = useRef<number | null>(null);
-  const gyroInitBetaRef = useRef<number | null>(null);
-  const gyroInitGammaRef = useRef<number | null>(null);
-  const gyroInitYawRef = useRef<number>(0);
-  const gyroInitPitchRef = useRef<number>(0);
-  const gyroEventCountRef = useRef(0);
+  const gyroMethodRef = useRef<any>(null);
 
-  // Keep ref in sync with state
   useEffect(() => {
-    gyroEnabledRef.current = gyroEnabled;
-  }, [gyroEnabled]);
+    if (!viewerRef.current || typeof Marzipano === "undefined") return;
 
-  // Helper: signed angular difference between two angles in [0,360)
-  // Returns value in (-180, 180]
-  const angleDiff = (a: number, b: number): number => {
-    let d = a - b;
-    while (d > 180) d -= 360;
-    while (d < -180) d += 360;
-    return d;
-  };
-
-  // Main gyro event listener — absolute orientation approach (no delta accumulation)
-  useEffect(() => {
-    if (!gyroEnabled) {
-      gyroInitAlphaRef.current = null;
-      gyroInitBetaRef.current = null;
-      gyroInitGammaRef.current = null;
-      gyroEventCountRef.current = 0;
-      setGyroDebugText("Asteapta senzor...");
-      return;
+    if (!gyroMethodRef.current) {
+      gyroMethodRef.current = new DeviceOrientationControlMethod();
+      viewerRef.current.controls().registerMethod("deviceOrientation", gyroMethodRef.current);
     }
 
-    const getScreenAngle = (): number => {
-      if (typeof (window as any).orientation !== "undefined") return Number((window as any).orientation) || 0;
-      if (window.screen?.orientation?.angle !== undefined) return window.screen.orientation.angle || 0;
-      return 0;
-    };
-
-    const toRad = (d: number) => d * Math.PI / 180;
-
-    const onDeviceOrientation = (e: DeviceOrientationEvent) => {
-      if (!gyroEnabledRef.current) return;
-      if (e.alpha == null || e.beta == null || e.gamma == null) return;
-
-      gyroEventCountRef.current += 1;
-
-      const view = viewerRef.current?.view();
-      if (!view) return;
-
-      // ── Calibrate on first valid event ──
-      // Save device orientation AND current camera view as the reference point
-      if (gyroInitAlphaRef.current === null) {
-        gyroInitAlphaRef.current = e.alpha;
-        gyroInitBetaRef.current = e.beta;
-        gyroInitGammaRef.current = e.gamma;
-        gyroInitYawRef.current = view.yaw();
-        gyroInitPitchRef.current = view.pitch();
-        setGyroDebugText("Senzor activ ✓");
-        return;
-      }
-
-      if (gyroEventCountRef.current <= 4) {
-        setGyroDebugText(`α${e.alpha.toFixed(1)} β${e.beta.toFixed(1)} γ${e.gamma.toFixed(1)}`);
-      }
-      if (gyroEventCountRef.current === 5) {
-        setGyroDebugText("Senzor activ ✓");
-      }
-
-      const screenAngle = getScreenAngle();
-
-      let yawDelta: number;
-      let pitchDelta: number;
-
-      if (Math.abs(screenAngle) < 45) {
-        // ── Portrait ──
-        // alpha: compass heading 0-360, increases when rotating phone clockwise (seen from top)
-        // Rotating phone right → alpha increases → camera should pan LEFT (scene scrolls right)
-        // So: yawDelta = -angleDiff(alpha, initAlpha)
-        const dAlpha = angleDiff(e.alpha, gyroInitAlphaRef.current);
-        const dBeta = angleDiff(e.beta, gyroInitBetaRef.current!);
-        yawDelta = toRad(-dAlpha);
-        // beta increases as phone tilts forward (top away from you)
-        // Tilting phone up (top toward you) → beta decreases → look up (pitch negative in Marzipano)
-        pitchDelta = toRad(dBeta);
-      } else if (screenAngle > 0) {
-        // ── Landscape-right (phone rotated 90° CW) ──
-        // In landscape, gamma drives horizontal view, alpha still tracks compass
-        const dAlpha = angleDiff(e.alpha, gyroInitAlphaRef.current);
-        const dGamma = angleDiff(e.gamma, gyroInitGammaRef.current ?? 0);
-        yawDelta = toRad(-dAlpha);
-        pitchDelta = toRad(-dGamma);
-      } else {
-        // ── Landscape-left (phone rotated 90° CCW) ──
-        const dAlpha = angleDiff(e.alpha, gyroInitAlphaRef.current);
-        const dGamma = angleDiff(e.gamma, gyroInitGammaRef.current ?? 0);
-        yawDelta = toRad(-dAlpha);
-        pitchDelta = toRad(dGamma);
-      }
-
-      // Apply absolute offset from the initial view position
-      const newYaw = gyroInitYawRef.current + yawDelta;
-      const newPitch = Math.max(
-        -Math.PI / 2 + 0.05,
-        Math.min(Math.PI / 2 - 0.05, gyroInitPitchRef.current + pitchDelta)
-      );
-
-      view.setYaw(newYaw);
-      view.setPitch(newPitch);
-    };
-
-    window.addEventListener("deviceorientation", onDeviceOrientation, true);
+    if (gyroEnabled) {
+      viewerRef.current.controls().enableMethod("deviceOrientation");
+      // Add a small delay before clearing debug text if needed, but not necessary here
+    } else {
+      viewerRef.current.controls().disableMethod("deviceOrientation");
+    }
 
     return () => {
-      window.removeEventListener("deviceorientation", onDeviceOrientation, true);
-      gyroInitAlphaRef.current = null;
-      gyroInitBetaRef.current = null;
-      gyroInitGammaRef.current = null;
-      gyroEventCountRef.current = 0;
-      setGyroDebugText("Asteapta senzor...");
+      if (viewerRef.current && gyroMethodRef.current) {
+        viewerRef.current.controls().disableMethod("deviceOrientation");
+      }
     };
   }, [gyroEnabled]);
 
@@ -2245,7 +2240,7 @@ export default function App() {
     toggleFullscreen();
   };
 
-  const [startView, setStartView] = useState<{sceneId: string, yaw: number, pitch: number, fov: number} | null>(initialConfig?.startView || null);
+  const [startView, setStartView] = useState<{ sceneId: string, yaw: number, pitch: number, fov: number } | null>(initialConfig?.startView || null);
   const [hotspotSize, setHotspotSize] = useState<number>(initialConfig?.hotspotSize ?? 1.0);
   const [floorConfigs, setFloorConfigs] = useState<Record<number, FloorConfig>>(initialConfig?.floorConfigs || {});
   const [accentColor, setAccentColor] = useState(initialConfig?.accentColor || "#c8a96e");
@@ -2294,7 +2289,7 @@ export default function App() {
         const storedScenes = await get("scenes");
         const storedStartView = await get("startView");
         if (storedStartView) setStartView(storedStartView);
-        
+
         const storedHotspotSize = await get("hotspotSize");
         if (storedHotspotSize !== undefined) setHotspotSize(storedHotspotSize);
 
@@ -2339,6 +2334,14 @@ export default function App() {
         if (untexturedModel) setUntexturedModelUrl(untexturedModel);
         const savedFloorModels = await get("floorModels");
         if (savedFloorModels) setFloorModels(savedFloorModels);
+        const storedPropertyInfo = await get("propertyInfo");
+        if (storedPropertyInfo) setPropertyInfo(storedPropertyInfo);
+        const storedAgentInfo = await get("agentInfo");
+        if (storedAgentInfo) setAgentInfo(storedAgentInfo);
+        const storedShowLogo = await get("showLogo");
+        if (storedShowLogo !== undefined) setShowLogo(storedShowLogo);
+        const storedShowContactCard = await get("showContactCard");
+        if (storedShowContactCard !== undefined) setShowContactCard(storedShowContactCard);
       } catch (err) {
         console.error("Failed to load settings from DB", err);
       } finally {
@@ -2381,7 +2384,11 @@ export default function App() {
     else set("untexturedModelUrl", null).catch(console.error);
 
     set("floorModels", floorModels).catch(console.error);
-  }, [hasFloors, has3D, floorsList, accentColor, transitionType, transitionDuration, bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, floorModels, startView, hotspotSize, isLoading]);
+    set("propertyInfo", propertyInfo).catch(console.error);
+    set("agentInfo", agentInfo).catch(console.error);
+    set("showLogo", showLogo).catch(console.error);
+    set("showContactCard", showContactCard).catch(console.error);
+  }, [hasFloors, has3D, floorsList, accentColor, transitionType, transitionDuration, bubbleBg, bubbleOpacity, bubbleColor, bubbleBlur, modelUrl, untexturedModelUrl, floorModels, startView, hotspotSize, propertyInfo, agentInfo, showLogo, showContactCard, isLoading]);
 
   // Marzipano refs
   const panoRef = useRef<HTMLDivElement>(null);
@@ -2515,7 +2522,7 @@ export default function App() {
           if (oldScene) {
             const oldContainer = oldScene.hotspotContainer();
             hotspotObjsRef.current[oldSceneId].forEach((hsObj: any) => {
-              try { 
+              try {
                 const el = hsObj.domElement();
                 if (el && el.parentNode) el.parentNode.removeChild(el); // Force DOM removal
                 if (oldContainer) oldContainer.destroyHotspot(hsObj);
@@ -2539,7 +2546,7 @@ export default function App() {
             if (oldScene) {
               const oldContainer = oldScene.hotspotContainer();
               hotspotObjsRef.current[oldSceneId].forEach((hsObj: any) => {
-                try { 
+                try {
                   const el = hsObj.domElement();
                   if (el && el.parentNode) el.parentNode.removeChild(el);
                   if (oldContainer) oldContainer.destroyHotspot(hsObj);
@@ -2564,7 +2571,7 @@ export default function App() {
     // Use a small timeout to ensure the main image gets maximum bandwidth first
     const preloadTimer = setTimeout(() => {
       const targetsToPreload = new Set<string>();
-      
+
       // Add all hotspot targets
       if (currentScene.hotspots) {
         currentScene.hotspots.forEach(hs => {
@@ -2585,7 +2592,7 @@ export default function App() {
           // Detect if we should preload 4K or 8K based on device capability
           const use4k = MAX_TEXTURE_SIZE < 8192 || /iPhone|iPad|iPod/i.test(navigator.userAgent);
           const imgSrc = (use4k && targetData.img4k) ? targetData.img4k : targetData.img;
-          
+
           if (imgSrc) {
             const img = new Image();
             img.src = imgSrc; // Triggers network download, caches in browser RAM/Disk without hitting WebGL limits
@@ -3041,7 +3048,7 @@ export default function App() {
 
       currentScene.hotspots.forEach(hs => {
         if (!hs.targetId || typeof hs.yaw !== 'number' || typeof hs.pitch !== 'number') return;
-        
+
         let yawDiff = Math.abs(hs.yaw - coords.yaw);
         yawDiff = yawDiff % (2 * Math.PI);
         if (yawDiff > Math.PI) yawDiff = 2 * Math.PI - yawDiff;
@@ -3267,7 +3274,7 @@ export default function App() {
         else {
           el.className = "hs-glow"; // default
         }
-        
+
         el.style.setProperty('--hotspot-size', (hsData.size ?? hotspotSize).toString());
         el.style.scale = "var(--hotspot-size, 1)";
         el.style.animation = "hotspotFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards";
@@ -3413,15 +3420,12 @@ export default function App() {
         </div>
       )}
       {gyroEnabled && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-accent text-black px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
-          <Compass size={20} />
-          <div className="flex flex-col">
-            <span className="font-bold text-xs tracking-wide">Giroscop activ — Mișcă telefonul</span>
-            <span className="text-[10px] opacity-60 font-mono">{gyroDebugText}</span>
-          </div>
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-accent text-black px-4 py-2 rounded-xl shadow-lg flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity">
+          <Compass size={16} />
+          <span className="font-bold text-xs tracking-wide">Giroscop</span>
           <button
             onClick={() => setGyroEnabled(false)}
-            className="bg-black/90 text-white text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-black transition-colors ml-2 flex-shrink-0"
+            className="bg-black/15 text-black text-[10px] font-bold px-3 py-1 rounded-lg hover:bg-black/30 transition-colors ml-1"
           >
             Oprire
           </button>
@@ -3542,10 +3546,9 @@ export default function App() {
         {/* ── Welcome Modal ────────────────────────────────────────────── */}
         <WelcomeModal
           open={showWelcome}
-          onSelectLanguage={(lang) => {
-            setLanguage(lang);
-            setShowWelcome(false);
-          }}
+          language={language}
+          onChangeLanguage={setLanguage}
+          onStart={() => setShowWelcome(false)}
           onOpenHelp={() => {
             setShowHelpPanel(true);
           }}
@@ -3554,7 +3557,7 @@ export default function App() {
 
         {/* ΓöÇΓöÇ Top bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div className={`absolute top-0 left-0 right-0 flex items-start justify-between p-5 pt-[calc(1.25rem+env(safe-area-inset-top))] pl-[calc(1.25rem+env(safe-area-inset-left))] pr-[calc(1.25rem+env(safe-area-inset-right))] z-20 pointer-events-none transition-all duration-500 ease-in-out ${(isPlaying || gyroEnabled) ? "opacity-0 -translate-y-4" : "opacity-100 translate-y-0"}`}>
-          
+
           {/* Logo */}
           {showLogo && (
             <div className="pointer-events-auto flex items-center drop-shadow-md">
@@ -3565,7 +3568,7 @@ export default function App() {
           {/* Agent card */}
           {showContactCard && (agentOpen ? (
             <div
-              className="pointer-events-auto relative w-64 overflow-hidden rounded-2xl p-1.5"
+              className="pointer-events-auto relative w-[290px] overflow-hidden rounded-2xl p-1.5"
               style={{
                 background: bubbleBgStyle,
                 backdropFilter: bubbleBlurStyle,
@@ -3573,29 +3576,27 @@ export default function App() {
                 border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              <div className="flex items-center gap-3 p-4 pb-3">
-                <img src={agentInfo.avatar} alt={agentInfo.name} className="w-11 h-11 rounded-xl object-cover flex-shrink-0" />
-                <div className="min-w-0">
-                  <div className="font-semibold text-white text-sm leading-tight">{agentInfo.name}</div>
-                  <div className="text-xs text-white/60 mt-0.5">{agentInfo.title}</div>
+              <div className="flex items-start justify-between p-4 pb-3">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <img src={agentInfo.avatar} alt={agentInfo.name} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                  <div className="min-w-0 flex flex-col gap-0.5">
+                    <div className="font-semibold text-white text-[15px] leading-tight truncate">{agentInfo.name}</div>
+                    <div className="text-xs text-white/60 leading-tight mb-1 truncate">{agentInfo.title}</div>
+                    <div className="text-[13px] font-medium text-white/80 leading-tight flex items-center gap-1.5 mt-0.5">
+                      <span className="truncate">{agentInfo.phone}</span>
+                      <CopyButton text={agentInfo.phone} />
+                    </div>
+                    <div className="text-[13px] font-medium text-white/80 leading-tight flex items-center gap-1.5">
+                      <span className="truncate">{agentInfo.email}</span>
+                      <CopyButton text={agentInfo.email} />
+                    </div>
+                  </div>
                 </div>
-                <button onClick={() => setAgentOpen(false)} className="ml-auto text-white/50 hover:text-white transition-colors flex-shrink-0">
+                <button onClick={() => setAgentOpen(false)} className="ml-2 mt-0.5 text-white/50 hover:text-white transition-colors flex-shrink-0">
                   <X size={14} />
                 </button>
               </div>
-              <div className="border-t border-white/10 px-4 py-3 space-y-2">
-                <div className="flex items-center gap-2 text-xs text-white/75">
-                  <Phone size={12} className="text-accent flex-shrink-0" />
-                  <span className="font-medium">{agentInfo.phone}</span>
-                  <CopyButton text={agentInfo.phone} />
-                </div>
-                <div className="flex items-center gap-2 text-xs text-white/75">
-                  <Mail size={12} className="text-accent flex-shrink-0" />
-                  <span className="font-medium truncate">{agentInfo.email}</span>
-                  <CopyButton text={agentInfo.email} />
-                </div>
-              </div>
-              <div className="px-4 pb-4 flex gap-2">
+              <div className="px-4 pb-4 pt-1 flex gap-2">
                 <button type="button" onClick={() => openExternalLink(`tel:${agentInfo.phone.replace(/\s/g, "")}`)} aria-label="Call now" className="flex-1 flex items-center justify-center rounded-lg border border-white/10 bg-white/10 px-2 py-2 hover:bg-white/15 transition-colors">
                   <img src={phoneIcon} alt="Call now" className="h-5 w-auto object-contain brightness-0 invert" draggable={false} />
                 </button>
@@ -3638,7 +3639,7 @@ export default function App() {
               </h2>
             </div>
             {/* Hide Prev/Next buttons completely in autoplay to keep it clean */}
-            <div className={`flex-shrink-0 flex items-center gap-1 p-1.5 translate-y-1.5 transition-all duration-300 ${isPlaying ? "opacity-0 pointer-events-none w-0 overflow-hidden" : "opacity-100"}`}>
+            <div className={`flex-shrink-0 flex items-center gap-1 p-1.5 translate-y-1.5 transition-all duration-300 ${(isPlaying || gyroEnabled) ? "opacity-0 pointer-events-none w-0 overflow-hidden" : "opacity-100"}`}>
               <button id="btn-prev" onClick={goPrev} className="pointer-events-auto w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center justify-center text-white hover:bg-white/20 transition-colors">
                 <ChevronLeft size={18} />
               </button>
