@@ -2417,6 +2417,45 @@ export default function App() {
       controls: { mouseViewMode: "drag" },
     });
 
+    // ── Apple/Safari black-screen fix ────────────────────────────────────
+    // Safari/WebKit initialises the WebGL canvas at 0×0 before layout is
+    // complete, resulting in a black frame on first load.  We fix this with
+    // three complementary strategies:
+    //
+    // 1. ResizeObserver – fires as soon as the container gets its real
+    //    pixel dimensions (works even when the page is already loaded).
+    // 2. visibilitychange – re-syncs size when the user switches back to
+    //    this tab (common when opening a link in the background on iOS).
+    // 3. window resize – keeps the viewer correct after device rotation.
+    const forceUpdateSize = () => {
+      if (viewerRef.current) viewerRef.current.updateSize();
+    };
+
+    // Strategy 1: ResizeObserver on the container element
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && panoRef.current) {
+      let fired = false;
+      ro = new ResizeObserver(() => {
+        forceUpdateSize();
+        // After the first real size is painted, one call is enough;
+        // we keep the observer alive only for subsequent rotations.
+        if (!fired) { fired = true; }
+      });
+      ro.observe(panoRef.current);
+    }
+
+    // Strategy 2: visibilitychange (background-tab / iOS link preview)
+    const onVisibility = () => {
+      if (!document.hidden) forceUpdateSize();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    // Strategy 3: window resize (device rotation, browser chrome show/hide)
+    window.addEventListener("resize", forceUpdateSize);
+
+    // Fallback: one short timer for browsers that don't support ResizeObserver
+    if (!ro) setTimeout(forceUpdateSize, 300);
+
     // Stop autoplay on drag
     const stop = (e: Event) => { if ((e as MouseEvent).isTrusted) stopAutoPlay(); };
     panoRef.current.addEventListener("mousedown", stop);
@@ -2430,7 +2469,11 @@ export default function App() {
       switchScene(activeId);
     }
 
-    return () => { /* cleanup handled by scene replacement */ };
+    return () => {
+      ro?.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("resize", forceUpdateSize);
+    };
   }, [isLoading]); // Runs when isLoading becomes false and the div is mounted
 
   // ─── Load scene into Marzipano ──────────────────────────────────────────
